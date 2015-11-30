@@ -11,8 +11,7 @@
 %
 %  Documentation on the script can be found in the directory "Information",
 %  Examples of the required input textfiles can be found in the directory
-%  "Input" and examples of the produced output files can be found in the directory
-%  "Output"
+%  "ExampleInput"
 %
 %  TO DO before running the script: 
 %   1. Run AquaCrop simulations for all land units in the catchment
@@ -23,11 +22,12 @@
 %   4. Specify all required datapaths (see script section 0)
 %   5. Adapt the script for the soil types that occur in the catchment
 %        (see CatchmentOutput.m, section 5)
-%   6. Specify the AquaCrop model you use (normal versus plugin)
+%   6. Specify the AquaCrop model you uses (norma versus plugin)
 %        (see AquaCropHydro.m, section 1)
 %
 %  Author: Hanne Van Gaelen
-%  Last update: 30/11/2015
+%  Last update: 12/11/2015
+%  Version: AquaCrop-Hydro version 2015/11
 %   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
