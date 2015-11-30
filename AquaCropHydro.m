@@ -2,30 +2,30 @@
 % This scripts runs the submodels of the AquaCrop-Hydro model
 %
 % Author: Hanne Van Gaelen
-% Last update: 12/11/2015
+% Last update: 30/11/2015
 %   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-function[Q_MBF,Q_MIF,Q_MOF,Q_MTF,area,f,Wrmin,Wrmax,pbf,SoilPar,SimACOutput,CatchACOutput,Par]=AquaCropHydro(DatapathAC, DatapathInput,nAC)
+function[Q_MBF,Q_MIF,Q_MOF,Q_MTF,area,f,Wrmin,Wrmax,pbf,SoilPar,SimACOutput,CatchACOutput,Par]=AquaCropHydro(DatapathAC, DatapathInput)
 
 
 %% ------------------------------------------------------------------------
 % 1. AquaCrop model
 %--------------------------------------------------------------------------
        
-       % AquaCrop is ran outside matlab (every simulation is one landunit)
+       % AquaCrop is ran outside matlab (every project simulation is one landunit)
        % AquaCrop simulations need to be ran before running this script
        % output of AquaCrop should be stored in DataPathAC
        
-       ACMode=1; % 1= normal AquaCrop, 2= plugin version
+       ACMode=2; % 1= normal AquaCrop, 2= plugin version
                     
 %% ------------------------------------------------------------------------
 % 2. Upscaling : fielscale to catchment scale
 %------------------------------------------------------------------------
         
        % Load AquaCrop output for all simulation runs & calculate the summarized results for the catchment
-        [SimACOutput,CatchACOutput, SoilPar]=CatchmentOutput(DatapathAC, DatapathInput,ACMode);  
+        [SimACOutput,CatchACOutput, SoilPar,nTime]=CatchmentOutput(DatapathAC, DatapathInput,ACMode);  
         
        % Extract relevant soil water balance components for hydro model
         Wr2Catch=CatchACOutput(:,11);   % Soil water content in 2 m soil depth (mm)
@@ -43,5 +43,5 @@ function[Q_MBF,Q_MIF,Q_MOF,Q_MTF,area,f,Wrmin,Wrmax,pbf,SoilPar,SimACOutput,Catc
         clear name file
                            
        % Run the hydrological model
-        [Q_MBF,Q_MIF,Q_MOF,Q_MTF,area,f,Wrmin,Wrmax,pbf]=Hydro(Par,SoilPar,nAC,ROCatch,DPCatch,Wr2Catch);
+        [Q_MBF,Q_MIF,Q_MOF,Q_MTF,area,f,Wrmin,Wrmax,pbf]=Hydro(Par,SoilPar,nTime,ROCatch,DPCatch,Wr2Catch);
 end

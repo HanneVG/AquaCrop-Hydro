@@ -6,11 +6,11 @@
 % come to one result for the whole catchment
 %
 % Author: Hanne Van Gaelen
-% Last update: 12/11/2015
+% Last update: 30/11/2015
 %   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [SimACOutput,CatchACOutput,SoilPar]= CatchmentOutput(DatapathAC, DatapathInput, ACMode)
+function [SimACOutput,CatchACOutput,SoilPar,nTime]= CatchmentOutput(DatapathAC, DatapathInput, ACMode)
       
 %% %%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 1. READ EXTRA INFORMATION ABOUT AQUACROP SIMULATION UNITS

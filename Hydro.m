@@ -5,16 +5,16 @@
 %
 %
 % Author: Hanne Van Gaelen
-% Last update: 1/08/2015
+% Last update: 30/11/2015
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [Q_MBF,Q_MIF,Q_MOF,Q_MTF,area,f,Wrmin,Wrmax,pbf]=Hydro(Par,SoilPar,nAC,ROCatch,DPCatch,Wr2Catch)
+function [Q_MBF,Q_MIF,Q_MOF,Q_MTF,area,f,Wrmin,Wrmax,pbf]=Hydro(Par,SoilPar,nTime,ROCatch,DPCatch,Wr2Catch)
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 % 1. DEFINE ALL INPUT PARAMETERS AND VARIABLES
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    n=nAC; % number of simulated timesteps by Aquacrop
+    n=nTime; % number of simulated timesteps by Aquacrop
     
     kbf=Par(1,1); % recession constant for baseflow
     kif=Par(2,1);% recession constant for interflow
