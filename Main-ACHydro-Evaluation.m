@@ -1,5 +1,5 @@
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  This is the main script for the AquaCrop-Hydro model and its data processing
+%  This is the script for the AquaCrop-Hydro model and its data processing
 %  This scripts brings together AquaCrop simulation output and simulates catchment hydrology.
 %  Moreover, this script vizualizes all input & results, and does a performance analysis by comparing sim results with observations. 
 % 
