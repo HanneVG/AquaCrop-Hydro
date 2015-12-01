@@ -38,7 +38,7 @@ function[Q_MBF,Q_MIF,Q_MOF,Q_MTF,area,f,Wrmin,Wrmax,pbf,SoilPar,SimACOutput,Catc
                 
        % Load the parameters that are needed for hydrological model
         name='Parameters.txt';
-        file = [DatapathInput name];
+        file = fullfile(DatapathInput, name);
         Par = importdata(file); 
         clear name file
                            
