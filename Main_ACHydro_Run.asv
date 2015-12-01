@@ -50,11 +50,21 @@ clc % clear command window
 
      DatapathOutput=uigetdir('C:\','Select directory to store AquaCrop-Hydro output (flows)');
      
+% specify the AquaCrop mode that was used (1= normal AquaCrop, 2= plugin version)
+     ACMode=inputdlg('Did you use AquaCrop normal (1) or stand-alone plugin version (2)?','AquaCrop Mode');
+     ACMode=cell2mat(ACMode);
+     ACMode=str2double(ACMode);
+     try
+       not(ACMode==1) & not(ACMode==2);
+     catch 
+       error('invalid ACMode was entered as input')
+     end
+     
 %% ------------------------------------------------------------------------
 % 1. RUN AQUACROP-HYDRO                                                    %
 %--------------------------------------------------------------------------  
 
-[Q_MBF,Q_MIF,Q_MOF,Q_MTF,~,~,~,~,~,~,SimACOutput,CatchACOutput,~]=AquaCropHydro(DatapathAC, DatapathInput);
+[Q_MBF,Q_MIF,Q_MOF,Q_MTF,~,~,~,~,~,~,SimACOutput,CatchACOutput,~]=AquaCropHydro(DatapathAC, DatapathInput,ACMode);
 
 
 %% ------------------------------------------------------------------------
@@ -62,13 +72,13 @@ clc % clear command window
 %-------------------------------------------------------------------------- 
 
 % Combine output
-OutputHeaders[Baseflow,Interflow,Overland flow, Total flow]
+OutputHeaders={'Baseflow','Interflow','Overland flow', 'Total flow'};
 FlowOutput=[Q_MBF,Q_MIF,Q_MOF,Q_MTF];
 
 % write output to one excel tabsheet
-xlname='FlowResults.xlsx';
+xlname='FlowSimResults.xlsx';
 filename = fullfile(DatapathOutput,xlname);
+xlswrite(filename,OutputHeaders,'SimFlow','A1');
+xlswrite(filename,FlowOutput,'SimFlow','A2');
 
-xlswrite(filename,FlowOutput,'Flow','A2');
-
-clear xlname filename FlowOutput DatapathOutput DatapathInput DataopathAC 
+clear xlname filename FlowOutput OutputHeaders DatapathOutput DatapathInput DatapathAC 

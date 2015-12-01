@@ -50,11 +50,16 @@ clc % clear command window
 
      DatapathOutput=uigetdir('C:\','Select directory to store AquaCrop-Hydro output (flows)');
      
+% specify the AquaCrop mode that was used (1= normal AquaCrop, 2= plugin version)
+     ACMode=inputdlg('Did you use AquaCrop normal (1) or stand-alone plugin version (2)?','AquaCrop Mode');
+     ACMode=cell2mat(ACMode);
+     ACMode=str2double(ACMode);
+      
 %% ------------------------------------------------------------------------
 % 1. RUN AQUACROP-HYDRO                                                    %
 %--------------------------------------------------------------------------  
 
-[Q_MBF,Q_MIF,Q_MOF,Q_MTF,~,~,~,~,~,~,SimACOutput,CatchACOutput,~]=AquaCropHydro(DatapathAC, DatapathInput);
+[Q_MBF,Q_MIF,Q_MOF,Q_MTF,~,~,~,~,~,~,SimACOutput,CatchACOutput,~]=AquaCropHydro(DatapathAC, DatapathInput,ACMode);
 
 
 %% ------------------------------------------------------------------------

@@ -21,6 +21,8 @@
 %       (see example in 'ExampleInput' directory)
 %   4. Adapt the script for the soil types that occur in the catchment
 %        (see CatchmentOutput.m, section 5)
+%   5. Specify the AquaCrop model you uses (norma versus plugin)
+%        (see AquaCropHydro.m, section 1)
 %
 %  Author: Hanne Van Gaelen
 %  Last update: 12/11/2015
@@ -32,7 +34,7 @@ clear % clears all variables from a previous run
 close all % close all figures of a previous run
 
 %% ------------------------------------------------------------------------
-% 0. DEFINE DATA PATHS  & AquaCrop Mode                                                  %
+% 0. DEFINE DATA PATHS                                                    %
 %--------------------------------------------------------------------------      
 
 % specify in which path all inputs for this script are stored including 
@@ -42,31 +44,26 @@ close all % close all figures of a previous run
 %    d) the maximum root depth for every landunit and sim run (Zrx.txt)
 %    e) the soil parameters of each soil type present (SoilPar.txt)
     
-    DatapathInput = uigetdir('C:\','Select directory with all input files for AquaCrop-Hydro and the field observations');
+    DatapathInput = uigetdir('C:\','Select directory with all input files for AquaCrop-Hydro and the field bservations');
 
 % specify in which path all AquaCrop simulation output files are stored
 
-    DatapathAC=uigetdir('C:\','Select directory with AquaCrop output files for all landunits');
-     
+     DatapathAC='C:\DATA_HanneV\~Onderzoek\DEEL 2 - Ecohydro model\DEEL IIB  -VHM-AC\Testing\1. Kruishoutem\Simulation results\AquaCrop\Catchment sim files\Normal Ksat - Normal runoff';      
+
 % specify in which path all outputs of this script should be stored
 % including
 %    a) performance statistics
 %    b) yield data for every AquaCrop simulation unit and run
 
-    DatapathOutput=uigetdir('C:\','Select directory to store evaluation output & yield output');
-     
-% specify the AquaCrop mode that was used (1= normal AquaCrop, 2= plugin version)
-     ACMode=inputdlg('Did you use AquaCrop normal (1) or stand-alone plugin version (2)?','AquaCrop Mode');
-     ACMode=cell2mat(ACMode);
-     ACMode=str2double(ACMode); 
-     
+     DatapathOutput='C:\DATA_HanneV\~Onderzoek\DEEL 2 - Ecohydro model\DEEL IIB  -VHM-AC\Testing\1. Kruishoutem\Models\AquaCrop-Hydro\Output\';
+
 %% ------------------------------------------------------------------------ 
 % 1. LOAD ALL OBSERVATIONS                                                %
 %--------------------------------------------------------------------------      
    
 %%%% 1.1 Load AquaCrop climate observations (those are used as AquaCrop model input)
        name='Climate.txt';
-       file = fullfile(DatapathInput, name);
+       file = [DatapathInput name];
        A = importdata(file);
         
        Time1=A(:,1);    % Timesteps (days)
@@ -85,7 +82,7 @@ close all % close all figures of a previous run
 
 %%%% 1.2 Load de flow observation 
        name='Flow.txt';
-       file = fullfile(DatapathInput, name);
+       file = [DatapathInput name];
        F = importdata(file);
   
        Time2=F(:,1);    % timesteps (days)
@@ -115,7 +112,7 @@ close all % close all figures of a previous run
 
 % Run AquaCrop-Hydro with all its submodels
 
-[Q_MBF,Q_MIF,Q_MOF,Q_MTF,area,f,Wrmin,Wrmax,pbf,SoilPar,SimACOutput,CatchACOutput,Par]=AquaCropHydro(DatapathAC, DatapathInput,ACMode);
+[Q_MBF,Q_MIF,Q_MOF,Q_MTF,area,f,Wrmin,Wrmax,pbf,SoilPar,SimACOutput,CatchACOutput,Par]=AquaCropHydro(DatapathAC, DatapathInput,nAC);
 
 % Save important variables       
        % Save time variables        
@@ -1883,7 +1880,7 @@ figure('name','Subflow stacked plot');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 
 name='Performance analysis.xls';
-filename = fullfile(DatapathOutput, name);
+filename = [DatapathOutput name];
 
 xlswrite(filename,StatMatrixCalibDay,'Statistics','C16:F21');
 xlswrite(filename,StatMatrixValidDay,'Statistics','C24:F29');
@@ -1903,7 +1900,7 @@ xlswrite(filename,CumWabalflowCalib,'Balances','J35:P43');
 xlswrite(filename,CumWabalflowValid,'Balances','J49:P57');
 
 name2='Yield data.xls';
-filename2 = fullfile(DatapathOutput, name2);
+filename2 = [DatapathOutput name2];
 xlswrite(filename2, Ymain,'allYdata','B5:AF19');
 
 clear name name2 filename filename2

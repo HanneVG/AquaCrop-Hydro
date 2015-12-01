@@ -7,7 +7,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-function[Q_MBF,Q_MIF,Q_MOF,Q_MTF,area,f,Wrmin,Wrmax,pbf,SoilPar,SimACOutput,CatchACOutput,Par]=AquaCropHydro(DatapathAC, DatapathInput)
+function[Q_MBF,Q_MIF,Q_MOF,Q_MTF,area,f,Wrmin,Wrmax,pbf,SoilPar,SimACOutput,CatchACOutput,Par]=AquaCropHydro(DatapathAC, DatapathInput,ACMode)
 
 
 %% ------------------------------------------------------------------------
@@ -17,9 +17,9 @@ function[Q_MBF,Q_MIF,Q_MOF,Q_MTF,area,f,Wrmin,Wrmax,pbf,SoilPar,SimACOutput,Catc
        % AquaCrop is ran outside matlab (every project simulation is one landunit)
        % AquaCrop simulations need to be ran before running this script
        % output of AquaCrop should be stored in DataPathAC
-       
-       ACMode=2; % 1= normal AquaCrop, 2= plugin version
-                    
+       % the mode in which AquaCrop was run (normal versus pluging) is an
+       % input argument for AquaCrop-Hydro
+                          
 %% ------------------------------------------------------------------------
 % 2. Upscaling : fielscale to catchment scale
 %------------------------------------------------------------------------
