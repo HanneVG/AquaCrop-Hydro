@@ -54,7 +54,10 @@ clc % clear command window
      ACMode=inputdlg('Did you use AquaCrop normal (1) or stand-alone plugin version (2)?','AquaCrop Mode');
      ACMode=cell2mat(ACMode);
      ACMode=str2double(ACMode);
-      
+     
+     assert(ACMode==1|ACMode==2,'invalid AquaCrop mode selected');
+   
+     
 %% ------------------------------------------------------------------------
 % 1. RUN AQUACROP-HYDRO                                                    %
 %--------------------------------------------------------------------------  
