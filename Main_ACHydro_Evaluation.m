@@ -60,7 +60,12 @@ close all % close all figures of a previous run
      ACMode=cell2mat(ACMode);
      ACMode=str2double(ACMode); 
      
-     assert(ACMode==1|ACMode==2,'invalid AquaCrop mode selected');
+     if ACMode==1 || ACMode==2
+         %continue
+     else
+         error('invalid AquaCrop mode selected');
+     end
+    
      
 %% ------------------------------------------------------------------------ 
 % 1. LOAD ALL OBSERVATIONS                                                %
