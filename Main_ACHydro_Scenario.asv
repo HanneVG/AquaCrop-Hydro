@@ -10,9 +10,7 @@
 %      "03", "10","20" according to the landunit number
 %   3. Ensure that all AquaCrop ouput files are organized in subfolders
 %      with the name of the scenario
-%   4. Prepare all required input files for this script
-%   5. Add the paths where the DateCalc.m en ClimSubtotal.m file are
-%   located to the searchpath of matlab (see section 1)
+%   4. Prepare all required input files for this script 
 % 
 %   
 %
@@ -25,7 +23,7 @@
 %
 %
 % Author: Hanne Van Gaelen
-% Last updated: 06/01/2016
+% Last updated: 2/12/2015
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -33,13 +31,6 @@
 %% ------------------------------------------------------------------------
 % 1. DEFINE DATA PATHS (BY USER)                                                    
 %--------------------------------------------------------------------------      
-
-% Add the paths where the DateCalc.m en ClimSubtotal.m file are
-%   located to the searchpath of matlab
-    newpath1='C:\DATA_HanneV\~Onderzoek\DEEL 2 - Ecohydro model\DEEL IIB  -VHM-AC\Github\AquaCrop_Extra';
-    newpath2='C:\DATA_HanneV\~Onderzoek\DEEL 2 - Ecohydro model\DEEL IIB  -VHM-AC\Github\Climate_Processing';
-    path(path,newpath1) %adds the newpath folder to the bottom of the search path. 
-    path(path,newpath2)
 
 % specify in which path all AquaCrop simulation output files are stored for
 % all scenarios (each scenario in different subfolder)
@@ -365,7 +356,7 @@ clear sc
 % save workspace variables so that you can skip this the first part of the
 % code next time
 filename=['workspace ',datestr(date)];
-filename=fullfile(DatapathScenOut,filename);
+filename=fullfile(DatapathScenOutput,filename);
 save(filename)
 clear filename 
  
@@ -499,13 +490,7 @@ figure('name','Median yield changes')
         set(gca,'XTickLabel',{' '})
         
         linkaxes(h,'y')% link y axis of different plots (so that they change simultaneously
-
-%save figure
-filename='Median yield changes';
-filename=fullfile(DatapathScenOut,filename);
-savefig(filename)
-
-clear filename 
+ 
 clear sub h  
 
 %% -----------------------------------------------------------------------
@@ -544,7 +529,7 @@ end
 
 clear sc lu SowingDateSC MaturityDateSC LengthSC RotationDateSC
 
-% 5.1 Compose LGPpotential  matrix per crop type
+% 5.1 Compose cycle length matrix per crop type
 %--------------------------------------------------------------------------
 CycleLengthCrop=cell(2,ncrop);% initialize
 
@@ -589,7 +574,7 @@ clear c
 
 clear c
 
-% 4.5 Vizualize potential length of growing period ( impact
+% 4.5 Vizualize growing cycle length impact
 %------------------------------------------------------------------------- 
 NameMat= {'RCP 4.5','RCP 8.5'};
 
@@ -600,7 +585,7 @@ sugarbeet=find(strcmp(CycleLengthCrop(1,:),'Sugarbeet')==1);
 potato=find(strcmp(CycleLengthCrop(1,:),'Potato')==1);
 pea=find(strcmp(CycleLengthCrop(1,:),'Pea')==1);
 
-figure('name','Median LGPpot changes')
+figure('name','Median growing cycle length changes')
         sub(1)=subplot(2,5,1,'fontsize',10);
         boxplot(CLengthCropDeltastats{2,maize}(2,2:16),RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'labels',NameMat,'colors',['r','b']);
         line(xlim,[0,0],'Color','k','LineStyle','--')
@@ -663,10 +648,6 @@ figure('name','Median LGPpot changes')
         set(gca,'XTickLabel',{' '});
         
         linkaxes(h,'y')% link y axis of different plots (so that they change simultaneously
-%save figure
-filename='Median LGPpot changes';
-filename=fullfile(DatapathScenOut,filename);
-savefig(filename)
  
 clear sub h  
 
@@ -725,11 +706,6 @@ Q_MTFcum=cumsum(Q_MTF); % daily cumulative
             plot(Date(:,1),Q_MTFcum(1:nTime,1)*f/area,'color','k','LineWidth',2);
             ylabel('Total river flow (mm)')
 
-% save vizualization
-filename='Median yearly discharge changes';
-filename=fullfile(DatapathScenOut,filename);
-savefig(filename)
-
 % 6.3 Month Subtotal analysis and vizualization
 % ----------------------------------------------------------------------- 
 
@@ -766,7 +742,7 @@ savefig(filename)
         end
     end
     
-% vizualization    
+%% vizualization    
    
     figure('name','Median monthly discharge changes')
             sub(1)=subplot('Position',[0.05, 0.4, 0.055,0.55],'fontsize',10); 
@@ -867,8 +843,5 @@ savefig(filename)
             set(gca,'XTick',[1:12])
             set(gca,'box','off')
             
-% save vizualization
-filename='Median monthly discharge changes';
-filename=fullfile(DatapathScenOut,filename);
-savefig(filename)            
+            
             
