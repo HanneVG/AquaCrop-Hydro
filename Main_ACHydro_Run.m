@@ -36,9 +36,9 @@ clc % clear command window
 %--------------------------------------------------------------------------      
 
 % specify in which path all inputs for this script are stored including 
-%    a) additional information on AquaCrop simulations (SimInfo.txt)
+%    a) additional information on AquaCrop simulations of each landunits (SimInfo.txt)
 %    b) the parameters for the hydrological model (Parameters.txt)
-%    d) the maximum root depth for every landunit and sim run (Zrx.txt)
+%    c) the maximum root depth for every landunit and sim run (Zrx.txt)
 %    d) the soil parameters of each soil type present (SoilPar.txt)
      DatapathInput = uigetdir('C:\','Select directory with all input files for AquaCrop-Hydro');
  
@@ -60,8 +60,7 @@ clc % clear command window
      else
          error('invalid AquaCrop mode selected');
      end
-    
-   
+  
      
 %% ------------------------------------------------------------------------
 % 1. RUN AQUACROP-HYDRO                                                    %

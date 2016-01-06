@@ -37,7 +37,7 @@ close all % close all figures of a previous run
 
 % specify in which path all inputs for this script are stored including 
 %    a) the observations (Climate.txt & Flow.txt)
-%    b) additional information on AquaCrop simulations (SimInfo.txt)
+%    b) additional information on AquaCrop simulations of each landunits (SimInfo.txt)
 %    c) the parameters for the hydrological model (Parameters.txt)
 %    d) the maximum root depth for every landunit and sim run (Zrx.txt)
 %    e) the soil parameters of each soil type present (SoilPar.txt)
