@@ -893,8 +893,95 @@ f4=figure('name','Median yearly discharge changes- GCM&year variation');% boxplo
         title('overland flow')
         set(gca,'box','off','YTick',[])
 
-        linkaxes(sub,'y')            
-            
+        linkaxes(sub,'y')  
+        
+% 6.5 Analyse probabilities with cumulative distribution function  
+% -----------------------------------------------------------------------
+
+% test for normality 
+
+
+% fit distributions
+xrangeTF=0:5:max(Q_MTFyear2(:));
+xrangeBF=0:5:max(Q_MBFyear2(:));
+xrangeIF=0:5:max(Q_MIFyear2(:));
+xrangeOF=0:5:max(Q_MOFyear2(:));
+
+
+probabilitiesTF=NaN(length(xrangeTF),nsc);
+probabilitiesBF=NaN(length(xrangeBF),nsc);
+probabilitiesIF=NaN(length(xrangeIF),nsc);
+probabilitiesOF=NaN(length(xrangeOF),nsc);
+
+for sc=1:nsc
+pdsc=fitdist(Q_MTFyear2(:,sc),'Normal');
+probabilitiesTF(:,sc)=cdf(pdsc,xrangeTF);
+
+pdsc=fitdist(Q_MBFyear2(:,sc),'Normal');
+probabilitiesBF(:,sc)=cdf(pdsc,xrangeBF);
+
+pdsc=fitdist(Q_MIFyear2(:,sc),'Normal');
+probabilitiesIF(:,sc)=cdf(pdsc,xrangeIF);
+
+pdsc=fitdist(Q_MOFyear2(:,sc),'Normal');
+probabilitiesOF(:,sc)=cdf(pdsc,xrangeOF);
+
+end
+
+% vizualize
+GreyCol='[0.6 0.6 0.6]';
+colorstruct=cell(nsc-1,1);
+for i=1:nsc-1
+    colorstruct(i,1)={GreyCol};
+end
+
+f5=figure('name','Yearly discharge CDF');
+    subplot(2,2,1,'fontsize',10);
+    P=plot(xrangeTF,probabilitiesTF(:,2:nsc)) ;   
+    set(P,{'Color'},colorstruct)
+    set(P,{'LineStyle'},{'-'})
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual total flow (mm/year)','fontsize',8);
+    title('Total flow')
+    hold on 
+    P=plot(xrangeTF,probabilitiesTF(:,1),'Color','k','LineWidth',1.5); 
+    set(gca,'box','off')
+ 
+
+    subplot(2,2,2,'fontsize',10);
+    P=plot(xrangeBF,probabilitiesBF(:,2:nsc)) ;   
+    set(P,{'Color'},colorstruct)
+    set(P,{'LineStyle'},{'-'})
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual baseflow (mm/year)','fontsize',8);
+    title('Baseflow')
+    hold on 
+    P=plot(xrangeBF,probabilitiesBF(:,1),'Color','k','LineWidth',1.5); 
+    set(gca,'box','off')
+  
+    
+    subplot(2,2,3,'fontsize',10);
+    P=plot(xrangeIF,probabilitiesIF(:,2:nsc)) ;   
+    set(P,{'Color'},colorstruct)
+    set(P,{'LineStyle'},{'-'})
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual interflow (mm/year)','fontsize',8);
+    title('Interflow')
+    hold on 
+    P=plot(xrangeIF,probabilitiesIF(:,1),'Color','k','LineWidth',1.5); 
+    set(gca,'box','off')
+    
+    subplot(2,2,4,'fontsize',10);
+    P=plot(xrangeOF,probabilitiesOF(:,2:nsc)) ;   
+    set(P,{'Color'},colorstruct)
+    set(P,{'LineStyle'},{'-'})
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual overland flow (mm/year)','fontsize',8);
+    title('Overland flow')
+    hold on 
+    P=plot(xrangeOF,probabilitiesOF(:,1),'Color','k','LineWidth',1.5); 
+    set(gca,'box','off')
+  
             
 % 6.4 save results (vizualizations)
 % ----------------------------------------------------------------------- 
@@ -909,6 +996,10 @@ savefig(f2,filename)
 filename='Median yearly discharge changes-yeargcmboxplot';
 filename=fullfile(DatapathScenOut,filename);
 savefig(f4,filename)
+
+filename='Yearly discharge CDF';
+filename=fullfile(DatapathScenOut,filename);
+savefig(f5,filename)
 
 clear filename sub
 %% -----------------------------------------------------------------------
