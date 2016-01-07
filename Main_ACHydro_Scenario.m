@@ -41,6 +41,8 @@
     path(path,newpath1) %adds the newpath folder to the bottom of the search path. 
     path(path,newpath2)
 
+    clear newpath1 newpath2
+    
 % specify in which path all AquaCrop simulation output files are stored for
 % all scenarios (each scenario in different subfolder)
 
@@ -59,12 +61,12 @@
 %   simulated by AquaCrop-Hydro
 %   b) Yield values as simulated for each landunit during the main cropping season of each simulated year
 
-     DatapathACHOutput=uigetdir('C:\','Select directory to store AquaCrop-Hydro output (flows and yield values)');        
+     DatapathACHOutput=uigetdir('C:\','Select directory with scenario subfloders to store AquaCrop-Hydro output (flows and yield values)');        
 
 % specify in which path all information on the scenario comparison is stored including  
  %    a) information on the different scenarios (Scenario.txt)    
      
-     DatapathScenIn = uigetdir('C:\','Select directory with all information on the scenario comparison ');     
+     DatapathScenIn = uigetdir('C:\','Select directory with all input information on the scenario comparison ');     
 
 % specify in which path all output of scenario comparison (figure and workspace variables) should be stored   
      
@@ -84,7 +86,17 @@
      else
          error('invalid AquaCrop mode selected');
      end
- 
+     
+% specify the category that you want to group scenarios in
+     GroupCat=inputdlg('Do you want to group scenario analysis per RCP scenario (1), climate model (2) or management category (3)?','Grouping category');
+     GroupCat=cell2mat(GroupCat);
+     GroupCat=str2double(GroupCat);
+
+     if GroupCat==1 || GroupCat==2 || GroupCat==3
+         %continue
+     else
+         error('invalid grouping category selected - it can only be 1-2-3');
+     end 
      
 %% ------------------------------------------------------------------------
 % 2. LOAD EXTRA INFORMATION ON SIIMULATIONS AND LANDUNITS                                                  
@@ -120,79 +132,43 @@
     clear name file   
     
     scnumb=A.data(:,1).'; 
-    nsc=max(scnumb);
+    nsc=length(scnumb);
     ScenarioName=A.textdata(:,1).';
     ClimModel=A.textdata(:,2).';
     RCP=A.textdata(:,3).';
+    Manag=A.textdata(:,4).';
     StartDate=datetime((A.data(:,2).'),'ConvertFrom','excel');
     EndDate=datetime((A.data(:,3).'),'ConvertFrom','excel');
     nTime=daysact(datenum(StartDate(1,1)), datenum(EndDate(1,1)))+1;
     clear A 
     
+% 2.3 Create groups and labels for vizualization 
+%-------------------------------------------------------------------------     
+% baseline scenario is excluded for groups 
+
+    if GroupCat==1 % grouping per RCP
+        groupnames=unique(RCP(1,2:nsc));
+        ngroup=length(groupnames);     
+        groupmat=RCP;
+    elseif GroupCat==2 % grouping per climate model
+        groupnames=unique(ClimModel);
+        ngroup=length(groupnames) ;
+        groupmat=ClimModel;
+    elseif GroupCat==3 % grouping per management scenario
+        groupnames=unique(Manag);
+        ngroup=length(groupnames);  
+        groupmat=Manag;
+    else
+        error('grouping category is not well defined');
+    end
+    
+    
 %% -----------------------------------------------------------------------
 % 3. RUN AQUACROP-HYDRO FOR ALL SCENARIOS & SAVE OUTPUT OF EACH SCENARIO
+%-------------------------------------------------------------------------            
+
+%3.1 initialize variables
 %-------------------------------------------------------------------------
-
-% % 3.1 Check if AquaCrop results for all scenarios can be found
-% % -----------------------------------------------------------------------
-% Folders_DatapathAC=dir(DatapathAC);    % Folder structure of scenarios
-% 
-% %clean up
-%  for k = length(Folders_DatapathAC):-1:1 
-%     % remove non-folders
-%     if ~Folders_DatapathAC(k).isdir
-%         Folders_DatapathAC(k) = [ ];
-%         continue
-%     end
-% 
-%     % remove folders starting with .
-%     fname = Folders_DatapathAC(k).name;
-%     if fname(1) == '.'
-%         Folders_DatapathAC(k) = [ ];
-%     end
-% end
-% 
-% % order scenarios
-%     %convert to matrix      
-%     FolderNames = fieldnames(Folders_DatapathAC);
-% 
-%     FoldersMat=struct2cell(Folders_DatapathAC);
-%     FoldersMat=FoldersMat';
-% 
-%     %sort
-%     FoldersMatSort=sortrows(FoldersMat,2);   % use date timestamp to sort files (=proxy for order of scenarios) 
-% 
-%     %convert back to structure
-%     Folders_DatapathACSort=cell2struct(FoldersMatSort,FolderNames,2);
-% 
-%     %replace old datastructure with sorted
-%     Folders_DatapathAC=Folders_DatapathACSort;      
-% 
-% 
-% % check relevant information
-% [nsc2,~]=size(Folders_DatapathAC);      % Number of scenarios
-% if nsc2==nsc
-%     % continue as the number of simulated scenarios is correct
-% else 
-%     error('the number of simulated scenarios does not match the number of scenarios in information file')
-% end
-% 
-% 
-% ScenarioName2= {Folders_DatapathAC.name};
-% for sc=1:nsc
-%     if strcmp(ScenarioName2(1,sc),ScenarioName(1,sc))
-%         %continue as the names of the simulated scenarios are correct 
-%     else
-%         error(['The scenarioname of simulated scenario ',num2str(sc),' does not match the scenario name in the information file'])
-%     end
-% end
-% 
-% clear FoldersMatSortt FoldersMat Folders_DatapathACSort FolderNames fname k Folders_DatapathAC nsc2 ScenarioName2
-
-% 3.2 Run all scenarios and save results
-% -----------------------------------------------------------------------             
-
-%initialize variables
     %time variables
     Day=NaN(nTime,nsc);    % Day number
     Month=NaN(nTime,nsc);  % Month number
@@ -253,7 +229,10 @@
     Bfin(1,1:nsc)= ScenarioName(1,1:nsc);  
     Y(1,1:nsc)=ScenarioName(1,1:nsc);  
     Ymain(1,1:nsc)=ScenarioName(1,1:nsc);        
-        
+
+%3.2 Run ACHydro and save output
+%-------------------------------------------------------------------------
+    
 for sc=1:nsc %loop trough all scenarios
 % show progress
 disp(['Now running scenario ',num2str(sc),' of the ',num2str(nsc),' scenarios']);
@@ -362,8 +341,11 @@ end
 
 clear sc
 
+% 3.3 Save workspace
+%-------------------------------------------------------------------------
 % save workspace variables so that you can skip this the first part of the
 % code next time
+
 filename=['workspace ',datestr(date)];
 filename=fullfile(DatapathScenOut,filename);
 save(filename)
@@ -375,7 +357,7 @@ clear filename
 %------------------------------------------------------------------------
 
 % 4.1 Compose yield matrix per crop type
-%---------------------------------------
+%-------------------------------------------------------------------------
 Crop2 = unique(Crop(:,1)); % number of unique crops in catchment
 Crop2=Crop2(strcmp(Crop2(:,1),'Unknown')==0); % remove the landunits with unknown crop 
 Crop2=Crop2(strcmp(Crop2(:,1),'Impervious')==0); % remove the landunits with unknown crop 
@@ -399,7 +381,7 @@ end
 clear sc c 
 
 % 4.2 Calculate statistics
-%---------------------------------------
+%-------------------------------------------------------------------------
 % stats for each crop over different years 
     Ystats(1,1:ncrop)=Yall(1,1:ncrop); 
     
@@ -412,8 +394,6 @@ clear sc c
     end
 clear c
 
-% 4.3 Mean changes of statistics
-%---------------------------------------
 % Calculate changes of stats (change of avg, change of median)
     YDeltastats(1,1:ncrop)=Yall(1,1:ncrop); 
 
@@ -425,9 +405,8 @@ clear c
 
 clear c
    
-% 4.4 Vizualize yield impact
-%--------------------------------------- 
-NameMat= {'RCP 4.5','RCP 8.5'};
+% 4.3 Vizualize yield impact
+%-------------------------------------------------------------------------
 
 %search indices of crops you want to show
 maize=find(strcmp(Yall(1,:),'Maize')==1);
@@ -438,7 +417,7 @@ pea=find(strcmp(Yall(1,:),'Pea')==1);
 
 figure('name','Median yield changes')
         sub(1)=subplot(2,5,1,'fontsize',10);
-        boxplot(YDeltastats{2,maize}(2,2:16)*100,RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'labels',NameMat,'colors',['r','b']);
+        boxplot(YDeltastats{2,maize}(2,2:16)*100,groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
         ylabel('Median yield change (%)')
         axis([xlim, -30,30])
@@ -446,25 +425,25 @@ figure('name','Median yield changes')
         title('Maize')
         
         sub(2)=subplot(2,5,2,'fontsize',10);
-        boxplot(YDeltastats{2,wwheat}(2,2:16)*100,RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'labels',NameMat);
+        boxplot(YDeltastats{2,wwheat}(2,2:16)*100,groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
         set(gca,'box','off')
         title('Winter Wheat')
         
         sub(3)=subplot(2,5,3,'fontsize',10);
-        boxplot(YDeltastats{2,potato}(2,2:16)*100,RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'labels',NameMat);
+        boxplot(YDeltastats{2,potato}(2,2:16)*100,groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
         set(gca,'box','off')
         title('Potato')
         
         sub(4)=subplot(2,5,4,'fontsize',10);
-        boxplot(YDeltastats{2,sugarbeet}(2,2:16)*100,RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'labels',NameMat);
+        boxplot(YDeltastats{2,sugarbeet}(2,2:16)*100,groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
         set(gca,'box','off')
         title('Sugarbeet')
         
         sub(5)=subplot(2,5,5,'fontsize',10);
-        boxplot(YDeltastats{2,pea}(2,2:16)*100,RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'labels',NameMat);
+        boxplot(YDeltastats{2,pea}(2,2:16)*100,groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
         set(gca,'box','off')
         title('Peas')    
@@ -576,8 +555,6 @@ clear sc c subset
     end
 clear c
 
-% 5.4 Mean changes of statistics
-%-------------------------------------------------------------------------
 % Calculate changes of stats (change of avg, change of median)
      CLengthCropDeltastats(1,1:ncrop)=CycleLengthCrop(1,1:ncrop);
 
@@ -589,9 +566,8 @@ clear c
 
 clear c
 
-% 4.5 Vizualize potential length of growing period ( impact
+% 5.4 Vizualize potential length of growing period 
 %------------------------------------------------------------------------- 
-NameMat= {'RCP 4.5','RCP 8.5'};
 
 %search indices of crops you want to show
 maize=find(strcmp(CycleLengthCrop(1,:),'Maize')==1);
@@ -602,7 +578,7 @@ pea=find(strcmp(CycleLengthCrop(1,:),'Pea')==1);
 
 figure('name','Median LGPpot changes')
         sub(1)=subplot(2,5,1,'fontsize',10);
-        boxplot(CLengthCropDeltastats{2,maize}(2,2:16),RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'labels',NameMat,'colors',['r','b']);
+        boxplot(CLengthCropDeltastats{2,maize}(2,2:16),groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
         ylabel('Change of growing cycle length (days)')
         axis([xlim, -50,10])
@@ -610,25 +586,25 @@ figure('name','Median LGPpot changes')
         title('Maize')
         
         sub(2)=subplot(2,5,2,'fontsize',10);
-        boxplot(CLengthCropDeltastats{2,wwheat}(2,2:16),RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'labels',NameMat);
+        boxplot(CLengthCropDeltastats{2,wwheat}(2,2:16),groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
         set(gca,'box','off');
         title('Winter Wheat')
         
         sub(3)=subplot(2,5,3,'fontsize',10);
-        boxplot(CLengthCropDeltastats{2,potato}(2,2:16),RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'labels',NameMat);
+        boxplot(CLengthCropDeltastats{2,potato}(2,2:16),groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
         set(gca,'box','off');
         title('Potato')
         
         sub(4)=subplot(2,5,4,'fontsize',10);
-        boxplot(CLengthCropDeltastats{2,sugarbeet}(2,2:16),RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'labels',NameMat);
+        boxplot(CLengthCropDeltastats{2,sugarbeet}(2,2:16),groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
         set(gca,'box','off');
         title('Sugarbeet')
         
         sub(5)=subplot(2,5,5,'fontsize',10);
-        boxplot(CLengthCropDeltastats{2,pea}(2,2:16),RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'labels',NameMat);
+        boxplot(CLengthCropDeltastats{2,pea}(2,2:16),groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
         set(gca,'box','off');
         title('Peas')    
@@ -672,7 +648,7 @@ clear sub h
 
 
 %% -----------------------------------------------------------------------
-% 6. HYDROLOGICAL IMPACT 
+% 6. TOTAL DISCHARGE IMPACT 
 %------------------------------------------------------------------------
 
 % 6.1 Subtotal calculation 
@@ -710,10 +686,9 @@ Q_MTFcum=cumsum(Q_MTF); % daily cumulative
     end
 
 % vizualization    
-    NameMat= {'RCP 4.5','RCP 8.5'};
     figure('name','Median yearly discharge changes')
             sub(1)=subplot(2,1,2,'fontsize',10);
-            boxplot(Q_MTFyearDeltastats(1,2:16)*100,RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'labels',NameMat,'colors',['r','b']);
+            boxplot(Q_MTFyearDeltastats(1,2:16)*100,groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
             line(xlim,[0,0],'Color','k','LineStyle','--')
             ylabel('Median annual flow change (%)')
             axis([xlim, -10,30])
@@ -766,11 +741,10 @@ savefig(filename)
         end
     end
     
-% vizualization    
-   
+% vizualization     
     figure('name','Median monthly discharge changes')
             sub(1)=subplot('Position',[0.05, 0.4, 0.055,0.55],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,1}(1,2:16)*100,RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'colors',['r','b']);
+            boxplot(Q_MTFmonthDeltastats{2,1}(1,2:16)*100,groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
             line(xlim,[0,0],'Color','k','LineStyle','--')
             ylabel('Median monthly flow change (%)')
             xlabel('January')
@@ -779,35 +753,35 @@ savefig(filename)
             set(gca,'box','off')
             
             sub(2)=subplot('Position',[0.16, 0.4, 0.04,0.55],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,2}(1,2:16)*100,RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'colors',['r','b']);
+            boxplot(Q_MTFmonthDeltastats{2,2}(1,2:16)*100,groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
             line(xlim,[0,0],'Color','k','LineStyle','--')
             xlabel('February')           
             set(gca,'YTick',[],'XTick',[])
             set(gca,'box','off')
             
             sub(3)=subplot('Position',[0.2208, 0.4, 0.04,0.55],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,3}(1,2:16)*100,RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'colors',['r','b']);
+            boxplot(Q_MTFmonthDeltastats{2,3}(1,2:16)*100,groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
             line(xlim,[0,0],'Color','k','LineStyle','--')
             xlabel('March')
             set(gca,'YTick',[],'XTick',[])
             set(gca,'box','off')
             
             sub(4)=subplot('Position',[0.28, 0.4, 0.04,0.55],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,4}(1,2:16)*100,RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'colors',['r','b']);
+            boxplot(Q_MTFmonthDeltastats{2,4}(1,2:16)*100,groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
             line(xlim,[0,0],'Color','k','LineStyle','--')
             xlabel('April')
             set(gca,'YTick',[],'XTick',[])
             set(gca,'box','off')
 
             sub(5)=subplot('Position',[0.3355, 0.4, 0.04,0.55],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,5}(1,2:16)*100,RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'colors',['r','b']);
+            boxplot(Q_MTFmonthDeltastats{2,5}(1,2:16)*100,groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
             line(xlim,[0,0],'Color','k','LineStyle','--')
             xlabel('May')
              set(gca,'YTick',[],'XTick',[])
             set(gca,'box','off')
             
             sub(6)=subplot('Position',[0.401, 0.4, 0.04,0.55],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,6}(1,2:16)*100,RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'colors',['r','b']);
+            boxplot(Q_MTFmonthDeltastats{2,6}(1,2:16)*100,groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
             line(xlim,[0,0],'Color','k','LineStyle','--')
             xlabel('June')
             set(gca,'YTick',[],'XTick',[])
@@ -815,42 +789,42 @@ savefig(filename)
             
             title('Changes of median monthly discharge')            
             sub(7)=subplot('Position',[0.46, 0.4, 0.04,0.55],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,7}(1,2:16)*100,RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'colors',['r','b']);
+            boxplot(Q_MTFmonthDeltastats{2,7}(1,2:16)*100,groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
             line(xlim,[0,0],'Color','k','LineStyle','--')
             xlabel('July')
             set(gca,'YTick',[],'XTick',[])
             set(gca,'box','off')
           
             sub(8)=subplot('Position',[0.525, 0.4, 0.04,0.55],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,8}(1,2:16)*100,RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'colors',['r','b']);
+            boxplot(Q_MTFmonthDeltastats{2,8}(1,2:16)*100,groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
             line(xlim,[0,0],'Color','k','LineStyle','--')
             xlabel('August')
             set(gca,'YTick',[],'XTick',[])
             set(gca,'box','off')
           
             sub(9)=subplot('Position',[0.587, 0.4, 0.04,0.55],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,9}(1,2:16)*100,RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'colors',['r','b']);
+            boxplot(Q_MTFmonthDeltastats{2,9}(1,2:16)*100,groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
             line(xlim,[0,0],'Color','k','LineStyle','--')
             xlabel('September')
             set(gca,'YTick',[],'XTick',[])
             set(gca,'box','off')
               
             sub(10)=subplot('Position',[0.64, 0.4, 0.04,0.55],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,10}(1,2:16)*100,RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'colors',['r','b']);
+            boxplot(Q_MTFmonthDeltastats{2,10}(1,2:16)*100,groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
             line(xlim,[0,0],'Color','k','LineStyle','--')
             xlabel('October')  
             set(gca,'YTick',[],'XTick',[])
             set(gca,'box','off')
           
             sub(11)=subplot('Position',[0.725, 0.4, 0.04,0.55],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,11}(1,2:16)*100,RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'colors',['r','b']);
+            boxplot(Q_MTFmonthDeltastats{2,11}(1,2:16)*100,groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
             line(xlim,[0,0],'Color','k','LineStyle','--')
             xlabel('November')
             set(gca,'YTick',[],'XTick',[])
             set(gca,'box','off')
           
             sub(12)=subplot('Position',[0.785, 0.4, 0.04,0.55],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,12}(1,2:16)*100,RCP(1,2:16),'grouporder',{'RCP4.5','RCP8.5'},'colors',['r','b']);
+            boxplot(Q_MTFmonthDeltastats{2,12}(1,2:16)*100,groupmat(1,2:16),'grouporder',groupnames,'labels',groupnames);
             line(xlim,[0,0],'Color','k','LineStyle','--')
             xlabel('December')
             set(gca,'YTick',[],'XTick',[])
@@ -864,7 +838,7 @@ savefig(filename)
             bar(1:12,HistValue)
             ylabel('Median monthly flow (mm/month)','fontsize',10)
             axis([0.5,12.5, ylim])
-            set(gca,'XTick',[1:12])
+            set(gca,'XTick',1:12)
             set(gca,'box','off')
             
 % save vizualization
