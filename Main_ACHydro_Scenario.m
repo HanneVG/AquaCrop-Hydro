@@ -900,8 +900,50 @@ f4=figure('name','Median yearly discharge changes- GCM&year variation');% boxplo
 
 % test for normality 
 
+% Lillietest or Jarque-Bera test
+% Ho= data are normal distributed
+% test=1: Ho rejected -> data not normally distributed
+% etest=0: Ho accepted -> data normally distributed
 
-% fit distributions
+goodnews=0;
+sign=0.01;
+
+    for sc=1:nsc    
+%         testTF=lillietest(Q_MTFyear2(:,sc),'Alpha',sign);
+%         testBF=lillietest(Q_MBFyear2(:,sc),'Alpha',sign);
+%         testIF=lillietest(Q_MIFyear2(:,sc),'Alpha',sign);
+%         testOF=lillietest(Q_MOFyear2(:,sc),'Alpha',sign);
+        
+        testTF=jbtest(Q_MTFyear2(:,sc),sign);
+        testBF=jbtest(Q_MBFyear2(:,sc),sign);
+        testIF=jbtest(Q_MIFyear2(:,sc),sign);
+        testOF=jbtest(Q_MOFyear2(:,sc),sign);
+        
+        if testTF==0 && testBF==0 && testIF==0 && testOF==0
+           goodnews=goodnews+1;
+        else        
+            if testTF==1 
+                warning(['Yearly total discharge of scenario ' num2str(sc) ' with name ' ScenarioName{1,sc} ' is not normally distributed. Hence CDF plots are not valid'])
+            end
+            if testBF==1
+                warning(['Yearly baseflow of scenario ' num2str(sc) ' with name ' ScenarioName{1,sc} ' is not normally distributed. Hence CDF plots are not valid'])        
+            end
+            if testIF==1
+                warning(['Yearly interflow of scenario ' num2str(sc) ' with name ' ScenarioName{1,sc} ' is not normally distributed. Hence CDF plots are not valid'])
+            end
+            if testOF==1
+                warning(['Yearly overlandflow of scenario ' num2str(sc) ' with name ' ScenarioName{1,sc} ' is not normally distributed. Hence CDF plots are not valid'])        
+            end
+        end 
+  
+        if goodnews==nsc
+            disp([' All yearly flow values of all scenarios are normally distributed (sign level of ' ,num2str(sign), '). Hence CDF plots are valid'])
+        end
+    end
+    
+ clear goodnews testTF testOF testIF testBF sc sign
+    
+% fit normal distributions
 xrangeTF=0:5:max(Q_MTFyear2(:));
 xrangeBF=0:5:max(Q_MBFyear2(:));
 xrangeIF=0:5:max(Q_MIFyear2(:));
@@ -928,7 +970,7 @@ probabilitiesOF(:,sc)=cdf(pdsc,xrangeOF);
 end
 
 % vizualize
-linesstructall={'-','-','--',':','.-'};
+linesstructall={'-','-','--',':','.-'}; % format of potential groups
 colorstructall={'[0 0 0]','[0.6 0.6 0.6]','[0.6 0.6 0.6]','[0.3 0.3 0.3]','[0.3 0.3 0.3]'};
 linewstructall={1.5,0.5,0.5,0.5,0.5};
 
@@ -936,7 +978,7 @@ linesstruct=cell(nsc,1); % initialize
 colorstruct=cell(nsc,1);
 linewstruct=cell(nsc,1);
 
-for g=1:ngroup2
+for g=1:ngroup2 % format of actual groups
     index=strcmp(groupmat,groupnames2(1,g));
     linesstruct(index==1,1)=linesstructall(1,g);
     colorstruct(index==1,1)=colorstructall(1,g);
@@ -947,31 +989,23 @@ end
 f5=figure('name','Yearly discharge CDF');
     subplot(2,2,1,'fontsize',10);
     P=plot(xrangeTF,probabilitiesTF(:,1:nsc));   
-    set(P,{'Color'},colorstruct)
-    set(P,{'LineStyle'},linesstruct)
-    set(P,{'LineWidth'},linewstruct)
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
     ylabel('Cumulative probability','fontsize',8);
     xlabel('Annual total flow (mm/year)','fontsize',8);
     title('Total flow')
     set(gca,'box','off')
- 
 
     subplot(2,2,2,'fontsize',10);
     P=plot(xrangeBF,probabilitiesBF(:,1:nsc));   
-    set(P,{'Color'},colorstruct)
-    set(P,{'LineStyle'},linesstruct)
-    set(P,{'LineWidth'},linewstruct)
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
     ylabel('Cumulative probability','fontsize',8);
     xlabel('Annual baseflow (mm/year)','fontsize',8);
     title('Baseflow')
-    set(gca,'box','off')
-  
+    set(gca,'box','off') 
     
     subplot(2,2,3,'fontsize',10);
     P=plot(xrangeIF,probabilitiesIF(:,1:nsc));   
-    set(P,{'Color'},colorstruct)
-    set(P,{'LineStyle'},linesstruct)
-    set(P,{'LineWidth'},linewstruct)
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
     ylabel('Cumulative probability','fontsize',8);
     xlabel('Annual interflow (mm/year)','fontsize',8);
     title('Interflow')
@@ -979,9 +1013,7 @@ f5=figure('name','Yearly discharge CDF');
     
     subplot(2,2,4,'fontsize',10);
     P=plot(xrangeOF,probabilitiesOF(:,1:nsc));   
-    set(P,{'Color'},colorstruct)
-    set(P,{'LineStyle'},linesstruct)
-    set(P,{'LineWidth'},linewstruct)
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
     ylabel('Cumulative probability','fontsize',8);
     xlabel('Annual overland flow (mm/year)','fontsize',8);
     title('Overland flow')
