@@ -24,7 +24,7 @@
 %
 %
 % Author: Hanne Van Gaelen
-% Last updated: 07/01/2016
+% Last updated: 08/01/2016
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -897,51 +897,31 @@ f4=figure('name','Median yearly discharge changes- GCM&year variation');% boxplo
         
 % 6.5 Analyse probabilities with cumulative distribution function  
 % -----------------------------------------------------------------------
+% normality check 
+[notnormalTF,normalTF]=NormalityCheck(Q_MTFyear2,'lillie',0.01);
+[notnormalBF,normalBF]=NormalityCheck(Q_MBFyear2,'lillie',0.01);
+[notnormalIF,normalIF]=NormalityCheck(Q_MIFyear2,'lillie',0.01);
+[notnormalOF,normalOF]=NormalityCheck(Q_MOFyear2,'lillie',0.01);
 
-% test for normality 
-
-% Lillietest or Jarque-Bera test
-% Ho= data are normal distributed
-% test=1: Ho rejected -> data not normally distributed
-% etest=0: Ho accepted -> data normally distributed
-
-goodnews=0;
-sign=0.01;
-
-    for sc=1:nsc    
-%         testTF=lillietest(Q_MTFyear2(:,sc),'Alpha',sign);
-%         testBF=lillietest(Q_MBFyear2(:,sc),'Alpha',sign);
-%         testIF=lillietest(Q_MIFyear2(:,sc),'Alpha',sign);
-%         testOF=lillietest(Q_MOFyear2(:,sc),'Alpha',sign);
-        
-        testTF=jbtest(Q_MTFyear2(:,sc),sign);
-        testBF=jbtest(Q_MBFyear2(:,sc),sign);
-        testIF=jbtest(Q_MIFyear2(:,sc),sign);
-        testOF=jbtest(Q_MOFyear2(:,sc),sign);
-        
-        if testTF==0 && testBF==0 && testIF==0 && testOF==0
-           goodnews=goodnews+1;
-        else        
-            if testTF==1 
-                warning(['Yearly total discharge of scenario ' num2str(sc) ' with name ' ScenarioName{1,sc} ' is not normally distributed. Hence CDF plots are not valid'])
-            end
-            if testBF==1
-                warning(['Yearly baseflow of scenario ' num2str(sc) ' with name ' ScenarioName{1,sc} ' is not normally distributed. Hence CDF plots are not valid'])        
-            end
-            if testIF==1
-                warning(['Yearly interflow of scenario ' num2str(sc) ' with name ' ScenarioName{1,sc} ' is not normally distributed. Hence CDF plots are not valid'])
-            end
-            if testOF==1
-                warning(['Yearly overlandflow of scenario ' num2str(sc) ' with name ' ScenarioName{1,sc} ' is not normally distributed. Hence CDF plots are not valid'])        
-            end
-        end 
-  
-        if goodnews==nsc
-            disp([' All yearly flow values of all scenarios are normally distributed (sign level of ' ,num2str(sign), '). Hence CDF plots are valid'])
-        end
+if isempty(notnormalTF)==1 && isempty(notnormalBF)==1 && isempty(notnormalIF)==1 && isempty(notnormalOF)==1
+    disp('All flow values for all scenarios are normally distributed')
+else
+    if isempty(notnormalTF)==0
+    warning(['Total flow is not normally distributed for scenarios: ',num2str(normalTF.')])
     end
     
- clear goodnews testTF testOF testIF testBF sc sign
+    if isempty(notnormalBF)==0
+    warning(['Baseflow is not normally distributed for scenarios: ',num2str(normalBF.')])
+    end
+    
+    if isempty(notnormalIF)==0
+    warning(['Interflow is not normally distributed for scenarios: ',num2str(normalIF.')])
+    end
+    
+    if isempty(notnormalOF)==0
+    warning(['Overland flow is not normally distributed for scenarios: ',num2str(normalOF.')])
+    end
+end       
     
 % fit normal distributions
 xrangeTF=0:5:max(Q_MTFyear2(:));
