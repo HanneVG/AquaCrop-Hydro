@@ -932,10 +932,6 @@ linesstructall={'-','-','--',':','.-'};
 colorstructall={'[0 0 0]','[0.6 0.6 0.6]','[0.6 0.6 0.6]','[0.3 0.3 0.3]','[0.3 0.3 0.3]'};
 linewstructall={1.5,0.5,0.5,0.5,0.5};
 
-linesstruct=cell(nsc,1); % initialize
-colorstruct=cell(nsc,1);
-linewstruct=cell(nsc,1);
-
 for g=1:ngroup2
     index=strcmp(groupmat,groupnames2(1,g));
     linesstruct(index==1,1)=linesstructall(1,g);
@@ -957,34 +953,37 @@ f5=figure('name','Yearly discharge CDF');
  
 
     subplot(2,2,2,'fontsize',10);
-    P=plot(xrangeBF,probabilitiesBF(:,1:nsc));   
+    P=plot(xrangeBF,probabilitiesBF(:,2:nsc)) ;   
     set(P,{'Color'},colorstruct)
-    set(P,{'LineStyle'},linesstruct)
-    set(P,{'LineWidth'},linewstruct)
+    set(P,{'LineStyle'},{'-'})
     ylabel('Cumulative probability','fontsize',8);
     xlabel('Annual baseflow (mm/year)','fontsize',8);
     title('Baseflow')
+    hold on 
+    P=plot(xrangeBF,probabilitiesBF(:,1),'Color','k','LineWidth',1.5); 
     set(gca,'box','off')
   
     
     subplot(2,2,3,'fontsize',10);
-    P=plot(xrangeIF,probabilitiesIF(:,1:nsc));   
+    P=plot(xrangeIF,probabilitiesIF(:,2:nsc)) ;   
     set(P,{'Color'},colorstruct)
-    set(P,{'LineStyle'},linesstruct)
-    set(P,{'LineWidth'},linewstruct)
+    set(P,{'LineStyle'},{'-'})
     ylabel('Cumulative probability','fontsize',8);
     xlabel('Annual interflow (mm/year)','fontsize',8);
     title('Interflow')
+    hold on 
+    P=plot(xrangeIF,probabilitiesIF(:,1),'Color','k','LineWidth',1.5); 
     set(gca,'box','off')
     
     subplot(2,2,4,'fontsize',10);
-    P=plot(xrangeOF,probabilitiesOF(:,1:nsc));   
+    P=plot(xrangeOF,probabilitiesOF(:,2:nsc)) ;   
     set(P,{'Color'},colorstruct)
-    set(P,{'LineStyle'},linesstruct)
-    set(P,{'LineWidth'},linewstruct)
+    set(P,{'LineStyle'},{'-'})
     ylabel('Cumulative probability','fontsize',8);
     xlabel('Annual overland flow (mm/year)','fontsize',8);
     title('Overland flow')
+    hold on 
+    P=plot(xrangeOF,probabilitiesOF(:,1),'Color','k','LineWidth',1.5); 
     set(gca,'box','off')
   
             
