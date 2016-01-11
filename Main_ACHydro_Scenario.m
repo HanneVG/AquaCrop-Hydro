@@ -1,4 +1,4 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+e p%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DESCRIPTION: This script compares different scenarios that are simulated with
 % AquaCrop-Hydro. It runs each scenario and compares crop yield, soil water balance and river
 % discharge (cumulative volumes) for every scenario
@@ -164,6 +164,21 @@
         groupmat=Manag;
     else
         error('grouping category is not well defined');
+    end
+    
+    linesstructall={'-','-','--',':','.-'}; % format of potential groups
+    colorstructall={'[0 0 0]','[0.6 0.6 0.6]','[0.6 0.6 0.6]','[0.3 0.3 0.3]','[0.3 0.3 0.3]'};
+    linewstructall={1.5,0.5,0.5,0.5,0.5};
+
+    linesstruct=cell(nsc,1); % initialize
+    colorstruct=cell(nsc,1);
+    linewstruct=cell(nsc,1);
+
+    for g=1:ngroup2 % format of actual groups
+        index=strcmp(groupmat,groupnames2(1,g));
+        linesstruct(index==1,1)=linesstructall(1,g);
+        colorstruct(index==1,1)=colorstructall(1,g);
+        linewstruct(index==1,1)=linewstructall(1,g);
     end
     
     
@@ -379,10 +394,17 @@ for c=1:ncrop% loop trough each crop and make subset of crop yields
    
     for sc=1:nsc %loop trough al scenarios
         ysub=Ymain{2,sc}(:,index); % write data away
-        Yall{2,c}(:,sc)=mean(ysub.'); % take average of all data of same crop
+        Yall{2,c}(:,sc)=mean(ysub.'); % take average of all data of same crop weigthed based on soil type 
     end        
 end
 clear sc c 
+
+%Define indices of crops you want to show
+maize=find(strcmp(Yall(1,:),'Maize')==1);
+wwheat=find(strcmp(Yall(1,:),'WinterWheat')==1);
+sugarbeet=find(strcmp(Yall(1,:),'Sugarbeet')==1);
+potato=find(strcmp(Yall(1,:),'Potato')==1);
+pea=find(strcmp(Yall(1,:),'Pea')==1);
 
 % 4.2 Calculate statistics
 %-------------------------------------------------------------------------
@@ -409,17 +431,10 @@ clear c
 
 clear c
    
-% 4.3 Vizualize yield impact
+% 4.3 Vizualize yield impact with boxplots
 %-------------------------------------------------------------------------
 
-%search indices of crops you want to show
-maize=find(strcmp(Yall(1,:),'Maize')==1);
-wwheat=find(strcmp(Yall(1,:),'WinterWheat')==1);
-sugarbeet=find(strcmp(Yall(1,:),'Sugarbeet')==1);
-potato=find(strcmp(Yall(1,:),'Potato')==1);
-pea=find(strcmp(Yall(1,:),'Pea')==1);
-
-figure('name','Median yield changes')%(boxplot= variation over different GCMs) 
+f1=figure('name','Median yield changes');%(boxplot= variation over different GCMs) 
         sub(1)=subplot(2,5,1,'fontsize',10);
         boxplot(YDeltastats{2,maize}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
@@ -483,13 +498,245 @@ figure('name','Median yield changes')%(boxplot= variation over different GCMs)
         
         linkaxes(h,'y')% link y axis of different plots (so that they change simultaneously
 
-%save figure
-filename='Median yield changes';
+        clear sub h 
+        
+% 4.4 Analyse with focus on interannual variability as well
+% -----------------------------------------------------------------------        
+
+% Change of yield as compared to historical median for all years
+    YallDelta(1,1:ncrop)=Yall(1,1:ncrop); 
+    
+    YallDelta{2,maize}=(Yall{2,maize}-Ystats{2,maize}(2,1))./Ystats{2,maize}(2,1);   
+    YallDelta{2,wwheat}=(Yall{2,wwheat}-Ystats{2,wwheat}(2,1))./Ystats{2,wwheat}(2,1);   
+    YallDelta{2,sugarbeet}=(Yall{2,sugarbeet}-Ystats{2,sugarbeet}(2,1))./Ystats{2,sugarbeet}(2,1);   
+    YallDelta{2,potato}=(Yall{2,potato}-Ystats{2,potato}(2,1))./Ystats{2,potato}(2,1);   
+    YallDelta{2,pea}=(Yall{2,pea}-Ystats{2,pea}(2,1))./Ystats{2,pea}(2,1);  
+    
+f4=figure('name','Median yield changes- GCM&year variation');% boxplot = variation over different GCMs & over 30 different year)   
+
+    sub(1)=subplot(1,5,1,'fontsize',10);
+    boxplot(YallDelta{2,maize}(:,1:nsc)*100,groupmat(1,1:nsc),'grouporder',groupnames2,'labels',groupnames2)
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    ylabel('Annual yield from historical median (%)')
+    title('maize')
+    axis([xlim, -100,100])
+    set(gca,'box','off')
+
+    sub(2)=subplot(1,5,2,'fontsize',10);
+    boxplot(YallDelta{2,wwheat}(:,1:nsc)*100,groupmat(1,1:nsc),'grouporder',groupnames2,'labels',groupnames2)
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    title('winter wheat')
+    set(gca,'box','off','YTick',[])
+
+    sub(3)=subplot(1,5,3,'fontsize',10);
+    boxplot(YallDelta{2,sugarbeet}(:,1:nsc)*100,groupmat(1,1:nsc),'grouporder',groupnames2,'labels',groupnames2)
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    title('sugarbeet')
+    set(gca,'box','off','YTick',[])
+
+    sub(4)=subplot(1,5,4,'fontsize',10);
+    boxplot(YallDelta{2,potato}(:,1:nsc)*100,groupmat(1,1:nsc),'grouporder',groupnames2,'labels',groupnames2)
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    title('potato')
+    set(gca,'box','off','YTick',[])
+
+    sub(5)=subplot(1,5,5,'fontsize',10);
+    boxplot(YallDelta{2,pea}(:,1:nsc)*100,groupmat(1,1:nsc),'grouporder',groupnames2,'labels',groupnames2)
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    title('pea')
+    set(gca,'box','off','YTick',[])
+    
+    linkaxes(sub,'y')   
+  
+
+% 4.5 Vizualize yield impact with cumulative distribution function
+%-------------------------------------------------------------------------
+
+% normality check 
+[notnormalmaize,~]=NormalityCheck(Yall{2,maize},'lillie',0.05);
+[notnormalwwheat,~]=NormalityCheck(Yall{2,wwheat},'lillie',0.05);
+[notnormalsbeet,~]=NormalityCheck(Yall{2,sugarbeet},'lillie',0.05);
+[notnormalpotato,~]=NormalityCheck(Yall{2,potato},'lillie',0.05);
+[notnormalpea,~]=NormalityCheck(Yall{2,pea},'lillie',0.05);
+
+if isempty(notnormalmaize)==1 && isempty(notnormalwwheat)==1 && isempty(notnormalsbeet)==1 && isempty(notnormalpotato)==1 && isempty(notnormalpea)==1
+    disp('Yield values for all crops and all scenarios are normally distributed')
+else
+    if isempty(notnormalmaize)==0
+    warning(['Maize yield is not normally distributed for scenarios: ',num2str(notnormalmaize.')])
+    end
+    
+    if isempty(notnormalwwheat)==0
+    warning(['Winter wheat yield is not normally distributed for scenarios: ',num2str(notnormalwwheat.')])
+    end
+    
+    if isempty(notnormalsbeet)==0
+    warning(['Sugar beet yield is not normally distributed for scenarios: ',num2str(notnormalsbeet.')])
+    end
+    
+    if isempty(notnormalpotato)==0
+    warning(['Potato yield is not normally distributed for scenarios: ',num2str(notnormalpotato.')])
+    end
+    
+    if isempty(notnormalpea)==0
+    warning(['Pea yield is not normally distributed for scenarios: ',num2str(notnormalpea.')])
+    end
+end
+
+
+clear notnormalwwheat notnormalmaize notnormalpotato notnormalsbeet notnormalpea
+
+% fit theoretical normal distributions
+xrangemaize=0:0.5:max(Yall{2,maize}(:))+1.5;
+xrangewwheat=0:0.5:max(Yall{2,wwheat}(:))+1.5;
+xrangesbeet=0:0.5:max(Yall{2,sugarbeet}(:))+1.5;
+xrangepotato=0:0.5:max(Yall{2,potato}(:))+1.5;
+xrangepea=0:0.1:max(Yall{2,pea}(:))+1;
+
+probabilitiesmaize=NaN(length(xrangemaize),nsc);
+probabilitieswwheat=NaN(length(xrangewwheat),nsc);
+probabilitiessbeet=NaN(length(xrangesbeet),nsc);
+probabilitiespotato=NaN(length(xrangepotato),nsc);
+probabilitiespea=NaN(length(xrangepea),nsc);
+
+for sc=1:nsc
+pdsc=fitdist(Yall{2,maize}(:,sc),'Normal');
+probabilitiesmaize(:,sc)=cdf(pdsc,xrangemaize);
+
+pdsc=fitdist(Yall{2,wwheat}(:,sc),'Normal');
+probabilitieswwheat(:,sc)=cdf(pdsc,xrangewwheat);
+
+pdsc=fitdist(Yall{2,sugarbeet}(:,sc),'Normal');
+probabilitiessbeet(:,sc)=cdf(pdsc,xrangesbeet);
+
+pdsc=fitdist(Yall{2,potato}(:,sc),'Normal');
+probabilitiespotato(:,sc)=cdf(pdsc,xrangepotato);
+
+pdsc=fitdist(Yall{2,pea}(:,sc),'Normal');
+probabilitiespea(:,sc)=cdf(pdsc,xrangepea);
+end
+
+clear pdsc 
+
+% vizualize
+
+f2=figure('name','Seasonal yield theoretical CDF');
+    subplot(3,2,1,'fontsize',10);
+    P=plot(xrangemaize,probabilitiesmaize(:,1:nsc));   
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual yield (ton/ha)','fontsize',8);
+    title('Maize')
+    set(gca,'box','off')
+
+    subplot(3,2,2,'fontsize',10);
+    P=plot(xrangewwheat,probabilitieswwheat(:,1:nsc));   
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual yield (ton/ha)','fontsize',8);
+    title('Winter Wheat')
+    set(gca,'box','off') 
+    
+    subplot(3,2,3,'fontsize',10);
+    P=plot(xrangesbeet,probabilitiessbeet(:,1:nsc));   
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual yield (ton/ha)','fontsize',8);
+    title('Sugarbeet')
+    set(gca,'box','off')
+    
+    subplot(3,2,4,'fontsize',10);
+    P=plot(xrangepotato,probabilitiespotato(:,1:nsc));   
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual yield (ton/ha)','fontsize',8);
+    title('Potato')
+    set(gca,'box','off')
+    
+    subplot(3,2,5,'fontsize',10);
+    P=plot(xrangepea,probabilitiespea(:,1:nsc));   
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual yield (ton/ha)','fontsize',8);
+    title('pea')
+    set(gca,'box','off')
+
+    
+f3=figure('name','Seasonal yield emperical CDF');
+    subplot(3,2,1,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Yall{2,maize}(:,i));
+        hold on 
+    end
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual yield (ton/ha)','fontsize',8);
+    title('Maize')
+    set(gca,'box','off')
+    grid off
+
+    subplot(3,2,2,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Yall{2,wwheat}(:,i));
+        hold on 
+    end
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual yield (ton/ha)','fontsize',8);
+    title('Winter Wheat')
+    set(gca,'box','off') 
+    grid off
+    
+    subplot(3,2,3,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Yall{2,sugarbeet}(:,i));
+        hold on 
+    end  
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual yield (ton/ha)','fontsize',8);
+    title('Sugar beet')
+    set(gca,'box','off')
+    grid off
+    
+    subplot(3,2,4,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Yall{2,potato}(:,i));
+        hold on 
+    end    
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual yield (ton/ha)','fontsize',8);
+    title('Potato')
+    set(gca,'box','off')
+    grid off
+
+    subplot(3,2,5,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Yall{2,pea}(:,i));
+        hold on 
+    end    
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual yield (ton/ha)','fontsize',8);
+    title('Pea')
+    set(gca,'box','off')
+    grid off
+    
+clear xrangepotato xrangemaize xrangewwheat xrangesbeet xrangepea 
+
+
+% 4.6 Save vizualization
+%-------------------------------------------------------------------------
+filename='Median yield changes - boxplots';
 filename=fullfile(DatapathScenOut,filename);
-savefig(filename)
+savefig(f1,filename)
+
+filename='Yield empirical CDF ';
+filename=fullfile(DatapathScenOut,filename);
+savefig(f3,filename)
 
 clear filename 
-clear sub h  
 
 %% -----------------------------------------------------------------------
 % 5. IMPACT ON LENGTH OF THE POTENTIAL LENGTH OF GROWING CYCLE 
@@ -791,7 +1038,7 @@ Q_MOFcum=cumsum(Q_MOF);
             
             linkaxes(sub,'y')       
             
-% 6.4 Analyse with focus on interannual variability as well
+% 6.4 Analyse with focus on GCM & interannual variability 
 % -----------------------------------------------------------------------     
 % stats for all GCMs & different years together (historical set excluded)
     Q_MTBIOFyearstats=NaN(5,4);
@@ -898,32 +1145,34 @@ f4=figure('name','Median yearly discharge changes- GCM&year variation');% boxplo
 % 6.5 Analyse probabilities with cumulative distribution function  
 % -----------------------------------------------------------------------
 % normality check 
-[notnormalTF,normalTF]=NormalityCheck(Q_MTFyear2,'lillie',0.01);
-[notnormalBF,normalBF]=NormalityCheck(Q_MBFyear2,'lillie',0.01);
-[notnormalIF,normalIF]=NormalityCheck(Q_MIFyear2,'lillie',0.01);
-[notnormalOF,normalOF]=NormalityCheck(Q_MOFyear2,'lillie',0.01);
+[notnormalTF,~]=NormalityCheck(Q_MTFyear2,'lillie',0.05);
+[notnormalBF,~]=NormalityCheck(Q_MBFyear2,'lillie',0.05);
+[notnormalIF,~]=NormalityCheck(Q_MIFyear2,'lillie',0.05);
+[notnormalOF,~]=NormalityCheck(Q_MOFyear2,'lillie',0.05);
 
 if isempty(notnormalTF)==1 && isempty(notnormalBF)==1 && isempty(notnormalIF)==1 && isempty(notnormalOF)==1
     disp('All flow values for all scenarios are normally distributed')
 else
     if isempty(notnormalTF)==0
-    warning(['Total flow is not normally distributed for scenarios: ',num2str(normalTF.')])
+    warning(['Total flow is not normally distributed for scenarios: ',num2str(notnormalTF.')])
     end
     
     if isempty(notnormalBF)==0
-    warning(['Baseflow is not normally distributed for scenarios: ',num2str(normalBF.')])
+    warning(['Baseflow is not normally distributed for scenarios: ',num2str(notnormalBF.')])
     end
     
     if isempty(notnormalIF)==0
-    warning(['Interflow is not normally distributed for scenarios: ',num2str(normalIF.')])
+    warning(['Interflow is not normally distributed for scenarios: ',num2str(notnormalIF.')])
     end
     
     if isempty(notnormalOF)==0
-    warning(['Overland flow is not normally distributed for scenarios: ',num2str(normalOF.')])
+    warning(['Overland flow is not normally distributed for scenarios: ',num2str(notnormalOF.')])
     end
 end       
     
-% fit normal distributions
+clear notnormalTF notnormalBF notnormalIF notnormalOF 
+
+% fit theoretical normal distributions
 xrangeTF=0:5:max(Q_MTFyear2(:));
 xrangeBF=0:5:max(Q_MBFyear2(:));
 xrangeIF=0:5:max(Q_MIFyear2(:));
@@ -948,25 +1197,10 @@ pdsc=fitdist(Q_MOFyear2(:,sc),'Normal');
 probabilitiesOF(:,sc)=cdf(pdsc,xrangeOF);
 
 end
+clear pdsc 
 
 % vizualize
-linesstructall={'-','-','--',':','.-'}; % format of potential groups
-colorstructall={'[0 0 0]','[0.6 0.6 0.6]','[0.6 0.6 0.6]','[0.3 0.3 0.3]','[0.3 0.3 0.3]'};
-linewstructall={1.5,0.5,0.5,0.5,0.5};
-
-linesstruct=cell(nsc,1); % initialize
-colorstruct=cell(nsc,1);
-linewstruct=cell(nsc,1);
-
-for g=1:ngroup2 % format of actual groups
-    index=strcmp(groupmat,groupnames2(1,g));
-    linesstruct(index==1,1)=linesstructall(1,g);
-    colorstruct(index==1,1)=colorstructall(1,g);
-    linewstruct(index==1,1)=linewstructall(1,g);
-end
-
-
-f5=figure('name','Yearly discharge CDF');
+f5=figure('name','Yearly discharge theoretical CDF');
     subplot(2,2,1,'fontsize',10);
     P=plot(xrangeTF,probabilitiesTF(:,1:nsc));   
     set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
@@ -998,7 +1232,58 @@ f5=figure('name','Yearly discharge CDF');
     xlabel('Annual overland flow (mm/year)','fontsize',8);
     title('Overland flow')
     set(gca,'box','off')
-  
+
+    
+f6=figure('name','Yearly discharge emperical CDF');
+    subplot(2,2,1,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Q_MTFyear2(:,i));
+        hold on 
+    end
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual total flow (mm/year)','fontsize',8);
+    title('Total flow')
+    set(gca,'box','off')
+    grid off
+
+    subplot(2,2,2,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Q_MBFyear2(:,i));
+        hold on 
+    end
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual baseflow (mm/year)','fontsize',8);
+    title('Baseflow')
+    set(gca,'box','off') 
+    grid off
+    
+    subplot(2,2,3,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Q_MIFyear2(:,i));
+        hold on 
+    end  
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual interflow (mm/year)','fontsize',8);
+    title('Interflow')
+    set(gca,'box','off')
+    grid off
+    
+    subplot(2,2,4,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Q_MOFyear2(:,i));
+        hold on 
+    end    
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual overland flow (mm/year)','fontsize',8);
+    title('Overland flow')
+    set(gca,'box','off')
+    grid off
+    
+ clear xrangeTF xrangeBF xrangeIF xrangeOF   
             
 % 6.4 save results (vizualizations)
 % ----------------------------------------------------------------------- 
@@ -1014,9 +1299,9 @@ filename='Median yearly discharge changes-yeargcmboxplot';
 filename=fullfile(DatapathScenOut,filename);
 savefig(f4,filename)
 
-filename='Yearly discharge CDF';
+filename='Yearly discharge emperical CDF';
 filename=fullfile(DatapathScenOut,filename);
-savefig(f5,filename)
+savefig(f6,filename)
 
 clear filename sub
 %% -----------------------------------------------------------------------
