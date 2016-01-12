@@ -122,7 +122,7 @@ close all % close all figures of a previous run
 
 % Run AquaCrop-Hydro with all its submodels
 
-[Q_MBF,Q_MIF,Q_MOF,Q_MTF,area,f,Wrmin,Wrmax,pbf,SoilPar,SimACOutput,CatchACOutput,Par]=AquaCropHydro(DatapathAC, DatapathInput,ACMode);
+[Q_MBF,Q_MIF,Q_MOF,Q_MTF,area,f,Wrmin,Wrmax,pbf,SoilPar,SimACOutput,CatchACOutput,CropCatchACOutput,Par]=AquaCropHydro(DatapathAC, DatapathInput,ACMode);
 
 % Save important variables       
        % Save time variables        

@@ -7,7 +7,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-function[Q_MBF,Q_MIF,Q_MOF,Q_MTF,area,f,Wrmin,Wrmax,pbf,SoilPar,SimACOutput,CatchACOutput,Par]=AquaCropHydro(DatapathAC, DatapathInput,ACMode)
+function[Q_MBF,Q_MIF,Q_MOF,Q_MTF,area,f,Wrmin,Wrmax,pbf,SoilPar,SimACOutput,CatchACOutput,CropCatchACOutput,Par]=AquaCropHydro(DatapathAC, DatapathInput,ACMode)
 
 
 %% ------------------------------------------------------------------------
@@ -25,7 +25,7 @@ function[Q_MBF,Q_MIF,Q_MOF,Q_MTF,area,f,Wrmin,Wrmax,pbf,SoilPar,SimACOutput,Catc
 %------------------------------------------------------------------------
         
        % Load AquaCrop output for all simulation runs & calculate the summarized results for the catchment
-        [SimACOutput,CatchACOutput, SoilPar,nTime]=CatchmentOutput(DatapathAC, DatapathInput,ACMode);  
+        [SimACOutput,CatchACOutput,CropCatchACOutput,SoilPar,nTime]=CatchmentOutput(DatapathAC, DatapathInput,ACMode);  
         
        % Extract relevant soil water balance components for hydro model
         Wr2Catch=CatchACOutput(:,11);   % Soil water content in 2 m soil depth (mm)

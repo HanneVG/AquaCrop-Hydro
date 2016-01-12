@@ -1,4 +1,4 @@
-e p%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DESCRIPTION: This script compares different scenarios that are simulated with
 % AquaCrop-Hydro. It runs each scenario and compares crop yield, soil water balance and river
 % discharge (cumulative volumes) for every scenario
@@ -24,7 +24,7 @@ e p%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %
 % Author: Hanne Van Gaelen
-% Last updated: 08/01/2016
+% Last updated: 12/01/2016
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -58,9 +58,9 @@ e p%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % specify in which path all output should be stored including 
 %   a) Flow values (baseflow, interflow, overland flow, total flow) as
 %   simulated by AquaCrop-Hydro
-%   b) Yield values as simulated for each landunit during the main cropping season of each simulated year
+%   b) Catchment water balance values as simulated by AquaCrop-Hydro
 
-     DatapathACHOutput=uigetdir('C:\','Select directory with scenario subfloders to store AquaCrop-Hydro output (flows and yield values)');        
+     DatapathACHOutput=uigetdir('C:\','Select directory with scenario subfloders to store AquaCrop-Hydro output (flows and water balance values)');        
 
 % specify in which path all information on the scenario comparison is stored including  
  %    a) information on the different scenarios (Scenario.txt)    
@@ -221,9 +221,16 @@ e p%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     Wr2=cell(2,nsc) ; % Soil water content in 2 m soil depth (mm)
     CC=cell(2,nsc) ;   % Canopy Cover (%)
     B=cell(2,nsc) ;    % Dry aboveground biomass during growing season (ton/ha)
-    Bfin=cell(2,nsc) ; % Final dry aboveground biomass at maturity (ton/ha)
-    Y=cell(2,nsc) ;    % Dry yield at maturity for each sim run season(ton/ha)
-    Ymain=cell(2,nsc) ;     % Dry yield at maturity for only main season(ton/ha)(even sim runs correspond to the main season, odd run numbers are after-season crops)   
+   
+   % Crop results for main season (average over catchment)
+     Prod=cell(2,nsc);  % crop production variabiles for main season crops
+                        % for each scenario and each crop there is a matrix with 
+                            % Bfinact=Actual simulated dry aboveground biomass at maturity (ton/ha)
+                            % Bfinpot= Potential simulated biomass at maturity if no stresses(ton/ha)
+                            % Bfinrel= Bfinact/Bfinpot (%)
+                            % Yact= Actual simulated final yield at maturity (ton/ha)  
+                            % HIact= Actual simulated Harvest index at maturity (%) as affected by stresses   
+                            % LGPact=  Actual simulated length of growing period (days) as affected by early senescence
 
    % the catchment hydrology results   
     Q_MBF=NaN(nTime,nsc);
@@ -245,9 +252,7 @@ e p%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     Wr2(1,1:nsc)=   ScenarioName(1,1:nsc);   
     CC(1,1:nsc)=  ScenarioName(1,1:nsc);    
     B(1,1:nsc)= ScenarioName(1,1:nsc);  
-    Bfin(1,1:nsc)= ScenarioName(1,1:nsc);  
-    Y(1,1:nsc)=ScenarioName(1,1:nsc);  
-    Ymain(1,1:nsc)=ScenarioName(1,1:nsc);        
+    Prod(1,1:nsc)= ScenarioName(1,1:nsc);
 
 %3.2 Run ACHydro and save output
 %-------------------------------------------------------------------------
@@ -274,7 +279,7 @@ Name=ScenarioName{1,sc};
     end
 
 % Run AquaCrop-Hydro for this scenario
-[Q_MBFsc,Q_MIFsc,Q_MOFsc,Q_MTFsc,area,f,Wrmin,Wrmax,pbf,SoilPar,SimACOutput,CatchACOutput,Par]=AquaCropHydro(DatapathACSC, DatapathInputSC,ACMode);
+[Q_MBFsc,Q_MIFsc,Q_MOFsc,Q_MTFsc,area,f,Wrmin,Wrmax,pbf,SoilPar,SimACOutput,CatchACOutput,CropCatchACOutput,Par]=AquaCropHydro(DatapathACSC, DatapathInputSC,ACMode);
 
 % extract output for this scenario       
 
@@ -320,10 +325,10 @@ Name=ScenarioName{1,sc};
         Wr2{2,sc}=SimACOutput{1,11};  % Soil water content in 2 m soil depth (mm)
         CC{2,sc}=SimACOutput{1,12};   % Canopy Cover (%)
         B{2,sc}=SimACOutput{1,13};    % Dry aboveground biomass during growing season (ton/ha)
-        Bfin{2,sc}=SimACOutput{1,14}; % Final dry aboveground biomass at maturity (ton/ha)
-        Y{2,sc}=SimACOutput{1,15};    % Dry yield at maturity for each sim run season(ton/ha)
-        Ymain{2,sc}=Y{2,sc}(2:2:end,:);     % Dry yield at maturity for only main season(ton/ha)(even sim runs correspond to the main season, odd run numbers are after-season crops)                  
-        
+  
+      % Save crop production results for main season   
+        Prod{2,sc}=CropCatchACOutput(1:2,:); 
+  
       % Save the catchment hydrology results   
         Q_MBF(1:nTime,sc)=Q_MBFsc(1:nTime,1);
         Q_MIF(1:nTime,sc)=Q_MIFsc(1:nTime,1);
@@ -336,7 +341,7 @@ Name=ScenarioName{1,sc};
         HeadersFlow={'Date','Baseflow','Interflow','Overland flow', 'Total flow'};
         FlowOutput=[exceltime(Date(1:nTime,1)),Q_MBFsc(1:nTime,1),Q_MIFsc(1:nTime,1),Q_MOFsc(1:nTime,1),Q_MTFsc(1:nTime,1)];
 
-        HeadersWabalCatch={'Date','Tr','Trx','E','Ex','ETa','ETx','RO','DP','CR','BundWat','Wr2','CC'};
+        HeadersWabalCatch={'Date','Tr','Trx','E','Ex','ETa','ETx','RO','DP','CR','BundWat','Wr2'};
 
        % Write output to one excel tabsheet
         xlname='FlowSimResults.xlsx';
@@ -348,13 +353,10 @@ Name=ScenarioName{1,sc};
         filename = fullfile(DatapathOutputSC,xlname);
         xlswrite(filename,HeadersWabalCatch,'SimWabal','A1');
         xlswrite(filename,exceltime(Date(1:nTime,1)),'SimWabal','A2');
-        xlswrite(filename,CatchACOutput(1:nTime,1:12),'SimWabal','B2'); 
+        xlswrite(filename,CatchACOutput(1:nTime,1:11),'SimWabal','B2'); 
         
-        xlname='YieldResults.xlsx';
-        filename = fullfile(DatapathOutputSC,xlname);
-        xlswrite(filename,Ymain{2,sc},'SimYield','A1'); 
         
-clear SimACOutput CatchOutput FlowOutput WabalCatchOutput YieldOutput   DatapathOutputSC DatapathInputSC   
+clear SimACOutput CatchOutput FlowOutput WabalCatchOutput DatapathOutputSC DatapathInputSC   
 clear Q_MTFsc Q_MOFsc Q_MIFsc Q_MBFsc
 end
 
@@ -375,57 +377,57 @@ clear filename
 % 4. YIELD IMPACT 
 %------------------------------------------------------------------------
 
-% 4.1 Compose yield matrix per crop type
+% 4.1 Put yield in one structure
 %-------------------------------------------------------------------------
-Crop2 = unique(Crop(:,1)); % number of unique crops in catchment
-Crop2=Crop2(strcmp(Crop2(:,1),'Unknown')==0); % remove the landunits with unknown crop 
-Crop2=Crop2(strcmp(Crop2(:,1),'Impervious')==0); % remove the landunits with unknown crop 
-Crop2=Crop2(strcmp(Crop2(:,1),'Water')==0); % remove the landunits with unknown crop 
-[ncrop,~]=size(Crop2); % number of real crops
+Cropnames= Prod{2,1}(1,:);
+[~,ncrop]=size(Cropnames);
 
-Yall=cell(2,ncrop);% initialize
+Yact(1,1:ncrop)=Cropnames(1,1:ncrop);
 
-for c=1:ncrop% loop trough each crop and make subset of crop yields 
-    % write away crop name
-    Yall(1,c)=Crop2(c); 
-    
-    %search all projects with this crop
-    index=find(strcmp(Crop(:,1),Crop2(c))==1);
-   
-    for sc=1:nsc %loop trough al scenarios
-        ysub=Ymain{2,sc}(:,index); % write data away
-        Yall{2,c}(:,sc)=mean(ysub.'); % take average of all data of same crop weigthed based on soil type 
-    end        
+subset=[];
+
+for c=1:ncrop % loop trough each crop
+    for sc=1:nsc %loop trough each scenario
+        addcolumn= Prod{2,sc}{2,c}(:,4);
+        length(addcolumn);
+        subset(1:length(addcolumn),end+1)=addcolumn;
+        subset(length(addcolumn)+1:end,end)=NaN;
+        clear addcolumn
+    end
+    Yact{2,c}=subset;
+    subset=[];
 end
-clear sc c 
 
-%Define indices of crops you want to show
-maize=find(strcmp(Yall(1,:),'Maize')==1);
-wwheat=find(strcmp(Yall(1,:),'WinterWheat')==1);
-sugarbeet=find(strcmp(Yall(1,:),'Sugarbeet')==1);
-potato=find(strcmp(Yall(1,:),'Potato')==1);
-pea=find(strcmp(Yall(1,:),'Pea')==1);
+clear c sc Cropnames
 
-% 4.2 Calculate statistics
+% 4.2 Define index of crops you want to show
+%-------------------------------------------------------------------------
+maize=find(strcmp(Yact(1,1:ncrop),'Maize')==1);
+wwheat=find(strcmp(Yact(1,1:ncrop),'WinterWheat')==1);
+sugarbeet=find(strcmp(Yact(1,1:ncrop),'Sugarbeet')==1);
+potato=find(strcmp(Yact(1,1:ncrop),'Potato')==1);
+pea=find(strcmp(Yact(1,1:ncrop),'Pea')==1);
+
+% 4.3 Calculate statistics
 %-------------------------------------------------------------------------
 % stats for each crop over different years 
-    Ystats(1,1:ncrop)=Yall(1,1:ncrop); 
+    Yactstats(1,1:ncrop)=Yact(1,1:ncrop); 
     
     for c=1:ncrop
-        Ystats{2,c}(1,1:nsc)=mean(Yall{2,c}(:,1:nsc));
-        Ystats{2,c}(2,1:nsc)=median(Yall{2,c}(:,1:nsc));
-        Ystats{2,c}(3,1:nsc)=std(Yall{2,c}(:,1:nsc));
-        Ystats{2,c}(4,1:nsc)=min(Yall{2,c}(:,1:nsc));
-        Ystats{2,c}(5,1:nsc)=max(Yall{2,c}(:,1:nsc));
+        Yactstats{2,c}(1,1:nsc)=mean(Yact{2,c}(:,1:nsc));
+        Yactstats{2,c}(2,1:nsc)=median(Yact{2,c}(:,1:nsc));
+        Yactstats{2,c}(3,1:nsc)=std(Yact{2,c}(:,1:nsc));
+        Yactstats{2,c}(4,1:nsc)=min(Yact{2,c}(:,1:nsc));
+        Yactstats{2,c}(5,1:nsc)=max(Yact{2,c}(:,1:nsc));
     end
 clear c
 
 % Calculate changes of stats (change of avg, change of median)
-    YDeltastats(1,1:ncrop)=Yall(1,1:ncrop); 
+    YactDeltastats(1,1:ncrop)=Yact(1,1:ncrop); 
 
     for c=1:ncrop
         for stat=1:2
-        YDeltastats{2,c}(stat,1:nsc)=(Ystats{2,c}(stat,1:nsc)-Ystats{2,c}(stat,1))./Ystats{2,c}(stat,1);
+        YactDeltastats{2,c}(stat,1:nsc)=(Yactstats{2,c}(stat,1:nsc)-Yactstats{2,c}(stat,1))./Yactstats{2,c}(stat,1);
         end
     end
 
@@ -436,7 +438,7 @@ clear c
 
 f1=figure('name','Median yield changes');%(boxplot= variation over different GCMs) 
         sub(1)=subplot(2,5,1,'fontsize',10);
-        boxplot(YDeltastats{2,maize}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        boxplot(YactDeltastats{2,maize}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
         ylabel('Median yield change (%)')
         axis([xlim, -30,30])
@@ -444,25 +446,25 @@ f1=figure('name','Median yield changes');%(boxplot= variation over different GCM
         title('Maize')
         
         sub(2)=subplot(2,5,2,'fontsize',10);
-        boxplot(YDeltastats{2,wwheat}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        boxplot(YactDeltastats{2,wwheat}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
         set(gca,'box','off')
         title('Winter Wheat')
         
         sub(3)=subplot(2,5,3,'fontsize',10);
-        boxplot(YDeltastats{2,potato}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        boxplot(YactDeltastats{2,potato}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
         set(gca,'box','off')
         title('Potato')
         
         sub(4)=subplot(2,5,4,'fontsize',10);
-        boxplot(YDeltastats{2,sugarbeet}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        boxplot(YactDeltastats{2,sugarbeet}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
         set(gca,'box','off')
         title('Sugarbeet')
         
         sub(5)=subplot(2,5,5,'fontsize',10);
-        boxplot(YDeltastats{2,pea}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        boxplot(YactDeltastats{2,pea}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
         set(gca,'box','off')
         title('Peas')    
@@ -470,29 +472,29 @@ f1=figure('name','Median yield changes');%(boxplot= variation over different GCM
         linkaxes(sub,'y')% link y axis of different plots (so that they change simultaneously
         
         h(1)=subplot(2,5,6,'fontsize',10);
-        bar(Ystats{2,maize}(2,1))
+        bar(Yactstats{2,maize}(2,1))
         ylabel('Median historical yield (ton/ha)')
         axis([xlim , 0 ,15])
         title('Maize')
         set(gca,'XTickLabel',{' '})
         
         h(2)=subplot(2,5,7,'fontsize',10);
-        bar(Ystats{2,wwheat}(2,1))
+        bar(Yactstats{2,wwheat}(2,1))
         title('Winter Wheat')
         set(gca,'XTickLabel',{' '})
         
         h(3)=subplot(2,5,8,'fontsize',10);
-        bar(Ystats{2,potato}(2,1))
+        bar(Yactstats{2,potato}(2,1))
         title('Potato')
         set(gca,'XTickLabel',{' '})
          
         h(4)=subplot(2,5,9,'fontsize',10);
-        bar(Ystats{2,sugarbeet}(2,1))
+        bar(Yactstats{2,sugarbeet}(2,1))
         title('Sugarbeet')
         set(gca,'XTickLabel',{' '})
                 
         h(5)=subplot(2,5,10,'fontsize',10);
-        bar(Ystats{2,pea}(2,1))
+        bar(Yactstats{2,pea}(2,1))
         title('Peas')
         set(gca,'XTickLabel',{' '})
         
@@ -504,13 +506,13 @@ f1=figure('name','Median yield changes');%(boxplot= variation over different GCM
 % -----------------------------------------------------------------------        
 
 % Change of yield as compared to historical median for all years
-    YallDelta(1,1:ncrop)=Yall(1,1:ncrop); 
+    YallDelta(1,1:ncrop)=Yact(1,1:ncrop); 
     
-    YallDelta{2,maize}=(Yall{2,maize}-Ystats{2,maize}(2,1))./Ystats{2,maize}(2,1);   
-    YallDelta{2,wwheat}=(Yall{2,wwheat}-Ystats{2,wwheat}(2,1))./Ystats{2,wwheat}(2,1);   
-    YallDelta{2,sugarbeet}=(Yall{2,sugarbeet}-Ystats{2,sugarbeet}(2,1))./Ystats{2,sugarbeet}(2,1);   
-    YallDelta{2,potato}=(Yall{2,potato}-Ystats{2,potato}(2,1))./Ystats{2,potato}(2,1);   
-    YallDelta{2,pea}=(Yall{2,pea}-Ystats{2,pea}(2,1))./Ystats{2,pea}(2,1);  
+    YallDelta{2,maize}=(Yact{2,maize}-Yactstats{2,maize}(2,1))./Yactstats{2,maize}(2,1);   
+    YallDelta{2,wwheat}=(Yact{2,wwheat}-Yactstats{2,wwheat}(2,1))./Yactstats{2,wwheat}(2,1);   
+    YallDelta{2,sugarbeet}=(Yact{2,sugarbeet}-Yactstats{2,sugarbeet}(2,1))./Yactstats{2,sugarbeet}(2,1);   
+    YallDelta{2,potato}=(Yact{2,potato}-Yactstats{2,potato}(2,1))./Yactstats{2,potato}(2,1);   
+    YallDelta{2,pea}=(Yact{2,pea}-Yactstats{2,pea}(2,1))./Yactstats{2,pea}(2,1);  
     
 f4=figure('name','Median yield changes- GCM&year variation');% boxplot = variation over different GCMs & over 30 different year)   
 
@@ -553,11 +555,11 @@ f4=figure('name','Median yield changes- GCM&year variation');% boxplot = variati
 %-------------------------------------------------------------------------
 
 % normality check 
-[notnormalmaize,~]=NormalityCheck(Yall{2,maize},'lillie',0.05);
-[notnormalwwheat,~]=NormalityCheck(Yall{2,wwheat},'lillie',0.05);
-[notnormalsbeet,~]=NormalityCheck(Yall{2,sugarbeet},'lillie',0.05);
-[notnormalpotato,~]=NormalityCheck(Yall{2,potato},'lillie',0.05);
-[notnormalpea,~]=NormalityCheck(Yall{2,pea},'lillie',0.05);
+[notnormalmaize,~]=NormalityCheck(Yact{2,maize},'lillie',0.05);
+[notnormalwwheat,~]=NormalityCheck(Yact{2,wwheat},'lillie',0.05);
+[notnormalsbeet,~]=NormalityCheck(Yact{2,sugarbeet},'lillie',0.05);
+[notnormalpotato,~]=NormalityCheck(Yact{2,potato},'lillie',0.05);
+[notnormalpea,~]=NormalityCheck(Yact{2,pea},'lillie',0.05);
 
 if isempty(notnormalmaize)==1 && isempty(notnormalwwheat)==1 && isempty(notnormalsbeet)==1 && isempty(notnormalpotato)==1 && isempty(notnormalpea)==1
     disp('Yield values for all crops and all scenarios are normally distributed')
@@ -587,11 +589,11 @@ end
 clear notnormalwwheat notnormalmaize notnormalpotato notnormalsbeet notnormalpea
 
 % fit theoretical normal distributions
-xrangemaize=0:0.5:max(Yall{2,maize}(:))+1.5;
-xrangewwheat=0:0.5:max(Yall{2,wwheat}(:))+1.5;
-xrangesbeet=0:0.5:max(Yall{2,sugarbeet}(:))+1.5;
-xrangepotato=0:0.5:max(Yall{2,potato}(:))+1.5;
-xrangepea=0:0.1:max(Yall{2,pea}(:))+1;
+xrangemaize=0:0.5:max(Yact{2,maize}(:))+1.5;
+xrangewwheat=0:0.5:max(Yact{2,wwheat}(:))+1.5;
+xrangesbeet=0:0.5:max(Yact{2,sugarbeet}(:))+1.5;
+xrangepotato=0:0.5:max(Yact{2,potato}(:))+1.5;
+xrangepea=0:0.1:max(Yact{2,pea}(:))+1;
 
 probabilitiesmaize=NaN(length(xrangemaize),nsc);
 probabilitieswwheat=NaN(length(xrangewwheat),nsc);
@@ -600,19 +602,19 @@ probabilitiespotato=NaN(length(xrangepotato),nsc);
 probabilitiespea=NaN(length(xrangepea),nsc);
 
 for sc=1:nsc
-pdsc=fitdist(Yall{2,maize}(:,sc),'Normal');
+pdsc=fitdist(Yact{2,maize}(:,sc),'Normal');
 probabilitiesmaize(:,sc)=cdf(pdsc,xrangemaize);
 
-pdsc=fitdist(Yall{2,wwheat}(:,sc),'Normal');
+pdsc=fitdist(Yact{2,wwheat}(:,sc),'Normal');
 probabilitieswwheat(:,sc)=cdf(pdsc,xrangewwheat);
 
-pdsc=fitdist(Yall{2,sugarbeet}(:,sc),'Normal');
+pdsc=fitdist(Yact{2,sugarbeet}(:,sc),'Normal');
 probabilitiessbeet(:,sc)=cdf(pdsc,xrangesbeet);
 
-pdsc=fitdist(Yall{2,potato}(:,sc),'Normal');
+pdsc=fitdist(Yact{2,potato}(:,sc),'Normal');
 probabilitiespotato(:,sc)=cdf(pdsc,xrangepotato);
 
-pdsc=fitdist(Yall{2,pea}(:,sc),'Normal');
+pdsc=fitdist(Yact{2,pea}(:,sc),'Normal');
 probabilitiespea(:,sc)=cdf(pdsc,xrangepea);
 end
 
@@ -665,7 +667,7 @@ f2=figure('name','Seasonal yield theoretical CDF');
 f3=figure('name','Seasonal yield emperical CDF');
     subplot(3,2,1,'fontsize',10);
     for i=1:nsc
-        P(i)=cdfplot(Yall{2,maize}(:,i));
+        P(i)=cdfplot(Yact{2,maize}(:,i));
         hold on 
     end
     set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
@@ -677,7 +679,7 @@ f3=figure('name','Seasonal yield emperical CDF');
 
     subplot(3,2,2,'fontsize',10);
     for i=1:nsc
-        P(i)=cdfplot(Yall{2,wwheat}(:,i));
+        P(i)=cdfplot(Yact{2,wwheat}(:,i));
         hold on 
     end
     set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
@@ -689,7 +691,7 @@ f3=figure('name','Seasonal yield emperical CDF');
     
     subplot(3,2,3,'fontsize',10);
     for i=1:nsc
-        P(i)=cdfplot(Yall{2,sugarbeet}(:,i));
+        P(i)=cdfplot(Yact{2,sugarbeet}(:,i));
         hold on 
     end  
     set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
@@ -701,7 +703,7 @@ f3=figure('name','Seasonal yield emperical CDF');
     
     subplot(3,2,4,'fontsize',10);
     for i=1:nsc
-        P(i)=cdfplot(Yall{2,potato}(:,i));
+        P(i)=cdfplot(Yact{2,potato}(:,i));
         hold on 
     end    
     set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
@@ -713,7 +715,7 @@ f3=figure('name','Seasonal yield emperical CDF');
 
     subplot(3,2,5,'fontsize',10);
     for i=1:nsc
-        P(i)=cdfplot(Yall{2,pea}(:,i));
+        P(i)=cdfplot(Yact{2,pea}(:,i));
         hold on 
     end    
     set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
