@@ -156,7 +156,6 @@ if ACMode ==1 % AquaCrop was ran with the normal interface
         Brel=NaN(nTime,nRealSim);
         Yseason=NaN(nTime,nRealSim);
         HIseason=NaN(nTime,nRealSim);
-        GDD=NaN(nTime,nRealSim);  
         
         Bfin=NaN(100,nRealSim); % not clear how many runnumbers there will be so guess 100
         Y=NaN(100,nRealSim);
@@ -196,7 +195,6 @@ if ACMode ==1 % AquaCrop was ran with the normal interface
             Brel(:,i)=CropOutput{2,i} (:,25);
             Yseason(:,i)=CropOutput{2,i} (:,24);
             HIseason(:,i)=CropOutput{2,i} (:,23);
-            GDD(:,i)=CropOutput{2,i} (:,7);
 
             BundWat(:,i)=WabalOutput{2,i} (:,10);
             Tr(:,i)=WabalOutput{2,i} (:,20);
@@ -271,7 +269,6 @@ if ACMode ==1 % AquaCrop was ran with the normal interface
         Brel=NaN(nTime,nRealSim);
         Yseason=NaN(nTime,nRealSim);
         HIseason=NaN(nTime,nRealSim); 
-        GDD=NaN(nTime,nRealSim);  
         
         Bfin=NaN(100,nRealSim); % not clear how many runnumbers there will be so guess 100
         Y=NaN(100,nRealSim);
@@ -311,8 +308,7 @@ if ACMode ==1 % AquaCrop was ran with the normal interface
             Brel(:,i)=DayOutput{2,i} (:,41);
             Yseason(:,i)=DayOutput{2,i} (:,40);
             HIseason(:,i)=DayOutput{2,i} (:,39);
-            GDD(:,i)=DayOutput{2,i} (:,25); 
-            
+
             BundWat(:,i)=DayOutput{2,i} (:,10);
             Tr(:,i)=DayOutput{2,i} (:,20);
             Trx(:,i)=DayOutput{2,i} (:,19);
@@ -621,7 +617,7 @@ CropCatchACOutput{2,c}=[Bfincrop{2,c},Bfinpotcrop{2,c},Brelfincrop{2,c}, Ycrop{2
 end
 
 %%%% 6.3 Results of individual simulation units
-SimACOutput={Tr,Trx,E,Ex,ETa,ETx,RO,DP,CR,BundWat,Wr2,CC,B,Bfin,Y,Day,Month,Year,GDD};
+SimACOutput={Tr,Trx,E,Ex,ETa,ETx,RO,DP,CR,BundWat,Wr2,CC,B,Bfin,Y,Day,Month,Year};
 
 end
 
