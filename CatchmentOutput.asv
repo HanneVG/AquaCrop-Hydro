@@ -11,6 +11,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [SimACOutput,CatchACOutput,CropCatchACOutput,SoilPar,nTime]= CatchmentOutput(DatapathAC, DatapathInput, ACMode)
+DatapathInput='C:\DATA_HanneV\~Onderzoek\DEEL 2 - Ecohydro model\DEEL IIB  -VHM-AC\Application\Scenario simulation\Input\ACHydro';
+DatapathAC='C:\DATA_HanneV\~Onderzoek\DEEL 2 - Ecohydro model\DEEL IIB  -VHM-AC\Application\Scenario simulation\Results\AquaCrop_SA\Hist_fixCO2';
+ACMode=2;
 
 %% %%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 1. READ EXTRA INFORMATION ABOUT AQUACROP SIMULATION UNITS
@@ -106,7 +109,26 @@ function [SimACOutput,CatchACOutput,CropCatchACOutput,SoilPar,nTime]= CatchmentO
    
    SoilPar=[SoilPar, SoilPar2]; % add results to soil parameters matrix
    
-clear i st nst SoilPar2 SoilParSimRel
+%%%% 1.5 Load extra crop characteristics
+    name='HIo.txt';
+    file = fullfile(DatapathInput, name);        
+    A= importdata(file); 
+    clear name file 
+    
+    HIo(:,1)=A.textdata(:,1);
+    for i =1:length(A.data(:,1))
+        HIo{i,2}=A.data(i,1);
+    end
+    
+    % check if all crops have a harvest index number
+    for c=1:length(Crop)
+        index=find(strcmp(Crop(c,1),HIo(:,1))==1);
+        if isempty(index)==1
+            warning(['HIo information for ',Crop{c,1},' is missing'])
+        end
+    end
+    
+clear i st nst SoilPar2 SoilParSimRel c A
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 2. READ DAILY OUTPUT OF AQUACROP SIMULATIONS & REORGANIZE DATA
@@ -156,6 +178,7 @@ if ACMode ==1 % AquaCrop was ran with the normal interface
         Brel=NaN(nTime,nRealSim);
         Yseason=NaN(nTime,nRealSim);
         HIseason=NaN(nTime,nRealSim);
+        GDD=NaN(nTime,nRealSim);  
         
         Bfin=NaN(100,nRealSim); % not clear how many runnumbers there will be so guess 100
         Y=NaN(100,nRealSim);
@@ -195,6 +218,7 @@ if ACMode ==1 % AquaCrop was ran with the normal interface
             Brel(:,i)=CropOutput{2,i} (:,25);
             Yseason(:,i)=CropOutput{2,i} (:,24);
             HIseason(:,i)=CropOutput{2,i} (:,23);
+            GDD(:,i)=CropOutput{2,i} (:,7);
 
             BundWat(:,i)=WabalOutput{2,i} (:,10);
             Tr(:,i)=WabalOutput{2,i} (:,20);
@@ -269,6 +293,7 @@ if ACMode ==1 % AquaCrop was ran with the normal interface
         Brel=NaN(nTime,nRealSim);
         Yseason=NaN(nTime,nRealSim);
         HIseason=NaN(nTime,nRealSim); 
+        GDD=NaN(nTime,nRealSim);  
         
         Bfin=NaN(100,nRealSim); % not clear how many runnumbers there will be so guess 100
         Y=NaN(100,nRealSim);
@@ -308,7 +333,8 @@ if ACMode ==1 % AquaCrop was ran with the normal interface
             Brel(:,i)=DayOutput{2,i} (:,41);
             Yseason(:,i)=DayOutput{2,i} (:,40);
             HIseason(:,i)=DayOutput{2,i} (:,39);
-
+            GDD(:,i)=DayOutput{2,i} (:,25); 
+            
             BundWat(:,i)=DayOutput{2,i} (:,10);
             Tr(:,i)=DayOutput{2,i} (:,20);
             Trx(:,i)=DayOutput{2,i} (:,19);
@@ -547,20 +573,24 @@ clear TrSaL TrSiL TrxSaL TrxSiL ESaL ESiL ExSaL ExSiL ETaSaL ETaSiL ETxSaL ETxSi
  %initialize
  Ycrop=cell(2,ncrop);
  Ypotcrop=cell(2,ncrop);
+ DSIcrop=cell(2,ncrop);
  Bfincrop=cell(2,ncrop);
  Brelfincrop=cell(2,ncrop);
  Bfinpotcrop=cell(2,ncrop);
  HIcrop=cell(2,ncrop);
+ HIocrop=cell(2,ncrop);
  Cyclecrop=cell(2,ncrop);
   
   for c=1:ncrop
      % write away crop name
      Ycrop(1,c)=CropLim(c,1);
      Ypotcrop(1,c)=CropLim(c,1);
+     DSIcrop(1,c)=CropLim(c,1);
      Bfincrop(1,c)=CropLim(c,1);
      Brelfincrop(1,c)=CropLim(c,1);
      Bfinpotcrop(1,c)=CropLim(c,1);
      HIcrop(1,c)=CropLim(c,1);
+     HIocrop(1,c)=CropLim(c,1);
      Cyclecrop(1,c)=CropLim(c,1);
      
      %search all projects with this crop
@@ -592,7 +622,13 @@ clear TrSaL TrSiL TrxSaL TrxSiL ESaL ESiL ExSaL ExSiL ETaSaL ETaSiL ETxSaL ETxSi
      % calculate extra crop production variables 
      Bfinpotcrop{2,c}=Bfincrop{2,c}./(Brelfincrop{2,c}/100);
      
-     clear subsetY subsetBfin subsetBrelfin subsetHI index wgt
+     index2=find(strcmp(CropLim(c,1),HIo(:,1))==1);
+     HIocrop{2,c}(1,1)=HIo(index2,2);
+     
+     Ypotcrop{2,c}=Bfinpotcrop{2,c}.*(HIocrop{2,c}(1,1)/100);
+     DSIcrop{2,c}=(Ypotcrop{2,c}-Ycrop{2,c})./Ypotcrop{2,c};
+     
+     clear subsetY subsetBfin subsetBrelfin subsetHI index wgt index2
      
   end
  
@@ -617,7 +653,7 @@ CropCatchACOutput{2,c}=[Bfincrop{2,c},Bfinpotcrop{2,c},Brelfincrop{2,c}, Ycrop{2
 end
 
 %%%% 6.3 Results of individual simulation units
-SimACOutput={Tr,Trx,E,Ex,ETa,ETx,RO,DP,CR,BundWat,Wr2,CC,B,Bfin,Y,Day,Month,Year};
+SimACOutput={Tr,Trx,E,Ex,ETa,ETx,RO,DP,CR,BundWat,Wr2,CC,B,Bfin,Y,Day,Month,Year,GDD};
 
 end
 

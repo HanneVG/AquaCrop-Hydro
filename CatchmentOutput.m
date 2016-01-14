@@ -6,7 +6,7 @@
 % come to one result for the whole catchment
 %
 % Author: Hanne Van Gaelen
-% Last update: 12/01/2016
+% Last update: 14/01/2016
 %   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -106,7 +106,26 @@ function [SimACOutput,CatchACOutput,CropCatchACOutput,SoilPar,nTime]= CatchmentO
    
    SoilPar=[SoilPar, SoilPar2]; % add results to soil parameters matrix
    
-clear i st nst SoilPar2 SoilParSimRel
+%%%% 1.5 Load extra crop characteristics
+    name='HIo.txt';
+    file = fullfile(DatapathInput, name);        
+    A= importdata(file); 
+    clear name file 
+    
+    HIo(:,1)=A.textdata(:,1);
+    for i =1:length(A.data(:,1))
+        HIo{i,2}=A.data(i,1);
+    end
+    
+    % check if all crops have a harvest index number
+    for c=1:length(Crop)
+        index=find(strcmp(Crop(c,1),HIo(:,1))==1);
+        if isempty(index)==1
+            warning(['HIo information for ',Crop{c,1},' is missing'])
+        end
+    end
+    
+clear i st nst SoilPar2 SoilParSimRel c A
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 2. READ DAILY OUTPUT OF AQUACROP SIMULATIONS & REORGANIZE DATA
@@ -551,20 +570,24 @@ clear TrSaL TrSiL TrxSaL TrxSiL ESaL ESiL ExSaL ExSiL ETaSaL ETaSiL ETxSaL ETxSi
  %initialize
  Ycrop=cell(2,ncrop);
  Ypotcrop=cell(2,ncrop);
+ DSIcrop=cell(2,ncrop);
  Bfincrop=cell(2,ncrop);
  Brelfincrop=cell(2,ncrop);
  Bfinpotcrop=cell(2,ncrop);
  HIcrop=cell(2,ncrop);
+ HIocrop=cell(2,ncrop);
  Cyclecrop=cell(2,ncrop);
   
   for c=1:ncrop
      % write away crop name
      Ycrop(1,c)=CropLim(c,1);
      Ypotcrop(1,c)=CropLim(c,1);
+     DSIcrop(1,c)=CropLim(c,1);
      Bfincrop(1,c)=CropLim(c,1);
      Brelfincrop(1,c)=CropLim(c,1);
      Bfinpotcrop(1,c)=CropLim(c,1);
      HIcrop(1,c)=CropLim(c,1);
+     HIocrop(1,c)=CropLim(c,1);
      Cyclecrop(1,c)=CropLim(c,1);
      
      %search all projects with this crop
@@ -596,7 +619,13 @@ clear TrSaL TrSiL TrxSaL TrxSiL ESaL ESiL ExSaL ExSiL ETaSaL ETaSiL ETxSaL ETxSi
      % calculate extra crop production variables 
      Bfinpotcrop{2,c}=Bfincrop{2,c}./(Brelfincrop{2,c}/100);
      
-     clear subsetY subsetBfin subsetBrelfin subsetHI index wgt
+     index2=find(strcmp(CropLim(c,1),HIo(:,1))==1);
+     HIocrop{2,c}(1,1)=HIo(index2,2);
+     Ypotcrop{2,c}=Bfinpotcrop{2,c}.*(cell2mat(HIocrop{2,c})/100);
+     
+     DSIcrop{2,c}=((Ypotcrop{2,c}-Ycrop{2,c})./Ypotcrop{2,c})*100;
+     
+     clear subsetY subsetBfin subsetBrelfin subsetHI index wgt index2
      
   end
  
@@ -617,7 +646,7 @@ CatchACOutput=[TrCatch,TrxCatch,ECatch,ExCatch,ETaCatch,ETxCatch,ROCatch,DPCatch
 CropCatchACOutput(1,1:ncrop)=Ycrop(1,1:ncrop); % add cropnames
 
 for c=1:ncrop % add data of each crop
-CropCatchACOutput{2,c}=[Bfincrop{2,c},Bfinpotcrop{2,c},Brelfincrop{2,c}, Ycrop{2,c}, HIcrop{2,c},Cyclecrop{2,c}];
+CropCatchACOutput{2,c}=[Bfincrop{2,c},Bfinpotcrop{2,c},Brelfincrop{2,c}, Ycrop{2,c},Ypotcrop{2,c},HIcrop{2,c},Cyclecrop{2,c},DSIcrop{2,c}];
 end
 
 %%%% 6.3 Results of individual simulation units
