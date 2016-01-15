@@ -389,39 +389,50 @@ clear filename
 % 4. YIELD IMPACT 
 %------------------------------------------------------------------------
 
-% 4.1 Put yield (and DSI) in one structure
+% 4.1 Put yield (& WP & DSI) in one structure
 %-------------------------------------------------------------------------
 Cropnames= Prod{2,1}(1,:);
 [~,ncrop]=size(Cropnames);
 
 Yact(1,1:ncrop)=Cropnames(1,1:ncrop);
 DSI(1,1:ncrop)=Cropnames(1,1:ncrop);
+WP(1,1:ncrop)=Cropnames(1,1:ncrop);
 
-subset1=[];
-subset2=[];
+subsetY=[];
+subsetDSI=[];
+subsetWP=[];
 
 for c=1:ncrop % loop trough each crop
     for sc=1:nsc %loop trough each scenario
         addcolumn= Prod{2,sc}{2,c}(:,4);
         length(addcolumn);
-        subset1(1:length(addcolumn),end+1)=addcolumn;
-        subset1(length(addcolumn)+1:end,end)=NaN;
+        subsetY(1:length(addcolumn),end+1)=addcolumn;
+        subsetY(length(addcolumn)+1:end,end)=NaN;
         clear addcolumn
         
         addcolumn= Prod{2,sc}{2,c}(:,8);
         length(addcolumn);
-        subset2(1:length(addcolumn),end+1)=addcolumn;
-        subset2(length(addcolumn)+1:end,end)=NaN;
+        subsetDSI(1:length(addcolumn),end+1)=addcolumn;
+        subsetDSI(length(addcolumn)+1:end,end)=NaN;
         %subset2(subset2<0)=0; % replace all negative values by zero
         clear addcolumn
+        
+        addcolumn= Prod{2,sc}{2,c}(:,9);
+        length(addcolumn);
+        subsetWP(1:length(addcolumn),end+1)=addcolumn;
+        subsetWP(length(addcolumn)+1:end,end)=NaN;
+        clear addcolumn
     end
-    Yact{2,c}=subset1;
-    DSI{2,c}=subset2;
-    subset1=[];
-    subset2=[];
+    Yact{2,c}=subsetY;
+    DSI{2,c}=subsetDSI;
+    WP{2,c}=subsetWP;
+    
+    subsetY=[];
+    subsetDSI=[];
+    subsetWP=[];
 end
 
-clear c sc Cropnames
+clear c sc Cropnames subsetY subsetDSI subsetWP
 
 % 4.2 Define index of crops you want to show
 %-------------------------------------------------------------------------
@@ -696,7 +707,7 @@ f4=figure('name','Seasonal yield emperical CDF');
     end
     set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
     ylabel('Cumulative probability','fontsize',8);
-    xlabel('Annual yield (ton/ha)','fontsize',8);
+    xlabel('Seasonal yield (ton/ha)','fontsize',8);
     title('Maize')
     set(gca,'box','off')
     grid off
@@ -708,7 +719,7 @@ f4=figure('name','Seasonal yield emperical CDF');
     end
     set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
     ylabel('Cumulative probability','fontsize',8);
-    xlabel('Annual yield (ton/ha)','fontsize',8);
+    xlabel('Seasonal yield (ton/ha)','fontsize',8);
     title('Winter Wheat')
     set(gca,'box','off') 
     grid off
@@ -720,7 +731,7 @@ f4=figure('name','Seasonal yield emperical CDF');
     end  
     set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
     ylabel('Cumulative probability','fontsize',8);
-    xlabel('Annual yield (ton/ha)','fontsize',8);
+    xlabel('Seasonal yield (ton/ha)','fontsize',8);
     title('Sugar beet')
     set(gca,'box','off')
     grid off
@@ -732,7 +743,7 @@ f4=figure('name','Seasonal yield emperical CDF');
     end    
     set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
     ylabel('Cumulative probability','fontsize',8);
-    xlabel('Annual yield (ton/ha)','fontsize',8);
+    xlabel('Seasonal yield (ton/ha)','fontsize',8);
     title('Potato')
     set(gca,'box','off')
     grid off
@@ -744,7 +755,7 @@ f4=figure('name','Seasonal yield emperical CDF');
     end    
     set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
     ylabel('Cumulative probability','fontsize',8);
-    xlabel('Annual yield (ton/ha)','fontsize',8);
+    xlabel('Seasonal yield (ton/ha)','fontsize',8);
     title('Pea')
     set(gca,'box','off')
     grid off
@@ -764,6 +775,189 @@ savefig(f4,filename)
 
 clear filename 
 
+%% -----------------------------------------------------------------------
+% 5. WPET IMPACT 
+%------------------------------------------------------------------------
+
+% WPET was extracted in section on yield impact 
+
+% 5.1 Calculate WPET statistics
+%-------------------------------------------------------------------------
+% stats for each crop over different years 
+
+    WPstats(1,1:ncrop)=WP(1,1:ncrop); 
+    
+    for c=1:ncrop
+        WPstats{2,c}(1,1:nsc)=mean(WP{2,c}(:,1:nsc));
+        WPstats{2,c}(2,1:nsc)=median(WP{2,c}(:,1:nsc));
+        WPstats{2,c}(3,1:nsc)=std(WP{2,c}(:,1:nsc));
+        WPstats{2,c}(4,1:nsc)=min(WP{2,c}(:,1:nsc));
+        WPstats{2,c}(5,1:nsc)=max(WP{2,c}(:,1:nsc));
+    end
+clear c
+
+% Calculate changes of stats (change of avg, change of median)
+    WPDeltastats(1,1:ncrop)=WP(1,1:ncrop); 
+
+    for c=1:ncrop
+        for stat=1:2
+        WPDeltastats{2,c}(stat,1:nsc)=(WPstats{2,c}(stat,1:nsc)-WPstats{2,c}(stat,1));
+        end
+    end
+
+clear c
+
+% 5.2 Define index of crops you want to show
+%-------------------------------------------------------------------------
+maize=find(strcmp(WP(1,1:ncrop),'Maize')==1);
+wwheat=find(strcmp(WP(1,1:ncrop),'WinterWheat')==1);
+sugarbeet=find(strcmp(WP(1,1:ncrop),'Sugarbeet')==1);
+potato=find(strcmp(WP(1,1:ncrop),'Potato')==1);
+pea=find(strcmp(WP(1,1:ncrop),'Pea')==1);
+
+% 5.3 Vizualize WPET impact with boxplots
+%-------------------------------------------------------------------------
+
+f1=figure('name','Median WPET changes');%(boxplot= variation over different GCMs) 
+        sub(1)=subplot(2,5,1,'fontsize',10);
+        boxplot(WPDeltastats{2,maize}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        ylabel('Median WPET change (%)')
+        axis([xlim, -30,150])
+        set(gca,'box','off')
+        title('Maize')
+        
+        sub(2)=subplot(2,5,2,'fontsize',10);
+        boxplot(WPDeltastats{2,wwheat}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Winter Wheat')
+        
+        sub(3)=subplot(2,5,3,'fontsize',10);
+        boxplot(WPDeltastats{2,potato}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Potato')
+        
+        sub(4)=subplot(2,5,4,'fontsize',10);
+        boxplot(WPDeltastats{2,sugarbeet}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Sugarbeet')
+        
+        sub(5)=subplot(2,5,5,'fontsize',10);
+        boxplot(WPDeltastats{2,pea}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Peas')    
+
+        linkaxes(sub,'y')% link y axis of different plots (so that they change simultaneously
+        
+        h(1)=subplot(2,5,6,'fontsize',10);
+        bar(WPstats{2,maize}(2,1))
+        ylabel('Median historical WP(%)')
+        axis([xlim , 0 ,4])
+        title('Maize')
+        set(gca,'XTickLabel',{' '})
+        
+        h(2)=subplot(2,5,7,'fontsize',10);
+        bar(WPstats{2,wwheat}(2,1))
+        title('Winter Wheat')
+        set(gca,'XTickLabel',{' '})
+        
+        h(3)=subplot(2,5,8,'fontsize',10);
+        bar(WPstats{2,potato}(2,1))
+        title('Potato')
+        set(gca,'XTickLabel',{' '})
+         
+        h(4)=subplot(2,5,9,'fontsize',10);
+        bar(WPstats{2,sugarbeet}(2,1))
+        title('Sugarbeet')
+        set(gca,'XTickLabel',{' '})
+                
+        h(5)=subplot(2,5,10,'fontsize',10);
+        bar(WPstats{2,pea}(2,1))
+        title('Peas')
+        set(gca,'XTickLabel',{' '})
+        
+        linkaxes(h,'y')% link y axis of different plots (so that they change simultaneously
+
+        clear sub h 
+        
+% 5.4 Vizualize WPET with cumulative distribution function
+%-------------------------------------------------------------------------
+f2=figure('name','WP empirical CDF');
+    subplot(3,2,1,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(WP{2,maize}(:,i));
+        hold on 
+    end
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('WPET (kg/m³)','fontsize',8);
+    title('Maize')
+    set(gca,'box','off')
+    grid off
+
+    subplot(3,2,2,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(WP{2,wwheat}(:,i));
+        hold on 
+    end
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('WPET (kg/m³)','fontsize',8);
+    title('Winter Wheat')
+    set(gca,'box','off') 
+    grid off
+    
+    subplot(3,2,3,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(WP{2,sugarbeet}(:,i));
+        hold on 
+    end  
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('WPET (kg/m³)','fontsize',8);
+    title('Sugar beet')
+    set(gca,'box','off')
+    grid off
+    
+    subplot(3,2,4,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(WP{2,potato}(:,i));
+        hold on 
+    end    
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('WPET (kg/m³)','fontsize',8);
+    title('Potato')
+    set(gca,'box','off')
+    grid off
+
+    subplot(3,2,5,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(WP{2,pea}(:,i));
+        hold on 
+    end    
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('WPET (kg/m³)','fontsize',8);
+    title('Pea')
+    set(gca,'box','off')
+    grid off
+    
+% 5.5 save vizualization
+%-------------------------------------------------------------------------
+filename='WPET median changes - GCMboxplots';
+filename=fullfile(DatapathScenOut,filename);
+savefig(f1,filename)
+
+filename='WPET empirical CDF ';
+filename=fullfile(DatapathScenOut,filename);
+savefig(f2,filename)
+
+clear filename 
 %% -----------------------------------------------------------------------
 % 5. DROUGHT STRESS INDEX (DSI) IMPACT 
 %------------------------------------------------------------------------

@@ -6,11 +6,12 @@
 % come to one result for the whole catchment
 %
 % Author: Hanne Van Gaelen
-% Last update: 14/01/2016
+% Last update: 15/01/2016
 %   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [SimACOutput,CatchACOutput,CropCatchACOutput,SoilPar,nTime]= CatchmentOutput(DatapathAC, DatapathInput, ACMode)
+
 
 %% %%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 1. READ EXTRA INFORMATION ABOUT AQUACROP SIMULATION UNITS
@@ -182,7 +183,8 @@ if ACMode ==1 % AquaCrop was ran with the normal interface
         Brelfin=NaN(100,nRealSim);
         HI=NaN(100,nRealSim);
         Cycle=NaN(100,nRealSim);
-
+        WP=NaN(100,nRealSim);
+        
         BundWat=NaN(nTime,nRealSim); 
         Tr=NaN(nTime,nRealSim); 
         Trx=NaN(nTime,nRealSim);
@@ -226,26 +228,16 @@ if ACMode ==1 % AquaCrop was ran with the normal interface
             ETx(:,i)=WabalOutput{2,i} (:,22);
             RO(:,i)=WabalOutput{2,i} (:,12);
             DP(:,i)=WabalOutput{2,i} (:,13);
-            CR(:,i)=WabalOutput{2,i} (:,14);          
-        
-            M=max(RunNr(:,i)); 
-            for k=1:M % Loop trough all individual runs of each sim unit
-                
-                Cycle(1:M,i)=RunOutput{2,i}(:,23);
-                
-                cond=RunNr(:,i)==k;
-                
-                Bk=B(cond,i); % Select all values for simrun k
-                Yseasonk=Yseason(cond,i); 
-                Brelk=Brel(cond,i);
-                HIseasonk=HIseason(cond,i);
-                
-                Bfin(k,i)=max(Bk); % Select the maximum of these values
-                Y(k,i)=max(Yseasonk);
-                Brelfin(k,i)=max(Brelk);
-                HI(k,i)=max(HIseasonk);  
-            end
-
+            CR(:,i)=WabalOutput{2,i} (:,14);     
+                       
+            M=max(RunNr(:,i));
+            Bfin(1:M,i)=RunOutput{2,i}(:,30); 
+            Y(1:M,i)=RunOutput{2,i}(:,33);
+            Brelfin(1:M,i)=RunOutput{2,i}(:,31);
+            HI(1:M,i)=RunOutput{2,i}(:,32);   
+            Cycle(1:M,i)=RunOutput{2,i}(:,23);
+            WP(1:M,i)=RunOutput{2,i}(:,34);
+                        
         end
         
     %%%% 2.5 Clean up crop production variables (because initiated with 100
@@ -255,6 +247,7 @@ if ACMode ==1 % AquaCrop was ran with the normal interface
     Brelfin=Brelfin(1:max(RunNr(:)),:);
     HI=HI(1:max(RunNr(:)),:);
     Cycle=Cycle(1:max(RunNr(:)),:);
+    WP=WP(1:max(RunNr(:)),:);
     
  elseif ACMode ==2 % AquaCrop version 5.0 was ran with the plugin 
    %%%% 2.1 Read output of AquaCrop for all simulations
@@ -297,7 +290,8 @@ if ACMode ==1 % AquaCrop was ran with the normal interface
         Brelfin=NaN(100,nRealSim);
         HI=NaN(100,nRealSim);
         Cycle=NaN(100,nRealSim);
-
+        WP=NaN(100,nRealSim);
+        
         BundWat=NaN(nTime,nRealSim); 
         Tr=NaN(nTime,nRealSim); 
         Trx=NaN(nTime,nRealSim);
@@ -342,27 +336,17 @@ if ACMode ==1 % AquaCrop was ran with the normal interface
             RO(:,i)=DayOutput{2,i} (:,12);
             DP(:,i)=DayOutput{2,i} (:,13);
             CR(:,i)=DayOutput{2,i} (:,14);
-
-            M=max(RunNr(:,i)); 
-            for k=1:M % Loop trough all individual runs of each sim unit
-                
-                Cycle(1:M,i)=SeasonOutput{2,i}(:,22);
-                
-                cond=RunNr(:,i)==k;
-                
-                Bk=B(cond,i); % Select all values for simrun k
-                Yseasonk=Yseason(cond,i); 
-                Brelk=Brel(cond,i);
-                HIseasonk=HIseason(cond,i);
-                
-                Bfin(k,i)=max(Bk); % Select the maximum of these values
-                Y(k,i)=max(Yseasonk);
-                Brelfin(k,i)=max(Brelk);
-                HI(k,i)=max(HIseasonk);
-                
-            end
+            
+            M=max(RunNr(:,i));
+            Bfin(1:M,i)=SeasonOutput{2,i}(:,28); 
+            Y(1:M,i)=SeasonOutput{2,i}(:,31);
+            Brelfin(1:M,i)=SeasonOutput{2,i}(:,29);
+            HI(1:M,i)=SeasonOutput{2,i}(:,30);
+            Cycle(1:M,i)=SeasonOutput{2,i}(:,22);
+            WP(1:M,i)=SeasonOutput{2,i}(:,32);
         
         end
+        
     %%%% 2.5 Clean up crop production variables (because initiated with 100
     %%%% rows
     Bfin=Bfin(1:max(RunNr(:)),:);
@@ -370,9 +354,9 @@ if ACMode ==1 % AquaCrop was ran with the normal interface
     Brelfin=Brelfin(1:max(RunNr(:)),:);
     HI=HI(1:max(RunNr(:)),:);   
     Cycle=Cycle(1:max(RunNr(:)),:);  
-    
+    WP=WP(1:max(RunNr(:)),:);     
  end  
- clear a Bk Brelk Yseasonk M Yseason Brel WabalOutput CropOutput ProfOutput DayOutput;
+ clear a i M Yseason Brel WabalOutput CropOutput ProfOutput DayOutput;
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 3. CALCULATE SOIL WATER CONTENT IN 2 m SOIL DEPTH
@@ -577,6 +561,7 @@ clear TrSaL TrSiL TrxSaL TrxSiL ESaL ESiL ExSaL ExSiL ETaSaL ETaSiL ETxSaL ETxSi
  HIcrop=cell(2,ncrop);
  HIocrop=cell(2,ncrop);
  Cyclecrop=cell(2,ncrop);
+ WPcrop=cell(2,ncrop);
   
   for c=1:ncrop
      % write away crop name
@@ -589,6 +574,7 @@ clear TrSaL TrSiL TrxSaL TrxSiL ESaL ESiL ExSaL ExSiL ETaSaL ETaSiL ETxSaL ETxSi
      HIcrop(1,c)=CropLim(c,1);
      HIocrop(1,c)=CropLim(c,1);
      Cyclecrop(1,c)=CropLim(c,1);
+     WPcrop(1,c)=CropLim(c,1);
      
      %search all projects with this crop
      index=find(strcmp(CropLim(c,1),Crop(:,1))==1);
@@ -599,13 +585,15 @@ clear TrSaL TrSiL TrxSaL TrxSiL ESaL ESiL ExSaL ExSiL ETaSaL ETaSiL ETxSaL ETxSi
      subsetBrelfin=Brelfin(2:2:end,index);
      subsetHI=HI(2:2:end,index);
      subsetCycle=Cycle(2:2:end,index);
+     subsetWP=WP(2:2:end,index);
      
-     % remove NaN rows of this crop production data 
+     % remove NaN rows of this crop production data (at the end)
      subsetY = subsetY(all(~isnan(subsetY),2),:); 
      subsetBfin=subsetBfin(all(~isnan(subsetBfin),2),:); 
      subsetBrelfin = subsetBrelfin(all(~isnan(subsetBrelfin),2),:); 
      subsetHI = subsetHI(all(~isnan(subsetHI),2),:); 
      subsetCycle=subsetCycle(all(~isnan(subsetCycle),2),:); 
+     subsetWP=subsetWP(all(~isnan(subsetWP),2),:); 
      
      %take weighted average
      wgt=Wgt2(index,1);
@@ -615,6 +603,7 @@ clear TrSaL TrSiL TrxSaL TrxSiL ESaL ESiL ExSaL ExSiL ETaSaL ETaSiL ETxSaL ETxSi
      Brelfincrop{2,c}=subsetBrelfin*wgt;
      HIcrop{2,c}=subsetHI*wgt;
      Cyclecrop{2,c}=subsetCycle*wgt;
+     WPcrop{2,c}=subsetWP*wgt;
      
      % calculate extra crop production variables 
      Bfinpotcrop{2,c}=Bfincrop{2,c}./(Brelfincrop{2,c}/100);
@@ -646,7 +635,7 @@ CatchACOutput=[TrCatch,TrxCatch,ECatch,ExCatch,ETaCatch,ETxCatch,ROCatch,DPCatch
 CropCatchACOutput(1,1:ncrop)=Ycrop(1,1:ncrop); % add cropnames
 
 for c=1:ncrop % add data of each crop
-CropCatchACOutput{2,c}=[Bfincrop{2,c},Bfinpotcrop{2,c},Brelfincrop{2,c}, Ycrop{2,c},Ypotcrop{2,c},HIcrop{2,c},Cyclecrop{2,c},DSIcrop{2,c}];
+CropCatchACOutput{2,c}=[Bfincrop{2,c},Bfinpotcrop{2,c},Brelfincrop{2,c}, Ycrop{2,c},Ypotcrop{2,c},HIcrop{2,c},Cyclecrop{2,c},DSIcrop{2,c}, WPcrop{2,c}];
 end
 
 %%%% 6.3 Results of individual simulation units
