@@ -412,7 +412,7 @@ for c=1:ncrop % loop trough each crop
         length(addcolumn);
         subset2(1:length(addcolumn),end+1)=addcolumn;
         subset2(length(addcolumn)+1:end,end)=NaN;
-        subset2(subset2<0)=0; % replace all negative values by zero
+        %subset2(subset2<0)=0; % replace all negative values by zero
         clear addcolumn
     end
     Yact{2,c}=subset1;
@@ -442,6 +442,7 @@ pea=find(strcmp(Yact(1,1:ncrop),'Pea')==1);
         Yactstats{2,c}(3,1:nsc)=std(Yact{2,c}(:,1:nsc));
         Yactstats{2,c}(4,1:nsc)=min(Yact{2,c}(:,1:nsc));
         Yactstats{2,c}(5,1:nsc)=max(Yact{2,c}(:,1:nsc));
+        Yactstats{2,c}(6,1:nsc)=Yactstats{2,c}(3,1:nsc)./Yactstats{2,c}(1,1:nsc);
     end
 clear c
 
@@ -780,6 +781,7 @@ clear filename
         DSIstats{2,c}(3,1:nsc)=std(DSI{2,c}(:,1:nsc));
         DSIstats{2,c}(4,1:nsc)=min(DSI{2,c}(:,1:nsc));
         DSIstats{2,c}(5,1:nsc)=max(DSI{2,c}(:,1:nsc));
+        DSIstats{2,c}(6,1:nsc)=prctile(DSI{2,c}(:,1:nsc),[95]);
     end
 clear c
 
@@ -788,7 +790,7 @@ clear c
 
     for c=1:ncrop
         for stat=1:2
-        DSIDeltastats{2,c}(stat,1:nsc)=(DSIstats{2,c}(stat,1:nsc)-DSIstats{2,c}(stat,1))./DSIstats{2,c}(stat,1);
+        DSIDeltastats{2,c}(stat,1:nsc)=(DSIstats{2,c}(stat,1:nsc)-DSIstats{2,c}(stat,1));
         end
     end
 
@@ -807,33 +809,33 @@ pea=find(strcmp(DSI(1,1:ncrop),'Pea')==1);
 
 f1=figure('name','Median yield changes');%(boxplot= variation over different GCMs) 
         sub(1)=subplot(2,5,1,'fontsize',10);
-        boxplot(YactDeltastats{2,maize}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        boxplot(DSIDeltastats{2,maize}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
-        ylabel('Median yield change (%)')
-        axis([xlim, -30,30])
+        ylabel('Median DSI change (%)')
+        axis([xlim, -50,100])
         set(gca,'box','off')
         title('Maize')
         
         sub(2)=subplot(2,5,2,'fontsize',10);
-        boxplot(YactDeltastats{2,wwheat}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        boxplot(DSIDeltastats{2,wwheat}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
         set(gca,'box','off')
         title('Winter Wheat')
         
         sub(3)=subplot(2,5,3,'fontsize',10);
-        boxplot(YactDeltastats{2,potato}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        boxplot(DSIDeltastats{2,potato}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
         set(gca,'box','off')
         title('Potato')
         
         sub(4)=subplot(2,5,4,'fontsize',10);
-        boxplot(YactDeltastats{2,sugarbeet}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        boxplot(DSIDeltastats{2,sugarbeet}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
         set(gca,'box','off')
         title('Sugarbeet')
         
         sub(5)=subplot(2,5,5,'fontsize',10);
-        boxplot(YactDeltastats{2,pea}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        boxplot(DSIDeltastats{2,pea}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
         line(xlim,[0,0],'Color','k','LineStyle','--')
         set(gca,'box','off')
         title('Peas')    
@@ -841,29 +843,29 @@ f1=figure('name','Median yield changes');%(boxplot= variation over different GCM
         linkaxes(sub,'y')% link y axis of different plots (so that they change simultaneously
         
         h(1)=subplot(2,5,6,'fontsize',10);
-        bar(Yactstats{2,maize}(2,1))
-        ylabel('Median historical yield (ton/ha)')
+        bar(DSIstats{2,maize}(2,1))
+        ylabel('Median historical DSI(%)')
         axis([xlim , 0 ,15])
         title('Maize')
         set(gca,'XTickLabel',{' '})
         
         h(2)=subplot(2,5,7,'fontsize',10);
-        bar(Yactstats{2,wwheat}(2,1))
+        bar(DSIstats{2,wwheat}(2,1))
         title('Winter Wheat')
         set(gca,'XTickLabel',{' '})
         
         h(3)=subplot(2,5,8,'fontsize',10);
-        bar(Yactstats{2,potato}(2,1))
+        bar(DSIstats{2,potato}(2,1))
         title('Potato')
         set(gca,'XTickLabel',{' '})
          
         h(4)=subplot(2,5,9,'fontsize',10);
-        bar(Yactstats{2,sugarbeet}(2,1))
+        bar(DSIstats{2,sugarbeet}(2,1))
         title('Sugarbeet')
         set(gca,'XTickLabel',{' '})
                 
         h(5)=subplot(2,5,10,'fontsize',10);
-        bar(Yactstats{2,pea}(2,1))
+        bar(DSIstats{2,pea}(2,1))
         title('Peas')
         set(gca,'XTickLabel',{' '})
         

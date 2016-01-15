@@ -17,7 +17,7 @@
 %   the baseline scenario )
 %
 % Author: Hanne Van Gaelen
-% Last updated: 13/01/2016
+% Last updated: 14/01/2016
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -769,27 +769,192 @@ clear filename
 
 % DSI was extracted in section on yield impact 
 
-% 5.1 Define index of crops you want to show
+% 5.1 Calculate DSI statistics
+%-------------------------------------------------------------------------
+% stats for each crop over different years 
+    DSIstats(1,1:ncrop)=DSI(1,1:ncrop); 
+    
+    for c=1:ncrop
+        DSIstats{2,c}(1,1:nsc)=mean(DSI{2,c}(:,1:nsc));
+        DSIstats{2,c}(2,1:nsc)=median(DSI{2,c}(:,1:nsc));
+        DSIstats{2,c}(3,1:nsc)=std(DSI{2,c}(:,1:nsc));
+        DSIstats{2,c}(4,1:nsc)=min(DSI{2,c}(:,1:nsc));
+        DSIstats{2,c}(5,1:nsc)=max(DSI{2,c}(:,1:nsc));
+        DS
+    end
+clear c
+
+% Calculate changes of stats (change of avg, change of median)
+    DSIDeltastats(1,1:ncrop)=DSI(1,1:ncrop); 
+
+    for c=1:ncrop
+        for stat=1:2
+        DSIDeltastats{2,c}(stat,1:nsc)=(DSIstats{2,c}(stat,1:nsc)-DSIstats{2,c}(stat,1));
+        end
+    end
+
+clear c
+
+% 5.2 Define index of crops you want to show
 %-------------------------------------------------------------------------
 maize=find(strcmp(DSI(1,1:ncrop),'Maize')==1);
-wwheat=find(strcmp(Yact(1,1:ncrop),'WinterWheat')==1);
-sugarbeet=find(strcmp(Yact(1,1:ncrop),'Sugarbeet')==1);
-potato=find(strcmp(Yact(1,1:ncrop),'Potato')==1);
-pea=find(strcmp(Yact(1,1:ncrop),'Pea')==1);
+wwheat=find(strcmp(DSI(1,1:ncrop),'WinterWheat')==1);
+sugarbeet=find(strcmp(DSI(1,1:ncrop),'Sugarbeet')==1);
+potato=find(strcmp(DSI(1,1:ncrop),'Potato')==1);
+pea=find(strcmp(DSI(1,1:ncrop),'Pea')==1);
 
-% 5.2 Vizualize DSI with cumulative distribution function
+% 5.3 Vizualize yield impact with boxplots
 %-------------------------------------------------------------------------
 
+f1=figure('name','Median yield changes');%(boxplot= variation over different GCMs) 
+        sub(1)=subplot(2,5,1,'fontsize',10);
+        boxplot(DSIDeltastats{2,maize}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        ylabel('Median DSI change (%)')
+        axis([xlim, -50,100])
+        set(gca,'box','off')
+        title('Maize')
+        
+        sub(2)=subplot(2,5,2,'fontsize',10);
+        boxplot(DSIDeltastats{2,wwheat}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Winter Wheat')
+        
+        sub(3)=subplot(2,5,3,'fontsize',10);
+        boxplot(DSIDeltastats{2,potato}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Potato')
+        
+        sub(4)=subplot(2,5,4,'fontsize',10);
+        boxplot(DSIDeltastats{2,sugarbeet}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Sugarbeet')
+        
+        sub(5)=subplot(2,5,5,'fontsize',10);
+        boxplot(DSIDeltastats{2,pea}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Peas')    
 
+        linkaxes(sub,'y')% link y axis of different plots (so that they change simultaneously
+        
+        h(1)=subplot(2,5,6,'fontsize',10);
+        bar(DSIstats{2,maize}(2,1))
+        ylabel('Median historical DSI(%)')
+        axis([xlim , 0 ,15])
+        title('Maize')
+        set(gca,'XTickLabel',{' '})
+        
+        h(2)=subplot(2,5,7,'fontsize',10);
+        bar(DSIstats{2,wwheat}(2,1))
+        title('Winter Wheat')
+        set(gca,'XTickLabel',{' '})
+        
+        h(3)=subplot(2,5,8,'fontsize',10);
+        bar(DSIstats{2,potato}(2,1))
+        title('Potato')
+        set(gca,'XTickLabel',{' '})
+         
+        h(4)=subplot(2,5,9,'fontsize',10);
+        bar(DSIstats{2,sugarbeet}(2,1))
+        title('Sugarbeet')
+        set(gca,'XTickLabel',{' '})
+                
+        h(5)=subplot(2,5,10,'fontsize',10);
+        bar(DSIstats{2,pea}(2,1))
+        title('Peas')
+        set(gca,'XTickLabel',{' '})
+        
+        linkaxes(h,'y')% link y axis of different plots (so that they change simultaneously
+
+        clear sub h 
+        
+% 5.4 Vizualize DSI with cumulative distribution function
+%-------------------------------------------------------------------------
+f2=figure('name','DSI empirical CDF');
+    subplot(3,2,1,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(DSI{2,maize}(:,i));
+        hold on 
+    end
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Drought stress index (%)','fontsize',8);
+    title('Maize')
+    set(gca,'box','off')
+    grid off
+
+    subplot(3,2,2,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(DSI{2,wwheat}(:,i));
+        hold on 
+    end
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Drought stress index (%)','fontsize',8);
+    title('Winter Wheat')
+    set(gca,'box','off') 
+    grid off
+    
+    subplot(3,2,3,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(DSI{2,sugarbeet}(:,i));
+        hold on 
+    end  
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Drought stress index (%)','fontsize',8);
+    title('Sugar beet')
+    set(gca,'box','off')
+    grid off
+    
+    subplot(3,2,4,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(DSI{2,potato}(:,i));
+        hold on 
+    end    
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Drought stress index (%)','fontsize',8);
+    title('Potato')
+    set(gca,'box','off')
+    grid off
+
+    subplot(3,2,5,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(DSI{2,pea}(:,i));
+        hold on 
+    end    
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Drought stress index (%)','fontsize',8);
+    title('Pea')
+    set(gca,'box','off')
+    grid off
+    
+% 5.4 save vizualization
+%-------------------------------------------------------------------------
+filename='DSI median changes - GCMboxplots';
+filename=fullfile(DatapathScenOut,filename);
+savefig(f1,filename)
+
+filename='DSI empirical CDF ';
+filename=fullfile(DatapathScenOut,filename);
+savefig(f2,filename)
+
+clear filename 
 %% -----------------------------------------------------------------------
-% 5. IMPACT ON LENGTH OF THE POTENTIAL LENGTH OF GROWING CYCLE 
+% 6. IMPACT ON LENGTH OF THE POTENTIAL LENGTH OF GROWING CYCLE 
 %-------------------------------------------------------------------------
 % Potential length of growing cycle = the length based purely on
 % temperature and crop cycle requirements. If a crop dies of early due to
 % water stress this is not taken into account
 
 
-% 5.1 Calculate potential length of growing period & sowing/maturity dates
+% 6.1 Calculate potential length of growing period & sowing/maturity dates
 %-------------------------------------------------------------------------
 LGPpotAll(1,1:nsc)=ScenarioName(1,1:nsc);
 sowingAll(1,1:nsc)=ScenarioName(1,1:nsc);
@@ -820,7 +985,7 @@ end
 
 clear sc lu SowingDateSC MaturityDateSC LengthSC RotationDateSC
 
-% 5.2 Compose LGPpotential/sowing date  matrix per crop type
+% 6.2 Compose LGPpotential/sowing date  matrix per crop type
 %--------------------------------------------------------------------------
 Cropnames= Prod{2,1}(1,:);
 [~,ncrop]=size(Cropnames);
@@ -845,7 +1010,7 @@ end
 
 clear sc c 
 
-% 5.3 Calculate LGP statistics (over different year)
+% 6.3 Calculate LGP statistics (over different year)
 %-------------------------------------------------------------------------
  LGPpotstats(1,1:ncrop)=LGPpot(1,1:ncrop); 
     
@@ -869,7 +1034,7 @@ clear c
 
 clear c stat
 
-% 5.4 Vizualize potential length of growing period 
+% 6.4 Vizualize potential length of growing period 
 %------------------------------------------------------------------------- 
 
 %search indices of crops you want to show
@@ -1016,13 +1181,13 @@ savefig(f2,filename)
 
 clear sub h  
 %% -----------------------------------------------------------------------
-% 6. IMPACT ON ACTUAL LENGTH OF GROWING CYCLE 
+% 7. IMPACT ON ACTUAL LENGTH OF GROWING CYCLE 
 %-------------------------------------------------------------------------
 % Actual length of growing cycle = the length based  on
 % temperature and crop cycle requirements, as well as water stress which causes early senescence. 
 
 
-% 6.1 Put actual length of growing period in one structure
+% 7.1 Put actual length of growing period in one structure
 %-------------------------------------------------------------------------
 Cropnames= Prod{2,1}(1,:);
 [~,ncrop]=size(Cropnames);
@@ -1045,7 +1210,7 @@ end
 
 clear c sc Cropnames
 
-% 6.2 Calculate statistics (over different year)
+% 7.2 Calculate statistics (over different year)
 %-------------------------------------------------------------------------
  LGPactstats(1,1:ncrop)=LGPact(1,1:ncrop); 
     
@@ -1069,7 +1234,7 @@ clear c
 
 clear c
 
-% 6.3 Vizualize actual length of growing period 
+% 7.3 Vizualize actual length of growing period 
 %------------------------------------------------------------------------- 
 
 %search indices of crops you want to show
@@ -1145,7 +1310,7 @@ f1=figure('name','Median LGPact changes'); %(boxplot= variation over different G
 
         clear sub h  
 
-% 6.4 Vizualize LGPact with cumulative distribution function
+% 7.4 Vizualize LGPact with cumulative distribution function
 %-------------------------------------------------------------------------
 f2=figure('name','LGPact emperical CDF');
     subplot(3,2,1,'fontsize',10);
@@ -1218,7 +1383,7 @@ f2=figure('name','LGPact emperical CDF');
     set(gca,'box','off')
     grid off   
               
-% 6.5 Save vizualizations
+% 7.5 Save vizualizations
 %-------------------------------------------------------------------------
 filename='LGPact median changes - gcmboxplot';
 filename=fullfile(DatapathScenOut,filename);
@@ -1231,10 +1396,10 @@ savefig(f2,filename)
 
 
 %% -----------------------------------------------------------------------
-% 7. TOTAL DISCHARGE IMPACT 
+% 8. TOTAL DISCHARGE IMPACT 
 %------------------------------------------------------------------------
 
-% 7.1 aggregation of results (subtotals and cumulative) 
+% 8.1 aggregation of results (subtotals and cumulative) 
 % ----------------------------------------------------------------------- 
 
 % cumulative over days
@@ -1250,7 +1415,7 @@ Q_MOFcum=cumsum(Q_MOF);
 [Q_MOFyear,Q_MOFmonth,~,Q_MOFseason,Q_MOFymonth,~,Q_MOFyseason]=ClimSubtotal(Date(:,1),Q_MOF*f/area,'sum');
 
 
-% 7.2 put data in matrix (not structure)
+% 8.2 put data in matrix (not structure)
 % ----------------------------------------------------------------------- 
 
     nyear=year(EndDate(1,1))-year(StartDate(1,1))+1;
@@ -1266,7 +1431,7 @@ Q_MOFcum=cumsum(Q_MOF);
     Q_MOFyear2(:,sc)=Q_MOFyear{1,sc}(:,2);
     end
     
-% 7.3 Analyse with focus on variation between GCMs
+% 8.3 Analyse with focus on variation between GCMs
 % ----------------------------------------------------------------------- 
 % stats per GCM over different years 
     Q_MTFyearstats=NaN(5,nsc);
@@ -1370,7 +1535,7 @@ Q_MOFcum=cumsum(Q_MOF);
             
             linkaxes(sub,'y')       
             
-% 7.4 Analyse with focus on GCM & interannual variability 
+% 8.4 Analyse with focus on GCM & interannual variability 
 % -----------------------------------------------------------------------     
 % stats for all GCMs & different years together (historical set excluded)
     Q_MTBIOFyearstats=NaN(5,4);
@@ -1474,7 +1639,7 @@ f4=figure('name','Median yearly discharge changes- GCM&year variation');% boxplo
 
         linkaxes(sub,'y')  
         
-% 7.5 Analyse probabilities with cumulative distribution function  
+% 8.5 Analyse probabilities with cumulative distribution function  
 % -----------------------------------------------------------------------
 % normality check 
 [notnormalTF,~]=NormalityCheck(Q_MTFyear2,'lillie',0.05);
@@ -1617,7 +1782,7 @@ f6=figure('name','Yearly discharge emperical CDF');
     
  clear xrangeTF xrangeBF xrangeIF xrangeOF   
             
-% 7.6 save results (vizualizations)
+% 8.6 save results (vizualizations)
 % ----------------------------------------------------------------------- 
 filename='Discharge - cumulative';
 filename=fullfile(DatapathScenOut,filename);
@@ -1637,7 +1802,7 @@ savefig(f6,filename)
 
 clear filename sub
 %% -----------------------------------------------------------------------
-% 8. MONTHLY DISCHARGE IMPACT (Only QTF) 
+% 9. MONTHLY DISCHARGE IMPACT (Only QTF) 
 %------------------------------------------------------------------------
 
 % reorganize data in one matrix   
