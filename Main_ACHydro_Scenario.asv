@@ -2364,33 +2364,23 @@ clear matrix c scenario
 %% -----------------------------------------------------------------------
 % 9. SUMMARY TABLES
 %------------------------------------------------------------------------
-xlname='SummaryTables.xlsx';
-filename = fullfile(DatapathScenOut,xlname);
-
-% Summary of annual discharge (median and changes to median)
-HeadersColumns={'Historical median','Future median change min','Future median change med','Future median change max'};
-HeadersRows={'Annual Qtot';'Annual QBF';'Annual QIF';'Annual QOF'};
-Row1=
-Row2=
-Row3=
-Row4=
-DataMatrix=[Row1;Row2,Row3;Row4]
-
-xlswrite(filename,HeadersColumns,'Discharge','A1');
-xlswrite(filename,HeadersRows,'Discharge','A2');
-
-    
-        
-
-
-
-
 % write output for this scenario to excel      
       % Combine output in matrix if necessary
-        HeadersColumns={'Historical median','Future median change min','Future median change med','Future median change max'};
-        HeadersRows={'Seasonal crop yield';'CV yield';'WPET';'LGPact';'TSI';'DSI';'Annual Qtot';'Annual QBF';'Annual QIF';'Annual QOF'};
-        Row1=[
-                         
-                   
-                    
-         DataMatrix=[Row1;Row2,Row3;Row4;Row5;Row6;Row7;Row8;Row9;Row10];
+        HeadersColums={'Historical median','Future median change min','Future median change med','Future median change max'};
+        HeadersRows={'Seasonal crop yield';'CV yield';'WPET','LGPact';'TSI';'DSI';'Annual Qtot';'Annual QBF';'Annual QIF';'Annual QOF
+        FlowOutput=[exceltime(Date(1:nTime,1)),Q_MBFsc(1:nTime,1),Q_MIFsc(1:nTime,1),Q_MOFsc(1:nTime,1),Q_MTFsc(1:nTime,1)];
+
+        HeadersWabalCatch={'Date','Tr','Trx','E','Ex','ETa','ETx','RO','DP','CR','BundWat','Wr2'};
+
+       % Write output to one excel tabsheet
+        xlname='FlowSimResults.xlsx';
+        filename = fullfile(DatapathOutputSC,xlname);
+        xlswrite(filename,HeadersFlow,'SimFlow','A1');
+        xlswrite(filename,FlowOutput,'SimFlow','A2');
+    
+        xlname='WabalSimResults.xlsx';
+        filename = fullfile(DatapathOutputSC,xlname);
+        xlswrite(filename,HeadersWabalCatch,'SimWabal','A1');
+        xlswrite(filename,exceltime(Date(1:nTime,1)),'SimWabal','A2');
+        xlswrite(filename,CatchACOutput(1:nTime,1:11),'SimWabal','B2'); 
+        
