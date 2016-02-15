@@ -158,7 +158,6 @@
         error('grouping category is not well defined');
     end
     
-    
     % format of potential groups
     linesstructall={'-','-','--',':','-.','-'}; 
     linewstructall={1.5,0.5,0.5,0.5,0.5,0.5};
@@ -194,7 +193,7 @@
 % 3. RUN AQUACROP-HYDRO FOR ALL SCENARIOS & SAVE OUTPUT OF EACH SCENARIO
 %-------------------------------------------------------------------------            
 
-%3.1 initialize variables
+% 3.1 initialize variables
 %-------------------------------------------------------------------------
     %time variables
     Day=NaN(nTime,nsc);    % Day number
@@ -205,7 +204,7 @@
     Tmin=NaN(nTime,nsc); % minimum temperature (°C)
     Tmax=NaN(nTime,nsc); % maximum temperature (°C)
     Rain=NaN(nTime,nsc); % rainfall (mm)
-    ETo=NaN(nTime,nsc); % reference evapotranspiration (mm)
+    ETo=NaN(nTime,nsc);  % reference evapotranspiration (mm)
 
     %catchment-scale results
     TrCatch=NaN(nTime,nsc);     % Crop transpiration (actual) (mm)
@@ -218,24 +217,24 @@
     DPCatch=NaN(nTime,nsc);     % Deep percolation(mm)
     CRCatch=NaN(nTime,nsc);     % Capilary rise(mm)
     BundWatCatch=NaN(nTime,nsc); % Water between bunds (mm)
-    Wr2Catch=NaN(nTime,nsc);   % Soil water content in 2 m soil depth (mm)
-    CCCatch=NaN(nTime,nsc);    % Canopy Cover (%)
+    Wr2Catch=NaN(nTime,nsc);    % Soil water content in 2 m soil depth (mm)
+    CCCatch=NaN(nTime,nsc);     % Canopy Cover (%)
 
    % AquaCrop results per simulation unit 
-    Tr=cell(2,nsc) ;    % Crop transpiration(actual)(mm)
-    Trx=cell(2,nsc) ;   % Potential (maximum) crop transpiration(mm)
-    E=cell(2,nsc) ;     % Evaporation (actual)(mm)
-    Ex=cell(2,nsc) ;    % Potential (maximum) evaporation(mm)
-    ETa=cell(2,nsc) ;   % Actual evapotranspiration(mm)
-    ETx=cell(2,nsc) ;   % Potential (maximum) evapotranspiration(mm)
-    RO=cell(2,nsc) ;    % Runoff(mm)
-    DP=cell(2,nsc) ;  % Deep percolation(mm)
-    CR=cell(2,nsc) ;    % Capilary rise(mm)
-    BundWat=cell(2,nsc) ; % Water between bunds (mm)
-    Wr2=cell(2,nsc) ; % Soil water content in 2 m soil depth (mm)
-    CC=cell(2,nsc) ;   % Canopy Cover (%)
-    B=cell(2,nsc) ;    % Dry aboveground biomass during growing season (ton/ha)
-    GDD=cell(2,nsc);
+    Tr=cell(2,nsc) ;        % Crop transpiration(actual)(mm)
+    Trx=cell(2,nsc) ;       % Potential (maximum) crop transpiration(mm)
+    E=cell(2,nsc) ;         % Evaporation (actual)(mm)
+    Ex=cell(2,nsc) ;        % Potential (maximum) evaporation(mm)
+    ETa=cell(2,nsc) ;       % Actual evapotranspiration(mm)
+    ETx=cell(2,nsc) ;       % Potential (maximum) evapotranspiration(mm)
+    RO=cell(2,nsc) ;        % Runoff(mm)
+    DP=cell(2,nsc) ;        % Deep percolation(mm)
+    CR=cell(2,nsc) ;        % Capilary rise(mm)
+    BundWat=cell(2,nsc) ;   % Water between bunds (mm)
+    Wr2=cell(2,nsc) ;       % Soil water content in 2 m soil depth (mm)
+    CC=cell(2,nsc) ;        % Canopy Cover (%)
+    B=cell(2,nsc) ;         % Dry aboveground biomass during growing season (ton/ha)
+    GDD=cell(2,nsc);        % Growing degree days accumulated on that day (°C-day)
    
    % Crop results for main season (average over catchment)
      Prod=cell(2,nsc);  % crop production variabiles for main season crops
@@ -510,156 +509,7 @@ clear c
    
 % 4.2 Vizualize yield impact with boxplots
 %-------------------------------------------------------------------------
-% f1adapt=figure('name','Median yield changes');%(boxplot= variation over different GCMs) 
-%         sub(1)=subplot(1,5,1,'fontsize',10);
-%         boxplot(YactDeltastats{2,maize}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',{'ens','Hs','Hw','L','M'});
-%         line(xlim,[0,0],'Color','k','LineStyle','--')
-%         ylabel('Median yield change (%)')
-%         axis([xlim, -40,50])
-%         set(gca,'box','off')
-%         title('Maize')
-%         
-%         sub(2)=subplot(1,5,2,'fontsize',10);
-%         boxplot(YactDeltastats{2,wwheat}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',{'ens','Hs','Hw','L','M'});
-%         line(xlim,[0,0],'Color','k','LineStyle','--')
-%         set(gca,'box','off')
-%         title('Winter Wheat')
-%         
-%         sub(3)=subplot(1,5,3,'fontsize',10);
-%         boxplot(YactDeltastats{2,potato}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',{'ens','Hs','Hw','L','M'});
-%         line(xlim,[0,0],'Color','k','LineStyle','--')
-%         set(gca,'box','off')
-%         title('Potato')
-%         
-%         sub(4)=subplot(1,5,4,'fontsize',10);
-%         boxplot(YactDeltastats{2,sugarbeet}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',{'ens','Hs','Hw','L','M'});
-%         line(xlim,[0,0],'Color','k','LineStyle','--')
-%         set(gca,'box','off')
-%         title('Sugarbeet')
-%         
-%         sub(5)=subplot(1,5,5,'fontsize',10);
-%         boxplot(YactDeltastats{2,pea}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',{'ens','Hs','Hw','L','M'});
-%         line(xlim,[0,0],'Color','k','LineStyle','--')
-%         set(gca,'box','off')
-%         title('Peas')  
-% 
-%         linkaxes(sub,'y')% link y axis of different plots (so that they change simultaneously 
-
-% f1synth=figure('name','Median yield changes with synthestic scenarios');%(boxplot= variation over different GCMs) 
-%         sub(1)=subplot(1,5,1,'fontsize',10);
-%             gindex=find(strcmp(groupmat(1,1:nsc),'Ens')==1);
-%             boxplot(YactDeltastats{2,maize}(2,gindex)*100,'colors',[0.6 0.6 0.6],'symbol','+');
-%             ylabel('Median yield change (%)')
-%             %axis([xlim, min(YactDeltastats{2,maize}(2,:)*100)-5,max(YactDeltastats{2,maize}(2,:)*100)+5])
-%             axis([xlim, -40,45])
-%             set(gca,'box','off','XTickLabel',{' '})
-%             title('Maize')
-%             hold on
-%             line(xlim,[0,0],'Color','k','LineStyle','-')
-%             hold on
-%             gindex=find(strcmp(groupmat(1,1:nsc),'Hs')==1);
-%             line(xlim,[YactDeltastats{2,maize}(2,gindex)*100,YactDeltastats{2,maize}(2,gindex)*100],'Color','r','LineStyle','--')
-%             hold on
-%             gindex=find(strcmp(groupmat(1,1:nsc),'Hw')==1);
-%             line(xlim,[YactDeltastats{2,maize}(2,gindex)*100,YactDeltastats{2,maize}(2,gindex)*100],'Color','r','LineStyle',':')
-%             hold on
-%             gindex=find(strcmp(groupmat(1,1:nsc),'L')==1);
-%             line(xlim,[YactDeltastats{2,maize}(2,gindex)*100,YactDeltastats{2,maize}(2,gindex)*100],'Color','r','LineStyle','-.')        
-%             hold on
-%             gindex=find(strcmp(groupmat(1,1:nsc),'M')==1);
-%             line(xlim,[YactDeltastats{2,maize}(2,gindex)*100,YactDeltastats{2,maize}(2,gindex)*100],'Color','r','LineStyle','-')
-% 
-%         
-%         sub(2)=subplot(1,5,2,'fontsize',10);
-%             gindex=find(strcmp(groupmat(1,1:nsc),'Ens')==1);
-%             boxplot(YactDeltastats{2,wwheat}(2,gindex)*100,'colors',[0.6 0.6 0.6],'symbol','+');
-%             %ylabel('Median yield change (%)')
-%             axis([xlim, min(YactDeltastats{2,wwheat}(2,:)*100)-5,max(YactDeltastats{2,wwheat}(2,:)*100)+5])
-%             set(gca,'box','off','XTickLabel',{' '},'YTickLabel',{' '})
-%             title('Winter wheat')
-%             hold on
-%             line(xlim,[0,0],'Color','k','LineStyle','-')
-%             hold on
-%             gindex=find(strcmp(groupmat(1,1:nsc),'Hs')==1);
-%             line(xlim,[YactDeltastats{2,wwheat}(2,gindex)*100,YactDeltastats{2,wwheat}(2,gindex)*100],'Color','r','LineStyle','--')
-%             hold on
-%             gindex=find(strcmp(groupmat(1,1:nsc),'Hw')==1);
-%             line(xlim,[YactDeltastats{2,wwheat}(2,gindex)*100,YactDeltastats{2,wwheat}(2,gindex)*100],'Color','r','LineStyle',':')
-%             hold on
-%             gindex=find(strcmp(groupmat(1,1:nsc),'L')==1);
-%             line(xlim,[YactDeltastats{2,wwheat}(2,gindex)*100,YactDeltastats{2,wwheat}(2,gindex)*100],'Color','r','LineStyle','-.')        
-%             hold on
-%             gindex=find(strcmp(groupmat(1,1:nsc),'M')==1);
-%             line(xlim,[YactDeltastats{2,wwheat}(2,gindex)*100,YactDeltastats{2,wwheat}(2,gindex)*100],'Color','r','LineStyle','-')
-%         
-%         sub(3)=subplot(1,5,3,'fontsize',10);
-%             gindex=find(strcmp(groupmat(1,1:nsc),'Ens')==1);
-%             boxplot(YactDeltastats{2,potato}(2,gindex)*100,'colors',[0.6 0.6 0.6],'symbol','+');
-%             %ylabel('Median yield change (%)')
-%             axis([xlim, min(YactDeltastats{2,potato}(2,:)*100)-5,max(YactDeltastats{2,potato}(2,:)*100)+5])
-%             set(gca,'box','off','XTickLabel',{' '},'YTickLabel',{' '})
-%             title('Potato')
-%             hold on
-%             line(xlim,[0,0],'Color','k','LineStyle','-')
-%             hold on
-%             gindex=find(strcmp(groupmat(1,1:nsc),'Hs')==1);
-%             line(xlim,[YactDeltastats{2,potato}(2,gindex)*100,YactDeltastats{2,potato}(2,gindex)*100],'Color','r','LineStyle','--')
-%             hold on
-%             gindex=find(strcmp(groupmat(1,1:nsc),'Hw')==1);
-%             line(xlim,[YactDeltastats{2,potato}(2,gindex)*100,YactDeltastats{2,potato}(2,gindex)*100],'Color','r','LineStyle',':')
-%             hold on
-%             gindex=find(strcmp(groupmat(1,1:nsc),'L')==1);
-%             line(xlim,[YactDeltastats{2,potato}(2,gindex)*100,YactDeltastats{2,potato}(2,gindex)*100],'Color','r','LineStyle','-.')        
-%             hold on
-%             gindex=find(strcmp(groupmat(1,1:nsc),'M')==1);
-%             line(xlim,[YactDeltastats{2,potato}(2,gindex)*100,YactDeltastats{2,potato}(2,gindex)*100],'Color','r','LineStyle','-')
-%         
-%         sub(4)=subplot(1,5,4,'fontsize',10);
-%             gindex=find(strcmp(groupmat(1,1:nsc),'Ens')==1);
-%             boxplot(YactDeltastats{2,sugarbeet}(2,gindex)*100,'colors',[0.6 0.6 0.6],'symbol','+');
-%             %ylabel('Median yield change (%)')
-%             axis([xlim, min(YactDeltastats{2,sugarbeet}(2,:)*100)-5,max(YactDeltastats{2,sugarbeet}(2,:)*100)+5])
-%             set(gca,'box','off','XTickLabel',{' '},'YTickLabel',{' '})
-%             title('Sugar beet')
-%             hold on
-%             line(xlim,[0,0],'Color','k','LineStyle','-')
-%             hold on
-%             gindex=find(strcmp(groupmat(1,1:nsc),'Hs')==1);
-%             line(xlim,[YactDeltastats{2,sugarbeet}(2,gindex)*100,YactDeltastats{2,sugarbeet}(2,gindex)*100],'Color','r','LineStyle','--')
-%             hold on
-%             gindex=find(strcmp(groupmat(1,1:nsc),'Hw')==1);
-%             line(xlim,[YactDeltastats{2,sugarbeet}(2,gindex)*100,YactDeltastats{2,sugarbeet}(2,gindex)*100],'Color','r','LineStyle',':')
-%             hold on
-%             gindex=find(strcmp(groupmat(1,1:nsc),'L')==1);
-%             line(xlim,[YactDeltastats{2,sugarbeet}(2,gindex)*100,YactDeltastats{2,sugarbeet}(2,gindex)*100],'Color','r','LineStyle','-.')        
-%             hold on
-%             gindex=find(strcmp(groupmat(1,1:nsc),'M')==1);
-%             line(xlim,[YactDeltastats{2,sugarbeet}(2,gindex)*100,YactDeltastats{2,sugarbeet}(2,gindex)*100],'Color','r','LineStyle','-')
-%         
-%         sub(5)=subplot(1,5,5,'fontsize',10);
-%             gindex=find(strcmp(groupmat(1,1:nsc),'Ens')==1);
-%             boxplot(YactDeltastats{2,pea}(2,gindex)*100,'colors',[0.6 0.6 0.6],'symbol','+');
-%             %ylabel('Median yield change (%)')
-%             axis([xlim, min(YactDeltastats{2,pea}(2,:)*100)-5,max(YactDeltastats{2,pea}(2,:)*100)+5])
-%             set(gca,'box','off','XTickLabel',{' '},'YTickLabel',{' '})
-%             title('Pea')
-%             hold on
-%             line(xlim,[0,0],'Color','k','LineStyle','-')
-%             hold on
-%             gindex=find(strcmp(groupmat(1,1:nsc),'Hs')==1);
-%             line(xlim,[YactDeltastats{2,pea}(2,gindex)*100,YactDeltastats{2,pea}(2,gindex)*100],'Color','r','LineStyle','--')
-%             hold on
-%             gindex=find(strcmp(groupmat(1,1:nsc),'Hw')==1);
-%             line(xlim,[YactDeltastats{2,pea}(2,gindex)*100,YactDeltastats{2,pea}(2,gindex)*100],'Color','r','LineStyle',':')
-%             hold on
-%             gindex=find(strcmp(groupmat(1,1:nsc),'L')==1);
-%             line(xlim,[YactDeltastats{2,pea}(2,gindex)*100,YactDeltastats{2,pea}(2,gindex)*100],'Color','r','LineStyle','-.')        
-%             hold on
-%             gindex=find(strcmp(groupmat(1,1:nsc),'M')==1);
-%             line(xlim,[YactDeltastats{2,pea}(2,gindex)*100,YactDeltastats{2,pea}(2,gindex)*100],'Color','r','LineStyle','-')   
-%             
-%             linkaxes(sub,'y')% link y axis of different plots (so that they change simultaneously
-            
+           
 f1=figure('name','Median yield changes');%(boxplot= variation over different GCMs) 
         sub(1)=subplot(2,5,1,'fontsize',10);
         boxplot(YactDeltastats{2,maize}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
@@ -1177,80 +1027,6 @@ f1=figure('name','Median WPET changes');%(boxplot= variation over different GCMs
 
         clear sub h 
         
-% 5.2extra Vizualize WPET and yield impact with boxplots
-%-------------------------------------------------------------------------
-%PUBLICATION FIGURE
-f11=figure('name','Median yield and WPET changes');%(boxplot= variation over different GCMs) 
-        sub(1)=subplot(2,5,1,'fontsize',10);
-        boxplot(YactDeltastats{2,maize}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
-        line(xlim,[0,0],'Color','k','LineStyle','--')
-        ylabel('Median yield change (%)')
-        axis([xlim, -20,40])
-        set(gca,'box','off')
-        title('Maize','fontsize',8)
-        
-        sub(2)=subplot(2,5,2,'fontsize',10);
-        boxplot(YactDeltastats{2,wwheat}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
-        line(xlim,[0,0],'Color','k','LineStyle','--')
-        set(gca,'box','off')
-        title('Winter wheat','fontsize',8)
-        
-        sub(3)=subplot(2,5,3,'fontsize',10);
-        boxplot(YactDeltastats{2,potato}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
-        line(xlim,[0,0],'Color','k','LineStyle','--')
-        set(gca,'box','off')
-        title('Potato','fontsize',8)
-        
-        sub(4)=subplot(2,5,4,'fontsize',10);
-        boxplot(YactDeltastats{2,sugarbeet}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
-        line(xlim,[0,0],'Color','k','LineStyle','--')
-        set(gca,'box','off')
-        title('Sugar beet','fontsize',8)
-        
-        sub(5)=subplot(2,5,5,'fontsize',10);
-        boxplot(YactDeltastats{2,pea}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+');
-        line(xlim,[0,0],'Color','k','LineStyle','--')
-        set(gca,'box','off')
-        title('Peas','fontsize',8)    
-
-        linkaxes(sub,'y')% link y axis of different plots (so that they change simultaneously
-        
-        sub(1)=subplot(2,5,6,'fontsize',10);
-        boxplot(WPDeltastats{2,maize}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
-        line(xlim,[0,0],'Color','k','LineStyle','--')
-        h1=ylabel('Median WP_{ET} change (%)');
-        set(h1,'interpreter','tex')
-        axis([xlim, -10,70])
-        set(gca,'box','off')
-        %title('Maize')
-        
-        sub(2)=subplot(2,5,7,'fontsize',10);
-        boxplot(WPDeltastats{2,wwheat}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
-        line(xlim,[0,0],'Color','k','LineStyle','--')
-        set(gca,'box','off')
-        %title('Winter Wheat')
-        
-        sub(3)=subplot(2,5,8,'fontsize',10);
-        boxplot(WPDeltastats{2,potato}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
-        line(xlim,[0,0],'Color','k','LineStyle','--')
-        set(gca,'box','off')
-        %title('Potato')
-        
-        sub(4)=subplot(2,5,9,'fontsize',10);
-        boxplot(WPDeltastats{2,sugarbeet}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
-        line(xlim,[0,0],'Color','k','LineStyle','--')
-        set(gca,'box','off')
-        %title('Sugarbeet')
-        
-        sub(5)=subplot(2,5,10,'fontsize',10);
-        boxplot(WPDeltastats{2,pea}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
-        line(xlim,[0,0],'Color','k','LineStyle','--')
-        set(gca,'box','off')
-       % title('Peas')    
-
-        linkaxes(sub,'y')% link y axis of different plots (so that they change simultaneously
-        clear sub 
-
 % 5.3 Vizualize WPET with cumulative distribution function
 %-------------------------------------------------------------------------
 f2=figure('name','WP empirical CDF');
@@ -1316,267 +1092,6 @@ f2=figure('name','WP empirical CDF');
     
     clear P i 
     
-% 5.3 Vizualize WPET and Yield with cumulative distribution function
-%-------------------------------------------------------------------------
-% ALL LINES
-%PUBLICATION FIGURE 
-f3=figure('name','Seasonal yield emperical CDF');
-    subplot(5,2,1,'fontsize',10);
-    for i=1:nsc
-        P(i)=cdfplot(Yact{2,maize}(:,i));
-        hold on 
-    end
-    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('','fontsize',8);
-    title('Maize')
-    set(gca,'box','off')
-    grid off
-
-    subplot(5,2,3,'fontsize',10);
-    for i=1:nsc
-        P(i)=cdfplot(Yact{2,wwheat}(:,i));
-        hold on 
-    end
-    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('','fontsize',8);
-    title('Winter wheat')
-    set(gca,'box','off') 
-    grid off
-    
-    subplot(5,2,5,'fontsize',10);
-    for i=1:nsc
-        P(i)=cdfplot(Yact{2,sugarbeet}(:,i));
-        hold on 
-    end  
-    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('','fontsize',8);
-    title('Sugar beet')
-    set(gca,'box','off')
-    grid off
-    
-    subplot(5,2,7,'fontsize',10);
-    for i=1:nsc
-        P(i)=cdfplot(Yact{2,potato}(:,i));
-        hold on 
-    end    
-    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('','fontsize',8);
-    title('Potato')
-    set(gca,'box','off')
-    grid off
-
-    subplot(5,2,9,'fontsize',10);
-    for i=1:nsc
-        P(i)=cdfplot(Yact{2,pea}(:,i));
-        hold on 
-    end    
-    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('Seasonal yield (ton/ha)','fontsize',8);
-    title('Peas')
-    set(gca,'box','off')
-    grid off
-    
-    subplot(5,2,2,'fontsize',10);
-    for i=1:nsc
-        P(i)=cdfplot(WP{2,maize}(:,i));
-        hold on 
-    end
-    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('','fontsize',8);
-    title('Maize')
-    set(gca,'box','off')
-    grid off
-
-    subplot(5,2,4,'fontsize',10);
-    for i=1:nsc
-        P(i)=cdfplot(WP{2,wwheat}(:,i));
-        hold on 
-    end
-    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('','fontsize',8);
-    title('Winter wheat')
-    set(gca,'box','off') 
-    grid off
-    
-    subplot(5,2,6,'fontsize',10);
-    for i=1:nsc
-        P(i)=cdfplot(WP{2,sugarbeet}(:,i));
-        hold on 
-    end  
-    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('','fontsize',8);
-    title('Sugar beet')
-    set(gca,'box','off')
-    grid off
-    
-    subplot(5,2,8,'fontsize',10);
-    for i=1:nsc
-        P(i)=cdfplot(WP{2,potato}(:,i));
-        hold on 
-    end    
-    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('','fontsize',8);
-    title('Potato')
-    set(gca,'box','off')
-    grid off
-
-    subplot(5,2,10,'fontsize',10);
-    for i=1:nsc
-        P(i)=cdfplot(WP{2,pea}(:,i));
-        hold on 
-    end    
-    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('WP_{ET} (kg/m³)','fontsize',8);
-    title('Peas')
-    set(gca,'box','off')
-    grid off
-     
-  clear P 
-  
-% SIMPLIFIED    
-%PUBLICATION FIGURE
-f4=figure('name','Seasonal yield emperical CDF -Simple');
-    subplot(5,2,1,'fontsize',10);
-    for g=1:ngroup2
-        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
-        P(g)=cdfplot(reshape(Yact{2,maize}(:,gindex),[],1));
-        hold on 
-    end
-    set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('','fontsize',8);
-    title('Maize')
-    set(gca,'box','off')
-    grid off
-
-    subplot(5,2,3,'fontsize',10);
-    for g=1:ngroup2
-        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
-        P(g)=cdfplot(reshape(Yact{2,wwheat}(:,gindex),[],1));
-        hold on 
-    end
-    set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('','fontsize',8);
-    title('Winter wheat')
-    set(gca,'box','off') 
-    grid off
-    
-    subplot(5,2,5,'fontsize',10);
-    for g=1:ngroup2
-        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
-        P(g)=cdfplot(reshape(Yact{2,sugarbeet}(:,gindex),[],1));
-        hold on 
-    end  
-    set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('','fontsize',8);
-    title('Sugar beet')
-    set(gca,'box','off')
-    grid off
-    
-    subplot(5,2,7,'fontsize',10);
-    for g=1:ngroup2
-        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
-        P(g)=cdfplot(reshape(Yact{2,potato}(:,gindex),[],1));
-        hold on 
-    end    
-    set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('','fontsize',8);
-    title('Potato')
-    set(gca,'box','off')
-    grid off
-
-    subplot(5,2,9,'fontsize',10);
-    for g=1:ngroup2
-        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
-        P(g)=cdfplot(reshape(Yact{2,pea}(:,gindex),[],1));
-        hold on 
-    end    
-    set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('Seasonal yield (ton/ha)','fontsize',8);
-    title('Peas')
-    set(gca,'box','off')
-    grid off
-       
-    subplot(5,2,2,'fontsize',10);
-    for g=1:ngroup2
-        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
-        P(g)=cdfplot(reshape(WP{2,maize}(:,gindex),[],1));
-        hold on 
-    end
-    set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('','fontsize',8);
-    title('Maize')
-    set(gca,'box','off')
-    grid off
-
-    subplot(5,2,4,'fontsize',10);
-    for g=1:ngroup2
-        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
-        P(g)=cdfplot(reshape(WP{2,wwheat}(:,gindex),[],1));
-        hold on 
-    end
-    set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('','fontsize',8);
-    title('Winter wheat')
-    set(gca,'box','off') 
-    grid off
-    
-    subplot(5,2,6,'fontsize',10);
-    for g=1:ngroup2
-        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
-        P(g)=cdfplot(reshape(WP{2,sugarbeet}(:,gindex),[],1));
-        hold on 
-    end  
-    set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('','fontsize',8);
-    title('Sugar beet')
-    set(gca,'box','off')
-    grid off
-    
-    subplot(5,2,8,'fontsize',10);
-    for g=1:ngroup2
-        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
-        P(g)=cdfplot(reshape(WP{2,potato}(:,gindex),[],1));
-        hold on 
-    end    
-    set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('','fontsize',8);
-    title('Potato')
-    set(gca,'box','off')
-    grid off
-
-    subplot(5,2,10,'fontsize',10);
-    for g=1:ngroup2
-        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
-        P(g)=cdfplot(reshape(WP{2,pea}(:,gindex),[],1));
-        hold on 
-    end    
-    set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('WP_{ET} (kg/m³)','fontsize',8);
-    title('Peas')
-    set(gca,'box','off')
-    grid off
-
-    clear P 
     
 % 5.4 save vizualization
 %-------------------------------------------------------------------------
@@ -1584,21 +1099,12 @@ filename='WPET median changes - GCMboxplots';
 filename=fullfile(DatapathScenOut,filename);
 savefig(f1,filename)
 
-filename='WPETandYield median changes - GCMboxplots';
-filename=fullfile(DatapathScenOut,filename);
-savefig(f11,filename)
-
 filename='WPET empirical CDF ';
 filename=fullfile(DatapathScenOut,filename);
 savefig(f2,filename)
 
-
-filename='WPETandYield empirical CDF - simple';
-filename=fullfile(DatapathScenOut,filename);
-savefig(f4,filename)
-
 clear filename 
-clear f1 f2 f11
+clear f1 f2 
 %% -----------------------------------------------------------------------
 % 6. DROUGHT STRESS INDEX (DSI) and TEMPERATURE STRESS(TSI) IMPACT 
 %------------------------------------------------------------------------
@@ -1774,77 +1280,7 @@ f2=figure('name','Median Temperature stress changes');%(boxplot= variation over 
         linkaxes(h,'y')% link y axis of different plots (so that they change simultaneously
         clear sub h         
    
-f12=figure('name','Median DSI and TSI changes together');%(boxplot= variation over different GCMs) 
-        sub(1)=subplot(2,5,1,'fontsize',10);
-        boxplot(DSIDeltastats{2,maize}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+');
-        line(xlim,[0,0],'Color','k','LineStyle','--')
-        ylabel('Median DSI change (%)','fontsize',8)
-        axis([xlim, -5,20])
-        set(gca,'box','off')
-        title('Maize','fontsize',8)
-        
-        sub(2)=subplot(2,5,2,'fontsize',10);
-        boxplot(DSIDeltastats{2,wwheat}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
-        line(xlim,[0,0],'Color','k','LineStyle','--')
-        set(gca,'box','off')
-        title('Winter wheat','fontsize',8)
-        
-        sub(3)=subplot(2,5,3,'fontsize',5);
-        boxplot(DSIDeltastats{2,potato}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
-        line(xlim,[0,0],'Color','k','LineStyle','--')
-        set(gca,'box','off')
-        title('Potato','fontsize',8)
-        
-        sub(4)=subplot(2,5,4,'fontsize',10);
-        boxplot(DSIDeltastats{2,sugarbeet}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
-        line(xlim,[0,0],'Color','k','LineStyle','--')
-        set(gca,'box','off')
-        title('Sugar beet','fontsize',8)
-        
-        sub(5)=subplot(2,5,5,'fontsize',10);
-        boxplot(DSIDeltastats{2,pea}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
-        line(xlim,[0,0],'Color','k','LineStyle','--')
-        set(gca,'box','off')
-        title('Peas','fontsize',8)    
-
-        linkaxes(sub,'y')% link y axis of different plots (so that they change simultaneously
-        
-        sub(1)=subplot(2,5,6,'fontsize',10);
-        boxplot(TSIDeltastats{2,maize}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
-        line(xlim,[0,0],'Color','k','LineStyle','--')
-        ylabel('Median TSI change (%)','fontsize',8)
-        axis([xlim, -20,5])
-        set(gca,'box','off')
-        title('Maize')
-        
-        sub(2)=subplot(2,5,7,'fontsize',10);
-        boxplot(TSIDeltastats{2,wwheat}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
-        line(xlim,[0,0],'Color','k','LineStyle','--')
-        set(gca,'box','off')
-        title('Winter wheat')
-        
-        sub(3)=subplot(2,5,8,'fontsize',10);
-        boxplot(TSIDeltastats{2,potato}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
-        line(xlim,[0,0],'Color','k','LineStyle','--')
-        set(gca,'box','off')
-        title('Potato')
-        
-        sub(4)=subplot(2,5,9,'fontsize',10);
-        boxplot(TSIDeltastats{2,sugarbeet}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
-        line(xlim,[0,0],'Color','k','LineStyle','--')
-        set(gca,'box','off')
-        title('Sugar beet')
-        
-        sub(5)=subplot(2,5,10,'fontsize',10);
-        boxplot(TSIDeltastats{2,pea}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
-        line(xlim,[0,0],'Color','k','LineStyle','--')
-        set(gca,'box','off')
-        title('Peas')    
-
-        linkaxes(sub,'y')% link y axis of different plots (so that they change simultaneously
-        
- 
-        
+      
 % 6.3 Vizualize DSI & TSI with cumulative distribution function
 %-------------------------------------------------------------------------
 f3=figure('name','DSI empirical CDF');
@@ -1978,18 +1414,14 @@ savefig(f1,filename)
 
 filename='TSI median changes - GCMboxplots';
 filename=fullfile(DatapathScenOut,filename);
-savefig(f1,filename)
-
-filename='TSI&DSI median changes - GCMboxplots';
-filename=fullfile(DatapathScenOut,filename);
-savefig(f12,filename)
+savefig(f2,filename)
 
 filename='DSI_TSI empirical CDF ';
 filename=fullfile(DatapathScenOut,filename);
 savefig(f3,filename)
 
 clear filename 
-clear f1 f2 f3
+clear f1 f2 f3 
 %% -----------------------------------------------------------------------
 % 7. IMPACT ON LENGTH OF THE POTENTIAL LENGTH OF GROWING CYCLE 
 %-------------------------------------------------------------------------
@@ -2049,17 +1481,17 @@ for c=1:ncrop% loop trough each crop
         subset= LGPpotAll{2,sc}(:,index(1));% all landunits with same crop will have same LGPpot want same temp 
         subset=subset(all(~isnan(subset),2),:); 
         LGPpot{2,c}(:,sc)=subset;
-        subset= [];
+        clear subset
         
         subset=sowingAll{2,sc}(:,index(1));
         subset=subset(all(~isnat(subset),2),:); 
         sowing{2,c}(:,sc)= subset;
-        subset=[];
+        clear subset
             
         subset=maturitypotAll{2,sc}(:,index(1));
         subset=subset(all(~isnat(subset),2),:); 
         maturitypot{2,c}(:,sc)= subset;
-        subset=[];
+        clear subset
     end        
 end
 
@@ -2295,6 +1727,7 @@ f3=figure('name','LGPgap emperical CDF');
     grid off     
     
     clear P i        
+
 %save figure
 filename='LGPpot median changes - GCMboxplot';
 filename=fullfile(DatapathScenOut,filename);
@@ -2304,7 +1737,7 @@ filename='LGPpot empirical CDF';
 filename=fullfile(DatapathScenOut,filename);
 savefig(f2,filename)
 
-clear f1 f2
+clear f1 f2 f3
 %% -----------------------------------------------------------------------
 % 8. IMPACT ON ACTUAL LENGTH OF GROWING CYCLE 
 %-------------------------------------------------------------------------
@@ -2317,6 +1750,8 @@ clear f1 f2
 % LGPact= output AquaCrop
 
 % Maturity act: calculate from sowing date and LGPact
+% ATTENTION/ THIS IS NOT COOMPLETELY CORRECT. LGPact is period between
+% emergence and maturity, not sowing and maturity 
 maturityact(1,1:ncrop)=LGPact(1,1:ncrop); 
 
 for c=1:ncrop
@@ -2451,8 +1886,7 @@ f1=figure('name','Median LGPact changes'); %(boxplot= variation over different G
 
         clear sub h  
 
-% PUBLICATION FIGURE
-f11=figure('name','Median LGPact en LGP pot'); %(boxplot= variation over different GCMs) 
+f11=figure('name','Median LGPact en LGP pot'); %(boxplot= variation over different GCMs) % PUBLICATION FIGURE
 
         sub(1)=subplot(2,5,1,'fontsize',10);
         boxplot(LGPpotDeltastats{2,maize}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup', groupnames,'colors',boxplotcolor);
@@ -2541,13 +1975,9 @@ f11=figure('name','Median LGPact en LGP pot'); %(boxplot= variation over differe
         title('Peas')    
 
         linkaxes(sub,'y')% link y axis of different plots (so that they change simultaneously
-        
-
 
         clear sub 
-        
-        
-        
+              
         
 % 7.3 Vizualize LGPact with cumulative distribution function
 %-------------------------------------------------------------------------
@@ -2638,10 +2068,10 @@ savefig(f2,filename)
 clear f1 f2
 
 %% -----------------------------------------------------------------------
-% 8. TOTAL DISCHARGE IMPACT 
+% 9. TOTAL DISCHARGE IMPACT 
 %------------------------------------------------------------------------
 
-% 8.1 aggregation of results (subtotals and cumulative) 
+% 9.1 aggregation of results (subtotals and cumulative) 
 % ----------------------------------------------------------------------- 
 
 % cumulative over days
@@ -2657,7 +2087,7 @@ Q_MOFcum=cumsum(Q_MOF);
 [Q_MOFyear,Q_MOFmonth,~,Q_MOFseason,Q_MOFymonth,~,Q_MOFyseason]=ClimSubtotal(Date(:,1),Q_MOF*f/area,'sum');
 
 
-% 8.2 put data in matrix (not structure)
+% 9.2 put data in matrix (not structure)
 % ----------------------------------------------------------------------- 
 
     nyear=year(EndDate(1,1))-year(StartDate(1,1))+1;
@@ -2671,27 +2101,21 @@ Q_MOFcum=cumsum(Q_MOF);
     Q_MTFyseason3=NaN(nyear,nsc);
     Q_MTFyseason4=NaN(nyear,nsc);
     
-    index1=find(Q_MTFyseason{1,1}(:,2)==1);
-    index2=find(Q_MTFyseason{1,1}(:,2)==2);
-    index3=find(Q_MTFyseason{1,1}(:,2)==3);
-    index4=find(Q_MTFyseason{1,1}(:,2)==4);
-
     for sc=1:nsc
     Q_MTFyear2(:,sc)=Q_MTFyear{1,sc}(:,2);
     Q_MBFyear2(:,sc)=Q_MBFyear{1,sc}(:,2);
     Q_MIFyear2(:,sc)=Q_MIFyear{1,sc}(:,2);
     Q_MOFyear2(:,sc)=Q_MOFyear{1,sc}(:,2);
     
-    Q_MTFyseason1(:,sc)=Q_MTFyseason{1,sc}(index1,3);
-    Q_MTFyseason2(:,sc)=Q_MTFyseason{1,sc}(index2,3);
-    Q_MTFyseason3(:,sc)=Q_MTFyseason{1,sc}(index3,3);
-    Q_MTFyseason4(:,sc)=Q_MTFyseason{1,sc}(index4,3);
+    Q_MTFyseason1(:,sc)=Q_MTFyseason{1,sc}(Q_MTFyseason{1,1}(:,2)==1,3);
+    Q_MTFyseason2(:,sc)=Q_MTFyseason{1,sc}(Q_MTFyseason{1,1}(:,2)==2,3);
+    Q_MTFyseason3(:,sc)=Q_MTFyseason{1,sc}(Q_MTFyseason{1,1}(:,2)==3,3);
+    Q_MTFyseason4(:,sc)=Q_MTFyseason{1,sc}(Q_MTFyseason{1,1}(:,2)==4,3);
     end
+        
+    clear sc 
     
-    
-    clear sc index1 index2 index3 index4
-    
-% 8.3 Analyse with focus on variation between GCMs
+% 9.3 Analyse with focus on variation between GCMs
 % ----------------------------------------------------------------------- 
 % stats per GCM over different years 
     Q_MTFyearstats=NaN(7,nsc);
@@ -2798,9 +2222,8 @@ Q_MOFcum=cumsum(Q_MOF);
             plot(Date(:,1),Q_MOFcum(1:nTime,1)*f/area,'color','k','LineWidth',2);
             ylabel('Overland flow (mm)')
             set(gca,'box','off');    
-    %PUBLICATION FIGURE
-     f2=figure('name','Median yearly discharge changes - GCM variation');
-            sub(1)=subplot(1,4,1,'fontsize',10);
+    
+     f2=figure('name','Median yearly discharge changes - GCM variation'); % (PUBLICATION FIGURE)
             boxplot(Q_MTFyearDeltastats(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup', groupnames,'colors',boxplotcolor,'symbol','+');
             line(xlim,[0,0],'Color','k','LineStyle','--')
             ylabel('Median annual flow change (%)')
@@ -2830,7 +2253,7 @@ Q_MOFcum=cumsum(Q_MOF);
             
             clear sub
             
-% 8.4 Analyse with focus on GCM & interannual variability 
+% 9.4 Analyse with focus on GCM & interannual variability 
 % -----------------------------------------------------------------------     
 % stats for all GCMs & different years together (historical set excluded)
     Q_MTBIOFyearstats=NaN(5,4);
@@ -2936,7 +2359,7 @@ f4=figure('name','Median yearly discharge changes- GCM&year variation');% boxplo
         linkaxes(sub,'y')  
         clear sub
         
-% 8.5 Analyse probabilities with cumulative distribution function  
+% 9.5 Analyse probabilities with cumulative distribution function  
 % -----------------------------------------------------------------------
 % normality check 
 [notnormalTF,~]=NormalityCheck(Q_MTFyear2,'lillie',0.05);
@@ -3131,7 +2554,6 @@ f6=figure('name','Yearly discharge emperical CDF');
     title('')
     set(gca,'box','off')
     grid off
-    
   
  clear xrangeTF xrangeBF xrangeIF xrangeOF   P i
  
@@ -3175,8 +2597,7 @@ f6=figure('name','Yearly discharge emperical CDF');
     set(gca,'box','off')
     grid off   
     
- %PUBLICATION FIGURE    
- f9=figure('name','Yearly and seasonal discharge emperical CDF');
+ f9=figure('name','Yearly and seasonal discharge emperical CDF'); %PUBLICATION FIGURE
     subplot(2,2,1,'fontsize',10);
     for i=1:nsc
         P(i)=cdfplot(Q_MTFyear2(:,i));
@@ -3217,7 +2638,8 @@ f6=figure('name','Yearly discharge emperical CDF');
     text(5,0.95,'(c)','HorizontalAlignment','left')
     
     clear P i 
-% 8.6 save results (vizualizations)
+    
+% 9.6 save results (vizualizations)
 % ----------------------------------------------------------------------- 
 filename='Discharge - cumulative';
 filename=fullfile(DatapathScenOut,filename);
@@ -3240,10 +2662,10 @@ filename=fullfile(DatapathScenOut,filename);
 savefig(f7,filename)
 
 clear filename 
-clear f1 f2 f3 f4 f5 f6 f7
+clear f1 f2 f3 f4 f5 f6 f7 f8 f9
 
 %% -----------------------------------------------------------------------
-% 9. MONTHLY DISCHARGE IMPACT (Only QTF) 
+% 10. MONTHLY DISCHARGE IMPACT (Only QTF) 
 %------------------------------------------------------------------------
 
 % reorganize data in one matrix   
@@ -3384,108 +2806,7 @@ f1= figure('name','Median monthly discharge changes');
             set(gca,'box','off')
             
             clear sub i 
-         
-
- f2= figure('name','Median monthly discharge changes - only future changes');
-            %sub(1)=subplot(1,12,1,'fontsize',8); 
-            sub(1)=subplot('Position',[0.064, 0.15, 0.06,0.80],'fontsize',8); 
-            boxplot(Q_MTFmonthDeltastats{2,1}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
-            line(xlim,[0,0],'Color','k','LineStyle','--')
-            ylabel('Median monthly flow change (%)','fontsize',10)
-            xlabel('1')
-            axis([xlim, -60,80])
-            set(gca,'XTick',[])
-            set(gca,'box','off')
-            
-            %sub(2)=subplot(1,12,2,'fontsize',8);             
-            sub(2)=subplot('Position',[0.16, 0.15, 0.03,0.8],'fontsize',8); 
-            boxplot(Q_MTFmonthDeltastats{2,2}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
-            line(xlim,[0,0],'Color','k','LineStyle','--')
-            xlabel('2')           
-            set(gca,'YTick',[],'XTick',[])
-            set(gca,'box','off')
-            
-            %sub(3)=subplot(1,12,3,'fontsize',8);           
-            sub(3)=subplot('Position',[0.23, 0.15, 0.03,0.8],'fontsize',8); 
-            boxplot(Q_MTFmonthDeltastats{2,3}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
-            line(xlim,[0,0],'Color','k','LineStyle','--')
-            xlabel('3')
-            set(gca,'YTick',[],'XTick',[])
-            set(gca,'box','off')
-            
-            %sub(4)=subplot(1,12,4,'fontsize',8);           
-            sub(4)=subplot('Position',[0.29, 0.15, 0.03,0.8],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,4}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
-            line(xlim,[0,0],'Color','k','LineStyle','--')
-            xlabel('4')
-            set(gca,'YTick',[],'XTick',[])
-            set(gca,'box','off')
-
-            %sub(5)=subplot(1,12,5,'fontsize',810);           
-            sub(5)=subplot('Position',[0.36, 0.15, 0.03,0.8],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,5}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
-            line(xlim,[0,0],'Color','k','LineStyle','--')
-            xlabel('5')
-             set(gca,'YTick',[],'XTick',[])
-            set(gca,'box','off')
-            
-            %sub(6)=subplot(1,12,6,'fontsize',8);           
-            sub(6)=subplot('Position',[0.43, 0.15, 0.03,0.8],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,6}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
-            line(xlim,[0,0],'Color','k','LineStyle','--')
-            xlabel('6')
-            set(gca,'YTick',[],'XTick',[])
-            set(gca,'box','off')
-            
-            %sub(7)=subplot(1,12,7,'fontsize',8);          
-            sub(7)=subplot('Position',[0.50, 0.15, 0.03,0.8],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,7}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
-            line(xlim,[0,0],'Color','k','LineStyle','--')
-            xlabel('7')
-            set(gca,'YTick',[],'XTick',[])
-            set(gca,'box','off')
-          
-            %sub(8)=subplot(1,12,8,'fontsize',8);  
-            sub(8)=subplot('Position',[0.57, 0.15, 0.03,0.8],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,8}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
-            line(xlim,[0,0],'Color','k','LineStyle','--')
-            xlabel('8')
-            set(gca,'YTick',[],'XTick',[])
-            set(gca,'box','off')
-          
-            %sub(9)=subplot(1,12,9,'fontsize',8);  
-            sub(9)=subplot('Position',[0.64, 0.15, 0.03,0.8],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,9}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
-            line(xlim,[0,0],'Color','k','LineStyle','--')
-            xlabel('9')
-            set(gca,'YTick',[],'XTick',[])
-            set(gca,'box','off')
-              
-            %sub(10)=subplot(1,12,10,'fontsize',8);  
-            sub(10)=subplot('Position',[0.71, 0.15, 0.03,0.8],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,10}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
-            line(xlim,[0,0],'Color','k','LineStyle','--')
-            xlabel('10')  
-            set(gca,'YTick',[],'XTick',[])
-            set(gca,'box','off')
-          
-            %sub(11)=subplot(1,12,11,'fontsize',8);  
-            sub(11)=subplot('Position',[0.78, 0.15, 0.03,0.8],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,11}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
-            line(xlim,[0,0],'Color','k','LineStyle','--')
-            xlabel('11')
-            set(gca,'YTick',[],'XTick',[])
-            set(gca,'box','off')
-          
-            %sub(12)=subplot(1,12,12,'fontsize',8); 
-            sub(12)=subplot('Position',[0.85, 0.15, 0.03,0.8],'fontsize',10); 
-            boxplot(Q_MTFmonthDeltastats{2,12}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
-            line(xlim,[0,0],'Color','k','LineStyle','--')
-            xlabel('12')
-            set(gca,'YTick',[],'XTick',[])
-            set(gca,'box','off')     
-            linkaxes(sub,'y')% link y axis of different plots (so that they change simultaneously
-      
+               
 % save vizualization
 filename='Monthly Discharge - median changes GCM boxlplots';
 filename=fullfile(DatapathScenOut,filename);
@@ -3493,523 +2814,17 @@ savefig(f1,filename)
             
 clear filename f1
 
+
 %% -----------------------------------------------------------------------
-% % 9. CATCHMENT TRANSPIRATION COEFFICIENT (KC) IMPACT  (NOT TESTED YET!!!)
-% %------------------------------------------------------------------------
-% 
-% % 9.1 KC calculation  
-% % -----------------------------------------------------------------------
-% 
-%     Kc=ETaCatch./ETo;    % Kc but water content relation not filtered out
-%     Kc(isnan(Kc))=1;                     % replace NaN (0/0) by 1
-%     Kc2=Kc./Wr2Catch ;   % Kc with water content effect filtered out
-%       
-% 
-% % 9.2 aggregation of results (subtotals and cumulative) 
-% % ----------------------------------------------------------------------- 
-% 
-% % subtotals
-% [Kcyear,Kcmonth,~,Kcseason,Kcymonth,~,Kcyseason]=ClimSubtotal(Date(:,1),Kc,'sum');
-% [Kc2year,Kc2month,~,Kc2season,Kc2ymonth,~,Kc2yseason]=ClimSubtotal(Date(:,1),Kc2,'sum');
-% [Wr2Catchyear,Wr2Catchmonth,~,Wr2Catchseason,Wr2Catchymonth,~,Wr2Catchyseason]=ClimSubtotal(Date(:,1),Wr2Catch,'sum');
-% 
-% % 9.3 Yearly analysis
-% % ----------------------------------------------------------------------- 
-% % stats per GCM over different years 
-%     Kcyearstats=NaN(5,nsc);
-%     Kc2yearstats=NaN(5,nsc);
-%     Wr2Cyearstats=NaN(5,nsc);        
-%     
-%     %DOES NOT WORK YET (CAN NOT TAKE MEAN FROM STRUCTURE)
-%     Kcyearstats(1,1:nsc)=mean(Kcyear(:,1:nsc));
-%     Kcyearstats(2,1:nsc)=median(Kcyear(:,1:nsc));
-%     Kcyearstats(3,1:nsc)=std(Kcyear(:,1:nsc));
-%     Kcyearstats(4,1:nsc)=min(Kcyear(:,1:nsc));
-%     Kcyearstats(5,1:nsc)=max(Kcyear(:,1:nsc));
-%     
-%     Kc2yearstats(1,1:nsc)=mean(Kc2year(:,1:nsc));
-%     Kc2yearstats(2,1:nsc)=median(Kc2year(:,1:nsc));
-%     Kc2yearstats(3,1:nsc)=std(Kc2year(:,1:nsc));
-%     Kc2yearstats(4,1:nsc)=min(Kc2year(:,1:nsc));
-%     Kc2yearstats(5,1:nsc)=max(Kc2year(:,1:nsc));
-%     
-%     Wr2Cyearstats(1,1:nsc)=mean(Wr2Catchyear(:,1:nsc));
-%     Wr2Cyearstats(2,1:nsc)=median(Wr2Catchyear(:,1:nsc));
-%     Wr2Cyearstats(3,1:nsc)=std(Wr2Catchyear(:,1:nsc));
-%     Wr2Cyearstats(4,1:nsc)=min(Wr2Catchyear(:,1:nsc));
-%     Wr2Cyearstats(5,1:nsc)=max(Wr2Catchyear(:,1:nsc));       
-%     
-% %  Changes of mean and median (as compared to historical mean and median) for each GCM
-%     KcyearDeltastats=NaN(2,nsc);
-%     Kc2yearDeltastats=NaN(2,nsc);
-%     Wr2CyearDeltastats=NaN(2,nsc);
-%     
-%     for stat=1:2
-%         KcyearDeltastats(stat,1:nsc)=(Kcyearstats(stat,1:nsc)-Kcyearstats(stat,1))./Kcyearstats(stat,1);
-%         Kc2yearDeltastats(stat,1:nsc)=(Kc2yearstats(stat,1:nsc)-Kc2yearstats(stat,1))./Kc2yearstats(stat,1);
-%         Wr2CyearDeltastats(stat,1:nsc)=(Wr2Cyearstats(stat,1:nsc)-Wr2Cyearstats(stat,1))./Wr2Cyearstats(stat,1);
-%     end
-% 
-%     clear stat
-% % vizualization 
-%    
-%  f1=figure('name','Median yearly Kc changes - GCM variation');
-%         sub(1)=subplot(1,4,1:2,'fontsize',10);
-%         boxplot(KcyearDeltastats(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%         line(xlim,[0,0],'Color','k','LineStyle','--')
-%         ylabel('Median Kc change (%)')
-%         title('Kc')
-%         axis([xlim, -10,30])
-%         set(gca,'box','off')
-% 
-%         sub(2)=subplot(1,4,3,'fontsize',10);
-%         boxplot(Kc2yearDeltastats(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%         line(xlim,[0,0],'Color','k','LineStyle','--')
-%         title('Kc corrected')
-%         set(gca,'box','off','YTick',[])
-% 
-%         sub(3)=subplot(1,4,4,'fontsize',10);
-%         boxplot(Wr2CyearDeltastats(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%         line(xlim,[0,0],'Color','k','LineStyle','--')
-%         title('Soil water content')
-%         set(gca,'box','off','YTick',[])
-% 
-%         linkaxes(sub,'y')   
-%         clear sub
-%                
-% % stats for all GCMs & different years together (historical set excluded)
-%     Kcallyearstats=NaN(5,3);
-%     
-%     Kcyearfut=Kcyear(:,2:nsc);%select all columns of future
-%     Kc2yearfut=Kc2year(:,2:nsc);
-%     Wr2Catchyearfut=Wr2Catchyear(:,2:nsc);
-%     
-%     Kcallyearstats(1,1)=mean(Kcyearfut(:));
-%     Kcallyearstats(2,1)=median(Kcyearfut(:));
-%     Kcallyearstats(3,1)=std(Kcyearfut(:));
-%     Kcallyearstats(4,1)=min(Kcyearfut(:));
-%     Kcallyearstats(5,1)=max(Kcyearfut(:));
-%     
-%     Kcallyearstats(1,2)=mean(Kc2yearfut(:));
-%     Kcallyearstats(2,2)=median(Kc2yearfut(:));
-%     Kcallyearstats(3,2)=std(Kc2yearfut(:));
-%     Kcallyearstats(4,2)=min(Kc2yearfut(:));
-%     Kcallyearstats(5,2)=max(Kc2yearfut(:));
-%     
-%     Kcallyearstats(1,3)=mean(Wr2Catchyearfut(:));
-%     Kcallyearstats(2,3)=median(Wr2Catchyearfut(:));
-%     Kcallyearstats(3,3)=std(Wr2Catchyearfut(:));
-%     Kcallyearstats(4,3)=min(Wr2Catchyearfut(:));
-%     Kcallyearstats(5,3)=max(Wr2Catchyearfut(:));       
-%        
-%     clear Kcyearfut Kc2yearfut Wr2Catchyearfut
-% 
-% % Change of yearly discharge as compared to historical median for all years
-% 
-%     KcyearDelta=(Kcyear-Kcyearstats(2,1))./Kcyearstats(2,1);
-%     Kc2yearDelta=(Kc2year-Kc2yearstats(2,1))./Kc2yearstats(2,1);
-%     Wr2CyearDelta=(Wr2Catchyear-Wr2Cyearstats(2,1))./Wr2Cyearstats(2,1);
-% 
-% % vizualization                  
-% 
-% f2=figure('name','Median yearly Kc changes- GCM&year variation');% boxplot = variation over different GCMs & over 30 different year)   
-% 
-%         sub(1)=subplot(1,4,1:2,'fontsize',10);
-%         boxplot(KcyearDelta(:,1:nsc)*100,groupmat(1,1:nsc),'grouporder',groupnames2,'labels',groupnames2)
-%         line(xlim,[0,0],'Color','k','LineStyle','--')
-%         ylabel('Annual change from historical median (%)')
-%         title('Kc')
-%         axis([xlim, -100,100])
-%         set(gca,'box','off')
-% 
-%         sub(2)=subplot(1,4,3,'fontsize',10);
-%         boxplot(Kc2yearDelta(:,1:nsc)*100,groupmat(1,1:nsc),'grouporder',groupnames2,'labels',groupnames2)
-%         line(xlim,[0,0],'Color','k','LineStyle','--')
-%         title('Kc corrected')
-%         set(gca,'box','off','YTick',[])
-% 
-%         sub(3)=subplot(1,4,4,'fontsize',10);
-%         boxplot(Wr2CyearDelta(:,1:nsc)*100,groupmat(1,1:nsc),'grouporder',groupnames2,'labels',groupnames2)
-%         line(xlim,[0,0],'Color','k','LineStyle','--')
-%         title('Soil water content')
-%         set(gca,'box','off','YTick',[])
-% 
-%         linkaxes(sub,'y')  
-%         clear sub
-%         
-% % 9.4 Monthly analysis 
-% % -----------------------------------------------------------------------  
-% 
-% % reorganize data in one matrix   
-%     Kcymonth2=cell(1,12);
-%     Kc2ymonth2=cell(1,12);
-%     Wr2Cymonth2=cell(1,12);
-% 
-%     for m=1:12
-%         mindex=find(Kcymonth{1,1}(:,2)==m);
-%         for sc =1:nsc
-%         Kcymonth2{1,m}(:,sc)=Kcymonth{1,sc}(mindex,3);
-%         Kc2ymonth2{1,m}(:,sc)=Kc2ymonth{1,sc}(mindex,3);
-%         Wr2Cymonth2{1,m}(:,sc)=Wr2Cymonth{1,sc}(mindex,3);
-%         end
-%     end
-%     clear m 
-%     
-% % stats for each month and each scenario
-%     Kcmonthstats=cell(2,12);
-%     Kcmonthstats(1,1:12)={'jan','febr','march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'};
-%     
-%     Kc2monthstats=cell(2,12);
-%     Kc2monthstats(1,1:12)={'jan','febr','march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'};
-%     
-%     Wr2Cmonthstats=cell(2,12);
-%     Wr2Cmonthstats(1,1:12)={'jan','febr','march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'};
-%     
-%     for m=1:12 
-%         Kcmonthstats{2,m}(1,1:nsc)=mean(Kcymonth2{1,m}(:,1:nsc));
-%         Kcmonthstats{2,m}(2,1:nsc)=median(Kcymonth2{1,m}(:,1:nsc));
-%         Kcmonthstats{2,m}(3,1:nsc)=std(Kcymonth2{1,m}(:,1:nsc));
-%         Kcmonthstats{2,m}(4,1:nsc)=min(Kcymonth2{1,m}(:,1:nsc));
-%         Kcmonthstats{2,m}(5,1:nsc)=max(Kcymonth2{1,m}(:,1:nsc));
-%         
-%         Kc2monthstats{2,m}(1,1:nsc)=mean(Kc2ymonth2{1,m}(:,1:nsc));
-%         Kc2monthstats{2,m}(2,1:nsc)=median(Kc2ymonth2{1,m}(:,1:nsc));
-%         Kc2monthstats{2,m}(3,1:nsc)=std(Kc2ymonth2{1,m}(:,1:nsc));
-%         Kc2monthstats{2,m}(4,1:nsc)=min(Kc2ymonth2{1,m}(:,1:nsc));
-%         Kc2monthstats{2,m}(5,1:nsc)=max(Kc2ymonth2{1,m}(:,1:nsc));
-%         
-%         Wr2Cmonthstats{2,m}(1,1:nsc)=mean(Wr2Cymonth2{1,m}(:,1:nsc));
-%         Wr2Cmonthstats{2,m}(2,1:nsc)=median(Wr2Cymonth2{1,m}(:,1:nsc));
-%         Wr2Cmonthstats{2,m}(3,1:nsc)=std(Wr2Cymonth2{1,m}(:,1:nsc));
-%         Wr2Cmonthstats{2,m}(4,1:nsc)=min(Wr2Cymonth2{1,m}(:,1:nsc));
-%         Wr2Cmonthstats{2,m}(5,1:nsc)=max(Wr2Cymonth2{1,m}(:,1:nsc));
-%     end
-%     
-% %  Mean changes of statistics (mean and median)for each month and each
-% %  scenario
-%     KcmonthDeltastats=cell(2,12);
-%     KcmonthDeltastats(1,1:12)=Kcmonthstats(1,1:12);
-%    
-%     for m=1:12 
-%         for stat=1:2
-%             KcmonthDeltastats{2,m}(stat,1:nsc)=(Kcmonthstats{2,m}(stat,1:nsc)-Kcmonthstats{2,m}(stat,1))./Kcmonthstats{2,m}(stat,1);
-%             Kc2monthDeltastats{2,m}(stat,1:nsc)=(Kc2monthstats{2,m}(stat,1:nsc)-Kc2monthstats{2,m}(stat,1))./Kc2monthstats{2,m}(stat,1);
-%             Wr2CmonthDeltastats{2,m}(stat,1:nsc)=(Wr2Cmonthstats{2,m}(stat,1:nsc)-Wr2Cmonthstats{2,m}(stat,1))./Wr2Cmonthstats{2,m}(stat,1);
-%        end
-%     end
-%     clear m stat
-% 
-% % vizualization (boxplot= variation over different GCMs)     
-%     figure('name','Median monthly Kc changes')
-%             sub(1)=subplot('Position',[0.05, 0.4, 0.055,0.55],'fontsize',10); 
-%             boxplot(KcmonthDeltastats{2,1}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             ylabel('Median monthly Kc change (%)')
-%             xlabel('January')
-%             axis([xlim, -60,60])
-%             set(gca,'XTick',[])
-%             set(gca,'box','off')
-%             
-%             sub(2)=subplot('Position',[0.16, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(KcmonthDeltastats{2,2}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('February')           
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%             
-%             sub(3)=subplot('Position',[0.2208, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(KcmonthDeltastats{2,3}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('March')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%             
-%             sub(4)=subplot('Position',[0.28, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(KcmonthDeltastats{2,4}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('April')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-% 
-%             sub(5)=subplot('Position',[0.3355, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(KcmonthDeltastats{2,5}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('May')
-%              set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%             
-%             sub(6)=subplot('Position',[0.401, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(KcmonthDeltastats{2,6}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('June')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%             
-%             title('Changes of median monthly Kc')            
-%             sub(7)=subplot('Position',[0.46, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(KcmonthDeltastats{2,7}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('July')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%           
-%             sub(8)=subplot('Position',[0.525, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(KcmonthDeltastats{2,8}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('August')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%           
-%             sub(9)=subplot('Position',[0.587, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(KcmonthDeltastats{2,9}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('September')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%               
-%             sub(10)=subplot('Position',[0.64, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(KcmonthDeltastats{2,10}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('October')  
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%           
-%             sub(11)=subplot('Position',[0.725, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(KcmonthDeltastats{2,11}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('November')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%           
-%             sub(12)=subplot('Position',[0.785, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(KcmonthDeltastats{2,12}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('December')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')     
-%             linkaxes(sub,'y')% link y axis of different plots (so that they change simultaneously
-%             
-%             subplot('Position',[0.06, 0.1, 0.76,0.2],'fontsize',12);
-%                 for i=1:12
-%                 HistValue(i,1)=Kcmonthstats{2,i}(1,2);
-%                 end
-%             bar(1:12,HistValue)
-%             ylabel('Median monthly Kc(mm/mm)','fontsize',10)
-%             axis([0.5,12.5, ylim])
-%             set(gca,'XTick',1:12)
-%             set(gca,'box','off')
-%             clear sub i 
-%             
-%      figure('name','Median monthly Kc2 changes')
-%             sub(1)=subplot('Position',[0.05, 0.4, 0.055,0.55],'fontsize',10); 
-%             boxplot(Kc2monthDeltastats{2,1}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             ylabel('Median monthly Kc2 change (%)')
-%             xlabel('January')
-%             axis([xlim, -60,60])
-%             set(gca,'XTick',[])
-%             set(gca,'box','off')
-%             
-%             sub(2)=subplot('Position',[0.16, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Kc2monthDeltastats{2,2}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('February')           
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%             
-%             sub(3)=subplot('Position',[0.2208, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Kc2monthDeltastats{2,3}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('March')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%             
-%             sub(4)=subplot('Position',[0.28, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Kc2monthDeltastats{2,4}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('April')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-% 
-%             sub(5)=subplot('Position',[0.3355, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Kc2monthDeltastats{2,5}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('May')
-%              set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%             
-%             sub(6)=subplot('Position',[0.401, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Kc2monthDeltastats{2,6}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('June')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%             
-%             title('Changes of median monthly Kc2')            
-%             sub(7)=subplot('Position',[0.46, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Kc2monthDeltastats{2,7}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('July')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%           
-%             sub(8)=subplot('Position',[0.525, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Kc2monthDeltastats{2,8}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('August')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%           
-%             sub(9)=subplot('Position',[0.587, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Kc2monthDeltastats{2,9}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('September')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%               
-%             sub(10)=subplot('Position',[0.64, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Kc2monthDeltastats{2,10}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('October')  
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%           
-%             sub(11)=subplot('Position',[0.725, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Kc2monthDeltastats{2,11}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('November')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%           
-%             sub(12)=subplot('Position',[0.785, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Kc2monthDeltastats{2,12}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('December')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')     
-%             linkaxes(sub,'y')% link y axis of different plots (so that they change simultaneously
-%             
-%             subplot('Position',[0.06, 0.1, 0.76,0.2],'fontsize',12);
-%                 for i=1:12
-%                 HistValue(i,1)=Kc2monthstats{2,i}(1,2);
-%                 end
-%             bar(1:12,HistValue)
-%             ylabel('Median monthly Kc2(mm/mm)','fontsize',10)
-%             axis([0.5,12.5, ylim])
-%             set(gca,'XTick',1:12)
-%             set(gca,'box','off')  
-%             clear sub i 
-%             
-%    figure('name','Median monthly Wr2catch changes')
-%             sub(1)=subplot('Position',[0.05, 0.4, 0.055,0.55],'fontsize',10); 
-%             boxplot(Wr2CmonthDeltastats{2,1}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             ylabel('Median monthly Wr2C change (%)')
-%             xlabel('January')
-%             axis([xlim, -60,60])
-%             set(gca,'XTick',[])
-%             set(gca,'box','off')
-%             
-%             sub(2)=subplot('Position',[0.16, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Wr2CmonthDeltastats{2,2}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('February')           
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%             
-%             sub(3)=subplot('Position',[0.2208, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Wr2CmonthDeltastats{2,3}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('March')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%             
-%             sub(4)=subplot('Position',[0.28, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Wr2CmonthDeltastats{2,4}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('April')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-% 
-%             sub(5)=subplot('Position',[0.3355, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Wr2CmonthDeltastats{2,5}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('May')
-%              set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%             
-%             sub(6)=subplot('Position',[0.401, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Wr2CmonthDeltastats{2,6}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('June')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%             
-%             title('Changes of median monthly Wr2C')            
-%             sub(7)=subplot('Position',[0.46, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Wr2CmonthDeltastats{2,7}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('July')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%           
-%             sub(8)=subplot('Position',[0.525, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Wr2CmonthDeltastats{2,8}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('August')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%           
-%             sub(9)=subplot('Position',[0.587, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Wr2CmonthDeltastats{2,9}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('September')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%               
-%             sub(10)=subplot('Position',[0.64, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Wr2CmonthDeltastats{2,10}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('October')  
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%           
-%             sub(11)=subplot('Position',[0.725, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Wr2CmonthDeltastats{2,11}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('November')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')
-%           
-%             sub(12)=subplot('Position',[0.785, 0.4, 0.04,0.55],'fontsize',10); 
-%             boxplot(Wr2CmonthDeltastats{2,12}(1,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
-%             line(xlim,[0,0],'Color','k','LineStyle','--')
-%             xlabel('December')
-%             set(gca,'YTick',[],'XTick',[])
-%             set(gca,'box','off')     
-%             linkaxes(sub,'y')% link y axis of different plots (so that they change simultaneously
-%             
-%             subplot('Position',[0.06, 0.1, 0.76,0.2],'fontsize',12);
-%                 for i=1:12
-%                 HistValue(i,1)=Wr2Cmonthstats{2,i}(1,2);
-%                 end
-%             bar(1:12,HistValue)
-%             ylabel('Median monthly Wr2C(mm/mm)','fontsize',10)
-%             axis([0.5,12.5, ylim])
-%             set(gca,'XTick',1:12)
-%             set(gca,'box','off')  
-%             clear sub i 
-%                   
-%             
-%% -----------------------------------------------------------------------
-% 10. SUMMARY TABLES
-%------------------------------------------------------------------------
+% 11. SAVE SUMMARY TABLES
+%-------------------------------------------------------------------------
+
 xlname='SummaryTables.xlsx';
 filename = fullfile(DatapathScenOut,xlname);
 
-% 10.1 Summary of annual discharge 
+% 11.1 Summary of annual discharge 
 % -----------------------------------------------------------------------  
-%  median and relative changes to median
+%  Baseline median and relative changes to median
 
 letters = 'AGMSY';
 letters2='BHNTZ';
@@ -4031,15 +2846,17 @@ for g=1:ngroup
     xlswrite(filename,HeadersRows,'Discharge',[letters(g) num2str(3)]);
     xlswrite(filename,DataMatrix,'Discharge',[letters2(g) num2str(3)]);
 
-    gindex=[];
+    clear gindex
 
 end
 
 clear HeadersColumns HeadersRows
 clear Row1 Row2 Row3 Row4 DataMatrix
+clear g gindex letters letters2
 
-% 10.2 Summary of MOnthly total flow changes
+% 11.2 Summary of monthly total flow 
 % ----------------------------------------------------------------------- 
+%  Relative changes to baseline median
 
 xlswrite(filename,groupnames2,'QTFmonth','B1');
 
@@ -4054,18 +2871,13 @@ for m=1:12
 
 end
 
-
 clear m g gindex DataMatrix 
 
-
-
-
-
-% 10.2 Summary of Crop development and production parameters
+% 11.3 Summary of Crop development and production parameters
 % -----------------------------------------------------------------------     
-% median and absolute changes to median
+% Baseline median and absolute changes to median
 
-name={'Maize','WinterWheat','Potato','Sugarbeet','Pea'};
+name={'Maize','Winter wheat','Potato','Sugar beet','Peas'};
 HeadersColumns={'Historical median','Future median change - min','Future median change - median','Future median change - max'};
 
 letters = 'AGMSY';
@@ -4093,16 +2905,18 @@ for g=1:ngroup
         xlswrite(filename,DataMatrix,'CropVar',[letters2(g) num2str(row+1)]);
         row=row+6  ;
     end
-    gindex=[];
+    clear gindex
 end
 
 clear HeadersColumns HeadersRows
 clear row1 row2 row3 row4 row 5 DataMatrix row
 clear c g letters letters2 name gindex cindex
 
-% 10.3 Summary of LGP gap
+% 11.4 Summary of LGP gap
 % ----------------------------------------------------------------------- 
-name={'Maize','WinterWheat','Potato','Sugarbeet','Pea'};
+% Baseline median and future median
+
+name={'Maize','Winter wheat','Potato','Sugar beet','Peas'};
 
 xlswrite(filename,groupnames2,'LGPgap','B1');
 
@@ -4122,11 +2936,14 @@ end
 
 
 clear c cindex g gindex DataMatrix 
+clear name 
 
-
-% 10.4 Summary of CV yield and WPET
+% 11.5 Summary of CV yield, WPET and flow
 % ----------------------------------------------------------------------- 
-name={'Maize','WinterWheat','Potato','Sugarbeet','Pea'};
+% Baseline and future median
+
+%YIELD
+name={'Maize','Winter wheat','Potato','Sugar beet','Peas'};
 
 xlswrite(filename,{'Yield'},'CV','A1');
 xlswrite(filename,groupnames2,'CV','B1');
@@ -4147,6 +2964,7 @@ end
 
 clear DataMatrix c g gindex cindex 
 
+%WPET
 xlswrite(filename,{'WPET'},'CV','A8');
 xlswrite(filename,groupnames2,'CV','B8');
 for c=1:length(name)
@@ -4164,6 +2982,7 @@ end
 
 clear DataMatrix c g gindex cindex 
 
+%FLOW
 xlswrite(filename,{'FLOW'},'CV','A15');
 xlswrite(filename,groupnames2,'CV','B15');
 xlswrite(filename,{'QTF';'QBF';'QIF';'QOF'},'CV','A16');
@@ -4185,15 +3004,18 @@ row3=[];
     
     xlswrite(filename,DataMatrix,'CV','B16');
 
-clear c cindex g gindex DataMatrix row1 row2 row3 row4
+clear c cindex g gindex DataMatrix 
+clear row1 row2 row3 row4
+clear name
 
-% 10.5 Summary of variability yield and WPET
+% 11.6 Summary of variability (range) of yield, WPET and flow
 % ----------------------------------------------------------------------- 
-name={'Maize','WinterWheat','Potato','Sugarbeet','Pea'};
+% Baseline and future median
+name={'Maize','Winter wheat','Potato','Sugar beet','Peas'};
 
+%YIELD
 xlswrite(filename,{'Yield'},'range','A1');
 xlswrite(filename,groupnames2,'range','B1');
-
 
 for c=1:length(name)
     cindex=find(strcmp(Cropnames(1,1:ncrop),name{1,c})==1);
@@ -4210,6 +3032,7 @@ end
 
 clear DataMatrix c g gindex cindex 
 
+%WPET
 xlswrite(filename,{'WPET'},'range','A8');
 xlswrite(filename,groupnames2,'range','B8');
 for c=1:length(name)
@@ -4226,6 +3049,7 @@ for c=1:length(name)
 end
 clear DataMatrix c g gindex cindex 
 
+%FLOW
 xlswrite(filename,{'FLOW'},'range','A15');
 xlswrite(filename,groupnames2,'range','B15');
 xlswrite(filename,{'QTF';'QBF';'QIF';'QOF'},'range','A16');
@@ -4247,122 +3071,800 @@ row3=[];
     
     xlswrite(filename,DataMatrix,'range','B16');
 
+clear  c cindex g gindex DataMatrix 
+clear row1 row2 row3 row4
 
+clear filename
 
-clear filename c cindex g gindex DataMatrix 
-% %% -----------------------------------------------------------------------
-% % % 11. EXTRA: DETERMINATION OF EXTENSION OF GDD 
-% % %------------------------------------------------------------------------
-% 
-% % 11.1 Median maturity and sowing date per group
-% % ----------------------------------------------------------------------- 
-% 
-MATactstatsg(1,1:ncrop) =MATactstats(1,1:ncrop); 
-MATpotstatsg(1,1:ncrop) =MATpotstats(1,1:ncrop); 
-sowingstatsg(1,1:ncrop) =MATactstats(1,1:ncrop); 
+%% -----------------------------------------------------------------------
+% 12. PUBLICATION FIGURES
+%-------------------------------------------------------------------------
+close all 
 
-for c=1:ncrop
+% FIGURE 2: BOXPLOT ANNUAL FLOW & SUBFLOW CHANGES
+%-------------------------------------------------------------------------
+f2=figure('name','Figure 2 - Annual Flow boxplot');
+    sub(1)=subplot(1,4,1,'fontsize',10);
+    boxplot(Q_MTFyearDeltastats(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup', groupnames,'colors',boxplotcolor,'symbol','+');
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    ylabel('Median annual flow change (%)')
+    title('Total flow')
+    axis([xlim, -15,40])
+    set(gca,'box','off')
+
+    sub(2)=subplot(1,4,2,'fontsize',10);
+    boxplot(Q_MBFyearDeltastats(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup', groupnames,'colors',boxplotcolor,'symbol','+');
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    title('Baseflow')
+    set(gca,'box','off','YTick',[])
+
+    sub(3)=subplot(1,4,3,'fontsize',10);
+    boxplot(Q_MIFyearDeltastats(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup', groupnames,'colors',boxplotcolor,'symbol','+');
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    title('Interflow')
+    set(gca,'box','off','YTick',[])
+
+    sub(4)=subplot(1,4,4,'fontsize',10);
+    boxplot(Q_MOFyearDeltastats(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup', groupnames,'colors',boxplotcolor,'symbol','+');
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    title('Overland flow')
+    set(gca,'box','off','YTick',[])
+
+    linkaxes(sub,'y')      
+
+    clear sub
+
+% FIGURE 3: CDF PLOTS ANNUAL FLOW & SUBFLOWS
+%-------------------------------------------------------------------------
+f3=figure('name','Figure 3 - Annual flow CDF');
+    subplot(2,2,1,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Q_MTFyear2(:,i));
+        hold on 
+    end
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual total flow (mm/year)','fontsize',8);
+    title('Total flow')
+    set(gca,'box','off')
+    grid off
+
+    subplot(2,2,2,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Q_MBFyear2(:,i));
+        hold on 
+    end
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual baseflow (mm/year)','fontsize',8);
+    title('Baseflow')
+    set(gca,'box','off') 
+    grid off
+    
+    subplot(2,2,3,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Q_MIFyear2(:,i));
+        hold on 
+    end  
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual interflow (mm/year)','fontsize',8);
+    title('Interflow')
+    set(gca,'box','off')
+    grid off
+    
+    subplot(2,2,4,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Q_MOFyear2(:,i));
+        hold on 
+    end    
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual overland flow (mm/year)','fontsize',8);
+    title('Overland flow')
+    set(gca,'box','off')
+    grid off
+    
+    clear P i
+
+% FIGURE 4: BOXPLOT MONTHLY TOTAL FLOW CHANGES
+%-------------------------------------------------------------------------
+f4=figure('name','Figure 4 - Montlhly flow boxplot');
+    sub(1)=subplot('Position',[0.064, 0.15, 0.06,0.80],'fontsize',8); 
+    boxplot(Q_MTFmonthDeltastats{2,1}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    ylabel('Median monthly flow change (%)','fontsize',10)
+    xlabel('1')
+    axis([xlim, -60,80])
+    set(gca,'XTick',[])
+    set(gca,'box','off')
+
+    sub(2)=subplot('Position',[0.16, 0.15, 0.03,0.8],'fontsize',8); 
+    boxplot(Q_MTFmonthDeltastats{2,2}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    xlabel('2')           
+    set(gca,'YTick',[],'XTick',[])
+    set(gca,'box','off')
+
+    sub(3)=subplot('Position',[0.23, 0.15, 0.03,0.8],'fontsize',8); 
+    boxplot(Q_MTFmonthDeltastats{2,3}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    xlabel('3')
+    set(gca,'YTick',[],'XTick',[])
+    set(gca,'box','off')
+
+    sub(4)=subplot('Position',[0.29, 0.15, 0.03,0.8],'fontsize',10); 
+    boxplot(Q_MTFmonthDeltastats{2,4}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    xlabel('4')
+    set(gca,'YTick',[],'XTick',[])
+    set(gca,'box','off')
+
+    sub(5)=subplot('Position',[0.36, 0.15, 0.03,0.8],'fontsize',10); 
+    boxplot(Q_MTFmonthDeltastats{2,5}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    xlabel('5')
+    set(gca,'YTick',[],'XTick',[])
+    set(gca,'box','off')
+
+    sub(6)=subplot('Position',[0.43, 0.15, 0.03,0.8],'fontsize',10); 
+    boxplot(Q_MTFmonthDeltastats{2,6}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    xlabel('6')
+    set(gca,'YTick',[],'XTick',[])
+    set(gca,'box','off')
+
+    sub(7)=subplot('Position',[0.50, 0.15, 0.03,0.8],'fontsize',10); 
+    boxplot(Q_MTFmonthDeltastats{2,7}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    xlabel('7')
+    set(gca,'YTick',[],'XTick',[])
+    set(gca,'box','off')
+
+    sub(8)=subplot('Position',[0.57, 0.15, 0.03,0.8],'fontsize',10); 
+    boxplot(Q_MTFmonthDeltastats{2,8}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    xlabel('8')
+    set(gca,'YTick',[],'XTick',[])
+    set(gca,'box','off')
+
+    sub(9)=subplot('Position',[0.64, 0.15, 0.03,0.8],'fontsize',10); 
+    boxplot(Q_MTFmonthDeltastats{2,9}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    xlabel('9')
+    set(gca,'YTick',[],'XTick',[])
+    set(gca,'box','off')
+
+    sub(10)=subplot('Position',[0.71, 0.15, 0.03,0.8],'fontsize',10); 
+    boxplot(Q_MTFmonthDeltastats{2,10}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    xlabel('10')  
+    set(gca,'YTick',[],'XTick',[])
+    set(gca,'box','off')
+
+    sub(11)=subplot('Position',[0.78, 0.15, 0.03,0.8],'fontsize',10); 
+    boxplot(Q_MTFmonthDeltastats{2,11}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    xlabel('11')
+    set(gca,'YTick',[],'XTick',[])
+    set(gca,'box','off')
+
+    sub(12)=subplot('Position',[0.85, 0.15, 0.03,0.8],'fontsize',10); 
+    boxplot(Q_MTFmonthDeltastats{2,12}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
+    line(xlim,[0,0],'Color','k','LineStyle','--')
+    xlabel('12')
+    set(gca,'YTick',[],'XTick',[])
+    set(gca,'box','off')  
+
+    linkaxes(sub,'y')
+    clear sub
+
+% FIGURE 5: BOXPLOT YIELD AND WPET CHANGES (per crop)
+%-------------------------------------------------------------------------
+figure('name','Figure 5 - Productivity boxplot');
+        sub(1)=subplot(2,5,1,'fontsize',10);
+        boxplot(YactDeltastats{2,maize}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        ylabel('Median yield change (%)')
+        axis([xlim, -20,40])
+        set(gca,'box','off')
+        title('Maize','fontsize',8)
+        
+        sub(2)=subplot(2,5,2,'fontsize',10);
+        boxplot(YactDeltastats{2,wwheat}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Winter wheat','fontsize',8)
+        
+        sub(3)=subplot(2,5,3,'fontsize',10);
+        boxplot(YactDeltastats{2,potato}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Potato','fontsize',8)
+        
+        sub(4)=subplot(2,5,4,'fontsize',10);
+        boxplot(YactDeltastats{2,sugarbeet}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Sugar beet','fontsize',8)
+        
+        sub(5)=subplot(2,5,5,'fontsize',10);
+        boxplot(YactDeltastats{2,pea}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+');
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Peas','fontsize',8)    
+
+        linkaxes(sub,'y')% link y axis of different plots (so that they change simultaneously
+        clear sub
+        
+        sub(1)=subplot(2,5,6,'fontsize',10);
+        boxplot(WPDeltastats{2,maize}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        h1=ylabel('Median WP_{ET} change (%)');
+        set(h1,'interpreter','tex')
+        axis([xlim, -10,70])
+        set(gca,'box','off')
+        
+        sub(2)=subplot(2,5,7,'fontsize',10);
+        boxplot(WPDeltastats{2,wwheat}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        
+        sub(3)=subplot(2,5,8,'fontsize',10);
+        boxplot(WPDeltastats{2,potato}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        
+        sub(4)=subplot(2,5,9,'fontsize',10);
+        boxplot(WPDeltastats{2,sugarbeet}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        
+        sub(5)=subplot(2,5,10,'fontsize',10);
+        boxplot(WPDeltastats{2,pea}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+
+        linkaxes(sub,'y')% link y axis of different plots (so that they change simultaneously
+        clear sub 
+
+% FIGURE 6: CDF PLOTS YIELD AND WPET (traditional man)
+%-------------------------------------------------------------------------
+figure('name','Figure 6 - Productivity CDF');
+    subplot(5,2,1,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Yact{2,maize}(:,i));
+        hold on 
+    end
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('','fontsize',8);
+    title('Maize')
+    set(gca,'box','off')
+    grid off
+
+    subplot(5,2,3,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Yact{2,wwheat}(:,i));
+        hold on 
+    end
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('','fontsize',8);
+    title('Winter wheat')
+    set(gca,'box','off') 
+    grid off
+    
+    subplot(5,2,5,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Yact{2,sugarbeet}(:,i));
+        hold on 
+    end  
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('','fontsize',8);
+    title('Sugar beet')
+    set(gca,'box','off')
+    grid off
+    
+    subplot(5,2,7,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Yact{2,potato}(:,i));
+        hold on 
+    end    
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('','fontsize',8);
+    title('Potato')
+    set(gca,'box','off')
+    grid off
+
+    subplot(5,2,9,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Yact{2,pea}(:,i));
+        hold on 
+    end    
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Seasonal yield (ton/ha)','fontsize',8);
+    title('Peas')
+    set(gca,'box','off')
+    grid off
+    
+    subplot(5,2,2,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(WP{2,maize}(:,i));
+        hold on 
+    end
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('','fontsize',8);
+    title('Maize')
+    set(gca,'box','off')
+    grid off
+
+    subplot(5,2,4,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(WP{2,wwheat}(:,i));
+        hold on 
+    end
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('','fontsize',8);
+    title('Winter wheat')
+    set(gca,'box','off') 
+    grid off
+    
+    subplot(5,2,6,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(WP{2,sugarbeet}(:,i));
+        hold on 
+    end  
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('','fontsize',8);
+    title('Sugar beet')
+    set(gca,'box','off')
+    grid off
+    
+    subplot(5,2,8,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(WP{2,potato}(:,i));
+        hold on 
+    end    
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('','fontsize',8);
+    title('Potato')
+    set(gca,'box','off')
+    grid off
+
+    subplot(5,2,10,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(WP{2,pea}(:,i));
+        hold on 
+    end    
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('WP_{ET} (kg/m³)','fontsize',8);
+    title('Peas')
+    set(gca,'box','off')
+    grid off
+     
+    clear P i
+  
+% FIGURE 7: SIMPLIFIED CDF PLOTS YIELD AND WPET (2 management trategies compared)
+%-------------------------------------------------------------------------
+figure('name','Figure 7 - Productivity CDF simple');
+    subplot(5,2,1,'fontsize',10);
     for g=1:ngroup2
-        n=groupnames2(g);
-        index=find(strcmp(groupmat,n)==1);
-        MATactstatsg{2,c}(1,g)=median(MATactstats{2,c}(2,index));
-        MATpotstatsg{2,c}(1,g)=median(MATpotstats{2,c}(2,index));
-        sowingstatsg{2,c}(1,g)=sowing{2,c}(1,index(1)); % no need to calculate median because always the same
+        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
+        P(g)=cdfplot(reshape(Yact{2,maize}(:,gindex),[],1));
+        hold on 
     end
-end
+    set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('','fontsize',8);
+    title('Maize')
+    set(gca,'box','off')
+    grid off
 
-clear c g index n
-% 
-% % 11.2 Calculate maturity target
-% % ----------------------------------------------------------------------- 
-% 
-% % OPTION 1 : TARGET = MEDIAN ACTUAL MATURITY DATE OF HISTORICAL TIMESERIES
-% 
-% maturitytarget(1,1:ncrop)=MATactstats(1,1:ncrop); 
-% 
-% indexhist=find(strcmp(groupnames2,'Hist')==1);
-% for c=1:ncrop
-%     targetdate=MATactstatsg{2,c}(1,indexhist);
-%     m=month(targetdate(1,1));
-%     d=day(targetdate(1,1));
-%     maturitytarget{2,c}=datetime(year(maturityact{2,c}(:,2)),m,d);
-% end
-% 
-% 
-% clear indexhist m d targetdate c
-% 
-% % 11.2 Calculate GDD between sowing and target
-% % ----------------------------------------------------------------------- 
-% indexfut=find(strcmp(groupmat,'Adapted')==1);
-% targetGDD=maturitytarget(1,1:ncrop); 
-% 
-% for sc=1:length(indexfut)
-%     for c=1:ncrop
-%         cropindex=find(strcmp(Crop(:,1),targetGDD{1,c})==1,1,'first'); %first landunit with this crop
-%         for y=1:length(maturitytarget{2,c})
-%             start=sowing{2,c}(y,indexfut(sc));
-%             startT=find(Date(:,indexfut(sc))==start);
-%             stop=maturitytarget{2,c}(y,1);
-%             stopT=find(Date(:,indexfut(sc))==stop);
-%             targetGDD{2,c}(y,indexfut(sc))=sum(GDD{2,indexfut(sc)}(startT:stopT,cropindex));
-%         end
-%     end
-% end
-% 
-% clear c sc y indexfut start startT stop stopT
-% 
-% %calculate stats
-% targetGDDstats(1,1:ncrop) =targetGDD(1,1:ncrop);
-% for c=1:ncrop
-%        targetGDDstats{2,c}(1,1:nsc)=nanmean(targetGDD{2,c}(:,1:nsc));
-%        targetGDDstats{2,c}(2,1:nsc)=nanmedian(targetGDD{2,c}(:,1:nsc));
-%        targetGDDstats{2,c}(3,1:nsc)=nanstd(targetGDD{2,c}(:,1:nsc));
-%        targetGDDstats{2,c}(4,1:nsc)=min(targetGDD{2,c}(:,1:nsc));
-%        targetGDDstats{2,c}(5,1:nsc)=max(targetGDD{2,c}(:,1:nsc));
-%         
-% end
-% 
-% clear c 
-% 
-% %calculate stats per group
-% targetGDDstatsg(1,1:ncrop) =targetGDD(1,1:ncrop); 
-% 
-% for c=1:ncrop
-%     for g=1:ngroup2
-%         n=groupnames2(g);
-%         index=find(strcmp(groupmat,n)==1);
-%         targetGDDstatsg{2,c}(1,g)=median(targetGDDstats{2,c}(2,index));
-%     end
-% end
-% 
-% clear c n g index
-
-% %% -----------------------------------------------------------------------
-% % % 12. FIND YEAR OF MEDIAN CROP YIELD 
-% % %------------------------------------------------------------------------
-
-name={'Maize','WinterWheat','Potato','Sugarbeet','Pea'};
-
-for sc=1:nsc
-year2(:,sc)=unique(Year(:,sc));
-end
-
-for c=1:length(name)
-    cindex=find(strcmp(Cropnames(1,1:ncrop),name{1,c})==1);
-    medianyear{1,c}=name{1,c};
-    
-    med=Yactstats{2,cindex}(2,1:nsc);
-    [a,~]=size(Yact{2,cindex}(:,1:nsc));
-    med=repmat(med,a,1);
-    dif=abs(Yact{2,cindex}(:,1:nsc)-med);
-    
-    for sc=1:nsc
-    y=find(dif(:,sc)==min(dif(:,sc)));
-    
-    medianyear{2,c}(:,sc)=min(year2(y,sc));
+    subplot(5,2,3,'fontsize',10);
+    for g=1:ngroup2
+        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
+        P(g)=cdfplot(reshape(Yact{2,wwheat}(:,gindex),[],1));
+        hold on 
     end
+    set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('','fontsize',8);
+    title('Winter wheat')
+    set(gca,'box','off') 
+    grid off
     
-    clear med dif a cindex sc y 
-end
+    subplot(5,2,5,'fontsize',10);
+    for g=1:ngroup2
+        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
+        P(g)=cdfplot(reshape(Yact{2,sugarbeet}(:,gindex),[],1));
+        hold on 
+    end  
+    set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('','fontsize',8);
+    title('Sugar beet')
+    set(gca,'box','off')
+    grid off
+    
+    subplot(5,2,7,'fontsize',10);
+    for g=1:ngroup2
+        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
+        P(g)=cdfplot(reshape(Yact{2,potato}(:,gindex),[],1));
+        hold on 
+    end    
+    set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('','fontsize',8);
+    title('Potato')
+    set(gca,'box','off')
+    grid off
 
-clear c year2 name 
+    subplot(5,2,9,'fontsize',10);
+    for g=1:ngroup2
+        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
+        P(g)=cdfplot(reshape(Yact{2,pea}(:,gindex),[],1));
+        hold on 
+    end    
+    set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Seasonal yield (ton/ha)','fontsize',8);
+    title('Peas')
+    set(gca,'box','off')
+    grid off
+       
+    subplot(5,2,2,'fontsize',10);
+    for g=1:ngroup2
+        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
+        P(g)=cdfplot(reshape(WP{2,maize}(:,gindex),[],1));
+        hold on 
+    end
+    set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('','fontsize',8);
+    title('Maize')
+    set(gca,'box','off')
+    grid off
+
+    subplot(5,2,4,'fontsize',10);
+    for g=1:ngroup2
+        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
+        P(g)=cdfplot(reshape(WP{2,wwheat}(:,gindex),[],1));
+        hold on 
+    end
+    set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('','fontsize',8);
+    title('Winter wheat')
+    set(gca,'box','off') 
+    grid off
+    
+    subplot(5,2,6,'fontsize',10);
+    for g=1:ngroup2
+        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
+        P(g)=cdfplot(reshape(WP{2,sugarbeet}(:,gindex),[],1));
+        hold on 
+    end  
+    set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('','fontsize',8);
+    title('Sugar beet')
+    set(gca,'box','off')
+    grid off
+    
+    subplot(5,2,8,'fontsize',10);
+    for g=1:ngroup2
+        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
+        P(g)=cdfplot(reshape(WP{2,potato}(:,gindex),[],1));
+        hold on 
+    end    
+    set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('','fontsize',8);
+    title('Potato')
+    set(gca,'box','off')
+    grid off
+
+    subplot(5,2,10,'fontsize',10);
+    for g=1:ngroup2
+        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
+        P(g)=cdfplot(reshape(WP{2,pea}(:,gindex),[],1));
+        hold on 
+    end    
+    set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('WP_{ET} (kg/m³)','fontsize',8);
+    title('Peas')
+    set(gca,'box','off')
+    grid off
+
+    clear P g gindex
+
+% FIGURE 8: BOXPLOT LGP (actual) CHANGES
+%-------------------------------------------------------------------------
+figure('name','Figure 8 - LGP boxplot'); 
+        sub(1)=subplot(1,5,1,'fontsize',10);
+        boxplot(LGPactDeltastats{2,maize}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup', groupnames,'colors',boxplotcolor);
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        a=xlim;
+        text(a(1,1),1,[num2str(LGPact{2,maize}(2,1)),' days'],'HorizontalAlignment','left','fontsize',7)
+        ylabel('Change of length of growing period (days)')
+        axis([xlim, -50,10])
+        set(gca,'box','off');
+        title('Maize')
+        
+        sub(2)=subplot(1,5,2,'fontsize',10);
+        boxplot(LGPactDeltastats{2,wwheat}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup', groupnames,'colors',boxplotcolor);
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        a=xlim;
+        text(a(1,1),1,[num2str(LGPact{2,wwheat}(2,1)),' days'],'HorizontalAlignment','left','fontsize',7)
+        set(gca,'box','off');
+        title('Winter wheat')
+        
+        sub(3)=subplot(1,5,3,'fontsize',10);
+        boxplot(LGPactDeltastats{2,potato}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup', groupnames,'colors',boxplotcolor);
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        a=xlim;
+        text(a(1,1),1,[num2str(LGPact{2,potato}(2,1),3),' days'],'HorizontalAlignment','left','fontsize',7)
+        set(gca,'box','off');
+        title('Potato')
+        
+        sub(4)=subplot(1,5,4,'fontsize',10);
+        boxplot(LGPactDeltastats{2,sugarbeet}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup', groupnames,'colors',boxplotcolor);
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        a=xlim;
+        text(a(1,1),1,[num2str(LGPact{2,sugarbeet}(2,1)),' days'],'HorizontalAlignment','left','fontsize',7)
+        set(gca,'box','off');
+        title('Sugar beet')
+        
+        sub(5)=subplot(1,5,5,'fontsize',10);
+        boxplot(LGPactDeltastats{2,pea}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup', groupnames,'colors',boxplotcolor);
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        a=xlim;
+        text(a(1,1),1,[num2str(LGPact{2,pea}(2,1)),' days'],'HorizontalAlignment','left','fontsize',7)
+        set(gca,'box','off');
+        title('Peas')    
+
+        linkaxes(sub,'y')
+        clear sub a
+
+% FIGURE 9: BOXPLOT DSI CHANGES 
+%-------------------------------------------------------------------------
+figure('name','Figure 9 - DSI boxplot');
+        sub(1)=subplot(1,5,1,'fontsize',10);
+        boxplot(DSIDeltastats{2,maize}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+');
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        ylabel('Median DSI change (%)','fontsize',8)
+        axis([xlim, -5,20])
+        set(gca,'box','off')
+        title('Maize','fontsize',8)
+        
+        sub(2)=subplot(1,5,2,'fontsize',10);
+        boxplot(DSIDeltastats{2,wwheat}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Winter wheat','fontsize',8)
+        
+        sub(3)=subplot(1,5,3,'fontsize',5);
+        boxplot(DSIDeltastats{2,potato}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Potato','fontsize',8)
+        
+        sub(4)=subplot(1,5,4,'fontsize',10);
+        boxplot(DSIDeltastats{2,sugarbeet}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Sugar beet','fontsize',8)
+        
+        sub(5)=subplot(1,5,5,'fontsize',10);
+        boxplot(DSIDeltastats{2,pea}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Peas','fontsize',8)    
+
+        linkaxes(sub,'y')% link y axis of different plots (so that they change simultaneously
+        clear sub
+
+% FIGURE 10: BOXPLOT TSI CHANGES
+%-------------------------------------------------------------------------        
+figure('name','Figure 10 - TSI boxplot');
+        sub(1)=subplot(1,5,1,'fontsize',10);
+        boxplot(TSIDeltastats{2,maize}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        ylabel('Median TSI change (%)','fontsize',8)
+        axis([xlim, -20,5])
+        set(gca,'box','off')
+        title('Maize')
+        
+        sub(2)=subplot(1,5,2,'fontsize',10);
+        boxplot(TSIDeltastats{2,wwheat}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Winter wheat')
+        
+        sub(3)=subplot(1,5,3,'fontsize',10);
+        boxplot(TSIDeltastats{2,potato}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Potato')
+        
+        sub(4)=subplot(1,5,4,'fontsize',10);
+        boxplot(TSIDeltastats{2,sugarbeet}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Sugar beet')
+        
+        sub(5)=subplot(1,5,5,'fontsize',10);
+        boxplot(TSIDeltastats{2,pea}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Peas')    
+
+        linkaxes(sub,'y')
+        clear sub
+
+% FIGURE 12: CDF PLOTS ANNUAL and SEASONAL TOTAL FLOW (with synthetic scenarios)
+%-------------------------------------------------------------------------
+figure('name','Figure 12 - Flow synth CDF'); %PUBLICATION FIGURE
+    subplot(2,2,1,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Q_MTFyear2(:,i));
+        hold on 
+    end
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Annual total flow (mm/year)','fontsize',8);
+    title(' ')
+    set(gca,'box','off')
+    grid off
+    text(5,0.95,'(a)','HorizontalAlignment','left')
+    
+    subplot(2,2,3,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Q_MTFyseason1(:,i));
+        hold on 
+    end
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Winter total flow (mm/season)','fontsize',8);
+    set(gca,'box','off')
+    title(' ')
+    grid off   
+    text(5,0.95,'(b)','HorizontalAlignment','left')
+    
+    subplot(2,2,4,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(Q_MTFyseason3(:,i));
+        hold on 
+    end
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('Summer total flow (mm/season)','fontsize',8);
+    set(gca,'box','off')
+    title(' ')
+    grid off   
+    text(5,0.95,'(c)','HorizontalAlignment','left')
+    
+    clear P i 
+
+% FIGURE 13: BOXPLOT YIELD CHANGES (with synthetic scenarios)
+%-------------------------------------------------------------------------
+figure('name','Figure 13 - Yield synth boxplot');
+        sub(1)=subplot(1,5,1,'fontsize',10);
+            gindex=find(strcmp(groupmat(1,1:nsc),'Ens')==1);
+            boxplot(YactDeltastats{2,maize}(2,gindex)*100,'colors',[0.6 0.6 0.6],'symbol','+');
+            ylabel('Median yield change (%)')
+            axis([xlim, -40,45])
+            set(gca,'box','off','XTickLabel',{' '})
+            title('Maize')
+            hold on
+            line(xlim,[0,0],'Color','k','LineStyle','-')
+            hold on
+            gindex=find(strcmp(groupmat(1,1:nsc),'Hs')==1);
+            line(xlim,[YactDeltastats{2,maize}(2,gindex)*100,YactDeltastats{2,maize}(2,gindex)*100],'Color','r','LineStyle','--')
+            hold on
+            gindex=find(strcmp(groupmat(1,1:nsc),'Hw')==1);
+            line(xlim,[YactDeltastats{2,maize}(2,gindex)*100,YactDeltastats{2,maize}(2,gindex)*100],'Color','r','LineStyle',':')
+            hold on
+            gindex=find(strcmp(groupmat(1,1:nsc),'L')==1);
+            line(xlim,[YactDeltastats{2,maize}(2,gindex)*100,YactDeltastats{2,maize}(2,gindex)*100],'Color','r','LineStyle','-.')        
+            hold on
+            gindex=find(strcmp(groupmat(1,1:nsc),'M')==1);
+            line(xlim,[YactDeltastats{2,maize}(2,gindex)*100,YactDeltastats{2,maize}(2,gindex)*100],'Color','r','LineStyle','-')
+
+        
+        sub(2)=subplot(1,5,2,'fontsize',10);
+            gindex=find(strcmp(groupmat(1,1:nsc),'Ens')==1);
+            boxplot(YactDeltastats{2,wwheat}(2,gindex)*100,'colors',[0.6 0.6 0.6],'symbol','+');
+            axis([xlim, min(YactDeltastats{2,wwheat}(2,:)*100)-5,max(YactDeltastats{2,wwheat}(2,:)*100)+5])
+            set(gca,'box','off','XTickLabel',{' '},'YTickLabel',{' '})
+            title('Winter wheat')
+            hold on
+            line(xlim,[0,0],'Color','k','LineStyle','-')
+            hold on
+            gindex=find(strcmp(groupmat(1,1:nsc),'Hs')==1);
+            line(xlim,[YactDeltastats{2,wwheat}(2,gindex)*100,YactDeltastats{2,wwheat}(2,gindex)*100],'Color','r','LineStyle','--')
+            hold on
+            gindex=find(strcmp(groupmat(1,1:nsc),'Hw')==1);
+            line(xlim,[YactDeltastats{2,wwheat}(2,gindex)*100,YactDeltastats{2,wwheat}(2,gindex)*100],'Color','r','LineStyle',':')
+            hold on
+            gindex=find(strcmp(groupmat(1,1:nsc),'L')==1);
+            line(xlim,[YactDeltastats{2,wwheat}(2,gindex)*100,YactDeltastats{2,wwheat}(2,gindex)*100],'Color','r','LineStyle','-.')        
+            hold on
+            gindex=find(strcmp(groupmat(1,1:nsc),'M')==1);
+            line(xlim,[YactDeltastats{2,wwheat}(2,gindex)*100,YactDeltastats{2,wwheat}(2,gindex)*100],'Color','r','LineStyle','-')
+        
+        sub(3)=subplot(1,5,3,'fontsize',10);
+            gindex=find(strcmp(groupmat(1,1:nsc),'Ens')==1);
+            boxplot(YactDeltastats{2,potato}(2,gindex)*100,'colors',[0.6 0.6 0.6],'symbol','+');
+            axis([xlim, min(YactDeltastats{2,potato}(2,:)*100)-5,max(YactDeltastats{2,potato}(2,:)*100)+5])
+            set(gca,'box','off','XTickLabel',{' '},'YTickLabel',{' '})
+            title('Potato')
+            hold on
+            line(xlim,[0,0],'Color','k','LineStyle','-')
+            hold on
+            gindex=find(strcmp(groupmat(1,1:nsc),'Hs')==1);
+            line(xlim,[YactDeltastats{2,potato}(2,gindex)*100,YactDeltastats{2,potato}(2,gindex)*100],'Color','r','LineStyle','--')
+            hold on
+            gindex=find(strcmp(groupmat(1,1:nsc),'Hw')==1);
+            line(xlim,[YactDeltastats{2,potato}(2,gindex)*100,YactDeltastats{2,potato}(2,gindex)*100],'Color','r','LineStyle',':')
+            hold on
+            gindex=find(strcmp(groupmat(1,1:nsc),'L')==1);
+            line(xlim,[YactDeltastats{2,potato}(2,gindex)*100,YactDeltastats{2,potato}(2,gindex)*100],'Color','r','LineStyle','-.')        
+            hold on
+            gindex=find(strcmp(groupmat(1,1:nsc),'M')==1);
+            line(xlim,[YactDeltastats{2,potato}(2,gindex)*100,YactDeltastats{2,potato}(2,gindex)*100],'Color','r','LineStyle','-')
+        
+        sub(4)=subplot(1,5,4,'fontsize',10);
+            gindex=find(strcmp(groupmat(1,1:nsc),'Ens')==1);
+            boxplot(YactDeltastats{2,sugarbeet}(2,gindex)*100,'colors',[0.6 0.6 0.6],'symbol','+');
+            axis([xlim, min(YactDeltastats{2,sugarbeet}(2,:)*100)-5,max(YactDeltastats{2,sugarbeet}(2,:)*100)+5])
+            set(gca,'box','off','XTickLabel',{' '},'YTickLabel',{' '})
+            title('Sugar beet')
+            hold on
+            line(xlim,[0,0],'Color','k','LineStyle','-')
+            hold on
+            gindex=find(strcmp(groupmat(1,1:nsc),'Hs')==1);
+            line(xlim,[YactDeltastats{2,sugarbeet}(2,gindex)*100,YactDeltastats{2,sugarbeet}(2,gindex)*100],'Color','r','LineStyle','--')
+            hold on
+            gindex=find(strcmp(groupmat(1,1:nsc),'Hw')==1);
+            line(xlim,[YactDeltastats{2,sugarbeet}(2,gindex)*100,YactDeltastats{2,sugarbeet}(2,gindex)*100],'Color','r','LineStyle',':')
+            hold on
+            gindex=find(strcmp(groupmat(1,1:nsc),'L')==1);
+            line(xlim,[YactDeltastats{2,sugarbeet}(2,gindex)*100,YactDeltastats{2,sugarbeet}(2,gindex)*100],'Color','r','LineStyle','-.')        
+            hold on
+            gindex=find(strcmp(groupmat(1,1:nsc),'M')==1);
+            line(xlim,[YactDeltastats{2,sugarbeet}(2,gindex)*100,YactDeltastats{2,sugarbeet}(2,gindex)*100],'Color','r','LineStyle','-')
+        
+        sub(5)=subplot(1,5,5,'fontsize',10);
+            gindex=find(strcmp(groupmat(1,1:nsc),'Ens')==1);
+            boxplot(YactDeltastats{2,pea}(2,gindex)*100,'colors',[0.6 0.6 0.6],'symbol','+');
+            axis([xlim, min(YactDeltastats{2,pea}(2,:)*100)-5,max(YactDeltastats{2,pea}(2,:)*100)+5])
+            set(gca,'box','off','XTickLabel',{' '},'YTickLabel',{' '})
+            title('Pea')
+            hold on
+            line(xlim,[0,0],'Color','k','LineStyle','-')
+            hold on
+            gindex=find(strcmp(groupmat(1,1:nsc),'Hs')==1);
+            line(xlim,[YactDeltastats{2,pea}(2,gindex)*100,YactDeltastats{2,pea}(2,gindex)*100],'Color','r','LineStyle','--')
+            hold on
+            gindex=find(strcmp(groupmat(1,1:nsc),'Hw')==1);
+            line(xlim,[YactDeltastats{2,pea}(2,gindex)*100,YactDeltastats{2,pea}(2,gindex)*100],'Color','r','LineStyle',':')
+            hold on
+            gindex=find(strcmp(groupmat(1,1:nsc),'L')==1);
+            line(xlim,[YactDeltastats{2,pea}(2,gindex)*100,YactDeltastats{2,pea}(2,gindex)*100],'Color','r','LineStyle','-.')        
+            hold on
+            gindex=find(strcmp(groupmat(1,1:nsc),'M')==1);
+            line(xlim,[YactDeltastats{2,pea}(2,gindex)*100,YactDeltastats{2,pea}(2,gindex)*100],'Color','r','LineStyle','-')   
+            
+            linkaxes(sub,'y')
+            clear sub gindex
