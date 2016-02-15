@@ -172,6 +172,10 @@
     linesstruct=cell(nsc,1); 
     colorstruct=cell(nsc,1);
     linewstruct=cell(nsc,1);
+    
+    linesstructg=cell(ngroup2,1); 
+    colorstructg=cell(ngroup2,1);
+    linewstructg=cell(ngroup2,1);
 
     for g=1:ngroup2 
         index=strcmp(groupmat,groupnames2(1,g));
@@ -199,6 +203,7 @@
     Day=NaN(nTime,nsc);    % Day number
     Month=NaN(nTime,nsc);  % Month number
     Year=NaN(nTime,nsc);   % Year number
+    %Date=NaT(nTime,nsc); % function works not in Matlab 2015a
     
     %climate variables
     Tmin=NaN(nTime,nsc); % minimum temperature (°C)
@@ -269,7 +274,7 @@
     Prod(1,1:nsc)= ScenarioName(1,1:nsc);
     GDD(1,1:nsc)=ScenarioName(1,1:nsc);
 
-%3.2 Run ACHydro and save output
+% 3.2 Run ACHydro and save output
 %-------------------------------------------------------------------------
     
 for sc=1:nsc %loop trough all scenarios
@@ -287,7 +292,7 @@ Name=ScenarioName{1,sc};
 
 % Check if AquaCrop results for this scenario can be found  
     
-    if exist(DatapathACSC) == 7
+    if exist(DatapathACSC) == 7 %#ok<EXIST>
         %continue as the AquaCrop results for a scneario with this name
         %can be found
     else
@@ -303,7 +308,7 @@ Name=ScenarioName{1,sc};
         Day(:,sc)=CatchACOutput(:,13);    % Day number
         Month(:,sc)=CatchACOutput(:,14);  % Month number
         Year(:,sc)=CatchACOutput(:,15);   % Year number
-        Date(:,sc)=datetime(Year(:,sc),Month(:,sc),Day(:,sc)); % Date 
+        Date(:,sc)=datetime(Year(:,sc),Month(:,sc),Day(:,sc)); %#ok<SAGROW> % Date 
         
         % Extract climate variables 
         Tempstr=ReadACTempInput(DatapathACSC);
@@ -388,7 +393,6 @@ end
 
 clear sc
 
-
 % 3.3 Reorganize production variables per crop
 %-------------------------------------------------------------------------
 % Put yield, WPET, DSI en TS in one structure 
@@ -402,68 +406,50 @@ WP(1,1:ncrop)=Cropnames(1,1:ncrop);
 TSI(1,1:ncrop)=Cropnames(1,1:ncrop);
 LGPact(1,1:ncrop)=Cropnames(1,1:ncrop);
 
-subsetY=[];
-subsetDSI=[];
-subsetWP=[];
-subsetTS=[];
-subsetLGP=[];
+% initialize subsets
+nyear=NaN(ncrop,1);
+for c=1:ncrop
+[nyear(c,1),~]=size(Prod{2,1}{2,c}(:,1));
+end
+subsetY=NaN(max(nyear(:)),nsc);
+subsetDSI=NaN(max(nyear(:)),nsc);
+subsetWP=NaN(max(nyear(:)),nsc);
+subsetTS=NaN(max(nyear(:)),nsc);
+subsetLGP=NaN(max(nyear(:)),nsc);
 
 for c=1:ncrop % loop trough each crop
     for sc=1:nsc %loop trough each scenario
-        addcolumn= Prod{2,sc}{2,c}(:,4);
-        length(addcolumn);
-        subsetY(1:length(addcolumn),end+1)=addcolumn;
-        subsetY(length(addcolumn)+1:end,end)=NaN;
-        clear addcolumn
-        
-        addcolumn= Prod{2,sc}{2,c}(:,8);
-        length(addcolumn);
-        subsetDSI(1:length(addcolumn),end+1)=addcolumn;
-        subsetDSI(length(addcolumn)+1:end,end)=NaN;
-        clear addcolumn
-        
-        addcolumn= Prod{2,sc}{2,c}(:,9);
-        length(addcolumn);
-        subsetWP(1:length(addcolumn),end+1)=addcolumn;
-        subsetWP(length(addcolumn)+1:end,end)=NaN;
-        clear addcolumn
-        
-        addcolumn= Prod{2,sc}{2,c}(:,10);
-        length(addcolumn);
-        subsetTS(1:length(addcolumn),end+1)=addcolumn;
-        subsetTS(length(addcolumn)+1:end,end)=NaN;
-        clear addcolumn
-        
-        addcolumn= Prod{2,sc}{2,c}(:,7);
-        length(addcolumn);
-        subsetLGP(1:length(addcolumn),end+1)=addcolumn;
-        subsetLGP(length(addcolumn)+1:end,end)=NaN;
-        clear addcolumn
+        subsetY(1:nyear(c,1),sc)=Prod{2,sc}{2,c}(:,4);       
+        subsetDSI(1:nyear(c,1),sc)=Prod{2,sc}{2,c}(:,8);
+        subsetWP(1:nyear(c,1),sc)=Prod{2,sc}{2,c}(:,9);
+        subsetTS(1:nyear(c,1),sc)=Prod{2,sc}{2,c}(:,10);
+        subsetLGP(1:nyear(c,1),sc)=Prod{2,sc}{2,c}(:,7);    
     end
+    
     Yact{2,c}=subsetY;
     DSI{2,c}=subsetDSI;
     WP{2,c}=subsetWP;
     TSI{2,c}=subsetTS;
     LGPact{2,c}=subsetLGP;  
     
-    subsetY=[];
-    subsetDSI=[];
-    subsetWP=[];
-    subsetTS=[];
-    subsetLGP=[];
+    clear subsetY;
+    clear subsetDSI;
+    clear subsetWP;
+    clear subsetTS;
+    clear subsetLGP;
 end
 
-% Define index of crops you want to show
+clear c sc subsetY subsetDSI subsetWP subsetTS subsetLGP nyear
+
+% 3.4 Define index of crops you want to show
+%------------------------------------------------------------------------- 
 maize=find(strcmp(Cropnames(1,1:ncrop),'Maize')==1);
 wwheat=find(strcmp(Cropnames(1,1:ncrop),'WinterWheat')==1);
 sugarbeet=find(strcmp(Cropnames(1,1:ncrop),'Sugarbeet')==1);
 potato=find(strcmp(Cropnames(1,1:ncrop),'Potato')==1);
 pea=find(strcmp(Cropnames(1,1:ncrop),'Pea')==1);
 
-
-clear c sc Cropnames subsetY subsetDSI subsetWP subsetTS subsetLGP
-
-% 3.4 Save workspace
+% 3.5 Save workspace
 %-------------------------------------------------------------------------
 % save workspace variables so that you can skip this the first part of the
 % code next time
@@ -589,7 +575,6 @@ f1=figure('name','Median yield changes');%(boxplot= variation over different GCM
     YallDelta{2,pea}=(Yact{2,pea}-Yactstats{2,pea}(2,1))./Yactstats{2,pea}(2,1);  
     
 f2=figure('name','Median yield changes- GCM&year variation');% boxplot = variation over different GCMs & over 30 different year)   
-
     sub(1)=subplot(1,5,1,'fontsize',10);
     boxplot(YallDelta{2,maize}(:,1:nsc)*100,groupmat(1,1:nsc),'grouporder',groupnames2,'labels',groupnames2)
     line(xlim,[0,0],'Color','k','LineStyle','--')
@@ -623,46 +608,8 @@ f2=figure('name','Median yield changes- GCM&year variation');% boxplot = variati
     set(gca,'box','off','YTick',[])
     
     linkaxes(sub,'y')   
-    
     clear sub
-  
-% f2adap=figure('name','Median yield changes- GCM&year variation');% boxplot = variation over different GCMs & over 30 different year)   
-% 
-%     sub(1)=subplot(1,5,1,'fontsize',10);
-%     boxplot(YallDelta{2,maize}(:,1:nsc)*100,groupmat(1,1:nsc),'grouporder',groupnames2,'labels',{'hist','ens','Hs','Hw','L','M'})
-%     line(xlim,[0,0],'Color','k','LineStyle','--')
-%     ylabel('Annual yield from historical median (%)')
-%     title('maize')
-%     axis([xlim, -100,100])
-%     set(gca,'box','off')
-% 
-%     sub(2)=subplot(1,5,2,'fontsize',10);
-%     boxplot(YallDelta{2,wwheat}(:,1:nsc)*100,groupmat(1,1:nsc),'grouporder',groupnames2,'labels',{'hist','ens','Hs','Hw','L','M'})
-%     line(xlim,[0,0],'Color','k','LineStyle','--')
-%     title('winter wheat')
-%     set(gca,'box','off','YTick',[])
-% 
-%     sub(3)=subplot(1,5,3,'fontsize',10);
-%     boxplot(YallDelta{2,sugarbeet}(:,1:nsc)*100,groupmat(1,1:nsc),'grouporder',groupnames2,'labels',{'hist','ens','Hs','Hw','L','M'})
-%     line(xlim,[0,0],'Color','k','LineStyle','--')
-%     title('sugarbeet')
-%     set(gca,'box','off','YTick',[])
-% 
-%     sub(4)=subplot(1,5,4,'fontsize',10);
-%     boxplot(YallDelta{2,potato}(:,1:nsc)*100,groupmat(1,1:nsc),'grouporder',groupnames2,'labels',{'hist','ens','Hs','Hw','L','M'})
-%     line(xlim,[0,0],'Color','k','LineStyle','--')
-%     title('potato')
-%     set(gca,'box','off','YTick',[])
-% 
-%     sub(5)=subplot(1,5,5,'fontsize',10);
-%     boxplot(YallDelta{2,pea}(:,1:nsc)*100,groupmat(1,1:nsc),'grouporder',groupnames2,'labels',{'hist','ens','Hs','Hw','L','M'})
-%     line(xlim,[0,0],'Color','k','LineStyle','--')
-%     title('pea')
-%     set(gca,'box','off','YTick',[])
-%     
-%     linkaxes(sub,'y')   
-%     clear sub
-    
+      
 % 4.4 Vizualize yield impact with cumulative distribution function
 %-------------------------------------------------------------------------
 
@@ -696,7 +643,6 @@ else
     warning(['Pea yield is not normally distributed for scenarios: ',num2str(notnormalpea.')])
     end
 end
-
 
 clear notnormalwwheat notnormalmaize notnormalpotato notnormalsbeet notnormalpea
 
@@ -733,7 +679,6 @@ end
 clear pdsc sc
 
 % vizualize
-
 f3=figure('name','Seasonal yield theoretical CDF');
     subplot(3,2,1,'fontsize',10);
     P=plot(xrangemaize,probabilitiesmaize(:,1:nsc));   
@@ -778,6 +723,7 @@ f3=figure('name','Seasonal yield theoretical CDF');
     
 f4=figure('name','Seasonal yield emperical CDF');
     subplot(3,2,1,'fontsize',10);
+    P=NaN(nsc,1);
     for i=1:nsc
         P(i)=cdfplot(Yact{2,maize}(:,i));
         hold on 
@@ -840,6 +786,7 @@ f4=figure('name','Seasonal yield emperical CDF');
     
 f5=figure('name','Seasonal yield emperical CDF -Simple');
     subplot(3,2,1,'fontsize',10);
+    P=NaN(ngroup2,1);
     for g=1:ngroup2
         gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
         P(g)=cdfplot(reshape(Yact{2,maize}(:,gindex),[],1));
@@ -922,7 +869,7 @@ filename='Yield empirical CDF - simple';
 filename=fullfile(DatapathScenOut,filename);
 savefig(f5,filename)
 
-clear filename  f1 f2 f3 f4 
+clear filename f1 f2 f3 f4 
 
 %% -----------------------------------------------------------------------
 % 5. WPET IMPACT 
@@ -1031,6 +978,7 @@ f1=figure('name','Median WPET changes');%(boxplot= variation over different GCMs
 %-------------------------------------------------------------------------
 f2=figure('name','WP empirical CDF');
     subplot(3,2,1,'fontsize',10);
+    P=NaN(nsc,1);
     for i=1:nsc
         P(i)=cdfplot(WP{2,maize}(:,i));
         hold on 
@@ -1146,7 +1094,7 @@ clear c
 clear c stat
 
 
-% 6.3 Vizualize DSI & TSI impact with boxplots
+% 6.2 Vizualize DSI & TSI impact with boxplots
 %-------------------------------------------------------------------------
 
 f1=figure('name','Median DSI changes');%(boxplot= variation over different GCMs) 
@@ -1284,6 +1232,7 @@ f2=figure('name','Median Temperature stress changes');%(boxplot= variation over 
 % 6.3 Vizualize DSI & TSI with cumulative distribution function
 %-------------------------------------------------------------------------
 f3=figure('name','DSI empirical CDF');
+    P=NaN(nsc,1);
     subplot(5,2,1,'fontsize',10);
     for i=1:nsc
         P(i)=cdfplot(DSI{2,maize}(:,i));
@@ -1429,7 +1378,6 @@ clear f1 f2 f3
 % temperature and crop cycle requirements. If a crop dies of early due to
 % water stress this is not taken into account
 
-
 % 7.1 Calculate potential length of growing period & sowing/maturity dates
 %-------------------------------------------------------------------------
 LGPpotAll(1,1:nsc)=ScenarioName(1,1:nsc);
@@ -1445,8 +1393,8 @@ for sc=1:nsc
         if SimType(lu,1)==2
             nrun=length(RotationDateSC{1,lu}(:,3));
             r=(nrun-rem(nrun,2))/2;     
-            SowingDateSC(1:r,lu)= RotationDateSC{1,lu}(2:2:nrun,3);   
-            MaturitypotDateSC(1:r,lu)= RotationDateSC{1,lu}(2:2:nrun,4);
+            SowingDateSC(1:r,lu)= RotationDateSC{1,lu}(2:2:nrun,3);    %#ok<SAGROW>
+            MaturitypotDateSC(1:r,lu)= RotationDateSC{1,lu}(2:2:nrun,4); %#ok<SAGROW>
         else 
             % skip this landunit (not agriculture)
         end
@@ -1604,6 +1552,7 @@ f1=figure('name','Median LGPpot changes'); %(boxplot= variation over different G
        
 f2=figure('name','LGPpot emperical CDF');
     subplot(3,2,1,'fontsize',10);
+    P=NaN(nsc,1);
     for i=1:nsc
         P(i)=cdfplot(LGPpot{2,maize}(:,i));
         hold on 
@@ -1664,69 +1613,6 @@ f2=figure('name','LGPpot emperical CDF');
     grid off     
     
     clear P i
-    
-f3=figure('name','LGPgap emperical CDF');
-    subplot(3,2,1,'fontsize',10);
-    for i=1:nsc
-        P(i)=cdfplot(LGPgap{2,maize}(:,i));
-        hold on 
-    end
-    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('LGPgap (days)','fontsize',8);
-    title('Maize')
-    set(gca,'box','off')
-    grid off
-
-    subplot(3,2,2,'fontsize',10);
-    for i=1:nsc
-        P(i)=cdfplot(LGPgap{2,wwheat}(:,i));
-        hold on 
-    end
-    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('LGPgap (days)','fontsize',8);
-    title('Winter Wheat')
-    set(gca,'box','off') 
-    grid off
-    
-    subplot(3,2,3,'fontsize',10);
-    for i=1:nsc
-        P(i)=cdfplot(LGPgap{2,sugarbeet}(:,i));
-        hold on 
-    end  
-    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('LGPgap (days)','fontsize',8);
-    title('Sugar beet')
-    set(gca,'box','off')
-    grid off
-    
-    subplot(3,2,4,'fontsize',10);
-    for i=1:nsc
-        P(i)=cdfplot(LGPgap{2,potato}(:,i));
-        hold on 
-    end    
-    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
-    ylabel('Cumulative probability','fontsize',8);
-    xlabel('LGPgap (days)','fontsize',8);
-    title('Potato')
-    set(gca,'box','off')
-    grid off
-
-    subplot(3,2,5,'fontsize',10);
-    for i=1:nsc
-        P(i)=cdfplot(LGPgap{2,pea}(:,i));
-        hold on 
-    end    
-    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
-    ylabel('Cumulative probability','fontsize',8);
-     xlabel('LGPgap (days)','fontsize',8);
-    title('Pea')
-    set(gca,'box','off')
-    grid off     
-    
-    clear P i        
 
 %save figure
 filename='LGPpot median changes - GCMboxplot';
@@ -1737,7 +1623,7 @@ filename='LGPpot empirical CDF';
 filename=fullfile(DatapathScenOut,filename);
 savefig(f2,filename)
 
-clear f1 f2 f3
+clear f1 f2 
 %% -----------------------------------------------------------------------
 % 8. IMPACT ON ACTUAL LENGTH OF GROWING CYCLE 
 %-------------------------------------------------------------------------
@@ -1817,7 +1703,7 @@ end
 
 clear c
 
-% 7.2 Vizualize actual & potential  length of growing period 
+% 8.3 Vizualize actual & potential  length of growing period 
 %------------------------------------------------------------------------- 
 
 f1=figure('name','Median LGPact changes'); %(boxplot= variation over different GCMs) 
@@ -1979,11 +1865,12 @@ f11=figure('name','Median LGPact en LGP pot'); %(boxplot= variation over differe
         clear sub 
               
         
-% 7.3 Vizualize LGPact with cumulative distribution function
+% 8.4 Vizualize LGPact with cumulative distribution function
 %-------------------------------------------------------------------------
 
 f2=figure('name','LGPact emperical CDF');
     subplot(3,2,1,'fontsize',10);
+    P=NaN(nsc,1);
     for i=1:nsc
         P(i)=cdfplot(LGPact{2,maize}(:,i));
         hold on 
@@ -2054,8 +1941,72 @@ f2=figure('name','LGPact emperical CDF');
     grid off   
     
     clear P PP i 
+    
+f3=figure('name','LGPgap emperical CDF'); %#ok<*NASGU>
+    subplot(3,2,1,'fontsize',10);
+    P=NaN(nsc,1);
+    for i=1:nsc
+        P(i)=cdfplot(LGPgap{2,maize}(:,i));
+        hold on 
+    end
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('LGPgap (days)','fontsize',8);
+    title('Maize')
+    set(gca,'box','off')
+    grid off
+
+    subplot(3,2,2,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(LGPgap{2,wwheat}(:,i));
+        hold on 
+    end
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('LGPgap (days)','fontsize',8);
+    title('Winter Wheat')
+    set(gca,'box','off') 
+    grid off
+    
+    subplot(3,2,3,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(LGPgap{2,sugarbeet}(:,i));
+        hold on 
+    end  
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('LGPgap (days)','fontsize',8);
+    title('Sugar beet')
+    set(gca,'box','off')
+    grid off
+    
+    subplot(3,2,4,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(LGPgap{2,potato}(:,i));
+        hold on 
+    end    
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+    xlabel('LGPgap (days)','fontsize',8);
+    title('Potato')
+    set(gca,'box','off')
+    grid off
+
+    subplot(3,2,5,'fontsize',10);
+    for i=1:nsc
+        P(i)=cdfplot(LGPgap{2,pea}(:,i));
+        hold on 
+    end    
+    set(P,{'Color'},colorstruct,{'LineStyle'},linesstruct,{'LineWidth'},linewstruct)
+    ylabel('Cumulative probability','fontsize',8);
+     xlabel('LGPgap (days)','fontsize',8);
+    title('Pea')
+    set(gca,'box','off')
+    grid off     
+    
+    clear P i            
               
-% 7.5 Save vizualizations
+% 8.5 Save vizualizations
 %-------------------------------------------------------------------------
 filename='LGPact median changes - gcmboxplot';
 filename=fullfile(DatapathScenOut,filename);
@@ -2454,6 +2405,7 @@ f5=figure('name','Yearly discharge theoretical CDF');
     
 f6=figure('name','Yearly discharge emperical CDF');
     subplot(2,2,1,'fontsize',10);
+    P=NaN(nsc,1);
     for i=1:nsc
         P(i)=cdfplot(Q_MTFyear2(:,i));
         hold on 
@@ -2504,9 +2456,10 @@ f6=figure('name','Yearly discharge emperical CDF');
     
  f7=figure('name','Yearly discharge emperical CDF - simple');
     subplot(2,2,1,'fontsize',10);
+    P=NaN(ngroup2,1);
     for g=1:ngroup2
         gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
-        P(g)=cdfplot(reshape(Q_MTFyear2(:,gindex),[],1));
+        P(g)=cdfplot(reshape(Q_MTFyear2(:,gindex),[],1)); 
         hold on 
     end
     set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
@@ -2519,7 +2472,7 @@ f6=figure('name','Yearly discharge emperical CDF');
     subplot(2,2,2,'fontsize',10);
     for g=1:ngroup2
         gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
-        P(g)=cdfplot(reshape(Q_MBFyear2(:,gindex),[],1));
+        P(g)=cdfplot(reshape(Q_MBFyear2(:,gindex),[],1)); 
         hold on 
     end
     set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
@@ -2532,7 +2485,7 @@ f6=figure('name','Yearly discharge emperical CDF');
     subplot(2,2,3,'fontsize',10);
     for g=1:ngroup2
         gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
-        P(g)=cdfplot(reshape(Q_MIFyear2(:,gindex),[],1));
+        P(g)=cdfplot(reshape(Q_MIFyear2(:,gindex),[],1)); %#ok<*FNDSB>
         hold on 
     end
     set(P,{'Color'},colorstructg,{'LineStyle'},linesstructg,{'LineWidth'},linewstructg)
@@ -2559,6 +2512,7 @@ f6=figure('name','Yearly discharge emperical CDF');
  
  f8=figure('name','Yearly & seasonal discharge emperical CDF - simple');
     subplot(2,2,1,'fontsize',10);
+    P=NaN(ngroup2,1);
     for g=1:ngroup2
         gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
         P(g)=cdfplot(reshape(Q_MTFyear2(:,gindex),[],1));
@@ -2668,8 +2622,9 @@ clear f1 f2 f3 f4 f5 f6 f7 f8 f9
 % 10. MONTHLY DISCHARGE IMPACT (Only QTF) 
 %------------------------------------------------------------------------
 
-% reorganize data in one matrix   
-    Q_MTFymonth2=cell(1,12);
+% 10.1 reorganize data in one matrix  
+% ----------------------------------------------------------------------- 
+Q_MTFymonth2=cell(1,12);
 
     for m=1:12
         mindex=find(Q_MTFymonth{1,1}(:,2)==m);
@@ -2679,6 +2634,9 @@ clear f1 f2 f3 f4 f5 f6 f7 f8 f9
     end
     
     clear m sc
+
+% 10.2 Calculate stats
+% -----------------------------------------------------------------------
 
 % stats for each month and each scenario
     Q_MTFmonthstats=cell(2,12);
@@ -2705,8 +2663,9 @@ clear f1 f2 f3 f4 f5 f6 f7 f8 f9
     end
     clear m 
     
-% vizualization (boxplot= variation over different GCMs)     
-f1= figure('name','Median monthly discharge changes');
+% 10.3 show in graphs
+% -----------------------------------------------------------------------    
+f1= figure('name','Median monthly discharge changes');%(boxplot= variation over different GCMs)    
             sub(1)=subplot('Position',[0.05, 0.4, 0.055,0.55],'fontsize',10); 
             boxplot(Q_MTFmonthDeltastats{2,1}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
             line(xlim,[0,0],'Color','k','LineStyle','--')
@@ -2796,6 +2755,7 @@ f1= figure('name','Median monthly discharge changes');
             linkaxes(sub,'y')% link y axis of different plots (so that they change simultaneously
             
             subplot('Position',[0.06, 0.1, 0.76,0.2],'fontsize',12);
+                HistValue=NaN(12,1);
                 for i=1:12
                 HistValue(i,1)=Q_MTFmonthstats{2,i}(1,2);
                 end
@@ -2805,15 +2765,15 @@ f1= figure('name','Median monthly discharge changes');
             set(gca,'XTick',1:12)
             set(gca,'box','off')
             
-            clear sub i 
+            clear sub i HistValue
                
-% save vizualization
+% 10.4 save vizualization
+% ----------------------------------------------------------------------- 
 filename='Monthly Discharge - median changes GCM boxlplots';
 filename=fullfile(DatapathScenOut,filename);
 savefig(f1,filename)            
             
 clear filename f1
-
 
 %% -----------------------------------------------------------------------
 % 11. SAVE SUMMARY TABLES
@@ -2862,10 +2822,10 @@ xlswrite(filename,groupnames2,'QTFmonth','B1');
 
 for m=1:12
     xlswrite(filename,Q_MTFmonthDeltastats(1,m),'QTFmonth',['A' num2str(m+1)]);
-    DataMatrix=[];   
+    DataMatrix=NaN(1,ngroup2);    
     for g=1:ngroup2
        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);         
-       DataMatrix=[DataMatrix,median(Q_MTFmonthDeltastats{2,m}(2,gindex))];
+       DataMatrix(1,g)=median(Q_MTFmonthDeltastats{2,m}(2,gindex));
     end     
        xlswrite(filename,DataMatrix,'QTFmonth',['B' num2str(m+1)]);
 
@@ -2877,7 +2837,7 @@ clear m g gindex DataMatrix
 % -----------------------------------------------------------------------     
 % Baseline median and absolute changes to median
 
-name={'Maize','Winter wheat','Potato','Sugar beet','Peas'};
+name={'Maize','WinterWheat','Potato','Sugarbeet','Pea'};
 HeadersColumns={'Historical median','Future median change - min','Future median change - median','Future median change - max'};
 
 letters = 'AGMSY';
@@ -2916,7 +2876,7 @@ clear c g letters letters2 name gindex cindex
 % ----------------------------------------------------------------------- 
 % Baseline median and future median
 
-name={'Maize','Winter wheat','Potato','Sugar beet','Peas'};
+name={'Maize','WinterWheat','Potato','Sugarbeet','Pea'};
 
 xlswrite(filename,groupnames2,'LGPgap','B1');
 
@@ -2924,16 +2884,15 @@ xlswrite(filename,groupnames2,'LGPgap','B1');
 for c=1:length(name)
     cindex=find(strcmp(Cropnames(1,1:ncrop),name{1,c})==1);
     xlswrite(filename,name(1,c),'LGPgap',['A' num2str(c+1)]);
-    DataMatrix=[];   
+    DataMatrix=NaN(1,ngroup2);   
     for g=1:ngroup2
             gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
                   
-            DataMatrix=[DataMatrix,median(LGPgapstats{2,cindex}(2,gindex))];
+            DataMatrix(1,g)=median(LGPgapstats{2,cindex}(2,gindex));
     end     
             xlswrite(filename,DataMatrix,'LGPgap',['B' num2str(c+1)]);
 
 end
-
 
 clear c cindex g gindex DataMatrix 
 clear name 
@@ -2943,7 +2902,7 @@ clear name
 % Baseline and future median
 
 %YIELD
-name={'Maize','Winter wheat','Potato','Sugar beet','Peas'};
+name={'Maize','WinterWheat','Potato','Sugarbeet','Pea'};
 
 xlswrite(filename,{'Yield'},'CV','A1');
 xlswrite(filename,groupnames2,'CV','B1');
@@ -2952,11 +2911,11 @@ xlswrite(filename,groupnames2,'CV','B1');
 for c=1:length(name)
     cindex=find(strcmp(Cropnames(1,1:ncrop),name{1,c})==1);
     xlswrite(filename,name(1,c),'CV',['A' num2str(c+1)]);
-    DataMatrix=[];   
+    DataMatrix=NaN(1,ngroup2);    
     for g=1:ngroup2
             gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
                   
-            DataMatrix=[DataMatrix,median(Yactstats{2,cindex}(6,gindex))];
+            DataMatrix(1,g)=median(Yactstats{2,cindex}(6,gindex));
     end     
             xlswrite(filename,DataMatrix,'CV',['B' num2str(c+1)]);
 
@@ -2970,11 +2929,11 @@ xlswrite(filename,groupnames2,'CV','B8');
 for c=1:length(name)
     cindex=find(strcmp(Cropnames(1,1:ncrop),name{1,c})==1);
     xlswrite(filename,name(1,c),'CV',['A' num2str(c+7+1)]);
-    DataMatrix=[];   
+    DataMatrix=NaN(1,ngroup2);   
     for g=1:ngroup2
             gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
                   
-            DataMatrix=[DataMatrix,median(WPstats{2,cindex}(6,gindex))];
+            DataMatrix(1,g)=median(WPstats{2,cindex}(6,gindex));
     end     
             xlswrite(filename,DataMatrix,'CV',['B' num2str(c+7+1)]);
 
@@ -2987,17 +2946,17 @@ xlswrite(filename,{'FLOW'},'CV','A15');
 xlswrite(filename,groupnames2,'CV','B15');
 xlswrite(filename,{'QTF';'QBF';'QIF';'QOF'},'CV','A16');
 
-row1=[];
-row2=[];
-row4=[];
-row3=[];
+row1=NaN(1,ngroup2);
+row2=NaN(1,ngroup2);
+row3=NaN(1,ngroup2);
+row4=NaN(1,ngroup2);
 
     for g=1:ngroup2
        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
-       row1=[row1,median(Q_MTFyearstats(6,gindex))];
-       row2=[row2,median(Q_MBFyearstats(6,gindex))];
-       row3=[row3,median(Q_MIFyearstats(6,gindex))];
-       row4=[row4,median(Q_MOFyearstats(6,gindex))];
+       row1(1,g)=median(Q_MTFyearstats(6,gindex));
+       row2(1,g)=median(Q_MBFyearstats(6,gindex));
+       row3(1,g)=median(Q_MIFyearstats(6,gindex));
+       row4(1,g)=median(Q_MOFyearstats(6,gindex));
     end 
     
     DataMatrix=[row1;row2;row3;row4];
@@ -3011,7 +2970,7 @@ clear name
 % 11.6 Summary of variability (range) of yield, WPET and flow
 % ----------------------------------------------------------------------- 
 % Baseline and future median
-name={'Maize','Winter wheat','Potato','Sugar beet','Peas'};
+name={'Maize','WinterWheat','Potato','Sugarbeet','Pea'};
 
 %YIELD
 xlswrite(filename,{'Yield'},'range','A1');
@@ -3020,11 +2979,11 @@ xlswrite(filename,groupnames2,'range','B1');
 for c=1:length(name)
     cindex=find(strcmp(Cropnames(1,1:ncrop),name{1,c})==1);
     xlswrite(filename,name(1,c),'range',['A' num2str(c+1)]);
-    DataMatrix=[];   
+    DataMatrix=NaN(1,ngroup2);    
     for g=1:ngroup2
             gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
                   
-            DataMatrix=[DataMatrix,median(Yactstats{2,cindex}(7,gindex))];
+            DataMatrix(1,g)=median(Yactstats{2,cindex}(7,gindex));
     end     
             xlswrite(filename,DataMatrix,'range',['B' num2str(c+1)]);
 
@@ -3038,11 +2997,11 @@ xlswrite(filename,groupnames2,'range','B8');
 for c=1:length(name)
     cindex=find(strcmp(Cropnames(1,1:ncrop),name{1,c})==1);
     xlswrite(filename,name(1,c),'range',['A' num2str(c+7+1)]);
-    DataMatrix=[];   
+    DataMatrix=NaN(1,ngroup2);     
     for g=1:ngroup2
             gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
                   
-            DataMatrix=[DataMatrix,median(WPstats{2,cindex}(7,gindex))];
+            DataMatrix(1,g)=median(WPstats{2,cindex}(7,gindex));
     end     
             xlswrite(filename,DataMatrix,'range',['B' num2str(c+7+1)]);
 
@@ -3054,17 +3013,17 @@ xlswrite(filename,{'FLOW'},'range','A15');
 xlswrite(filename,groupnames2,'range','B15');
 xlswrite(filename,{'QTF';'QBF';'QIF';'QOF'},'range','A16');
 
-row1=[];
-row2=[];
-row4=[];
-row3=[];
+row1=NaN(1,ngroup2);
+row2=NaN(1,ngroup2);
+row3=NaN(1,ngroup2);
+row4=NaN(1,ngroup2);
 
     for g=1:ngroup2
        gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
-       row1=[row1,median(Q_MTFyearstats(7,gindex))];
-       row2=[row2,median(Q_MBFyearstats(7,gindex))];
-       row3=[row3,median(Q_MIFyearstats(7,gindex))];
-       row4=[row4,median(Q_MOFyearstats(7,gindex))];
+       row1(1,g)=median(Q_MTFyearstats(7,gindex));
+       row2(1,g)=median(Q_MBFyearstats(7,gindex));
+       row3(1,g)=median(Q_MIFyearstats(7,gindex));
+       row4(1,g)=median(Q_MOFyearstats(7,gindex));
     end 
     
     DataMatrix=[row1;row2;row3;row4];
@@ -3118,6 +3077,7 @@ f2=figure('name','Figure 2 - Annual Flow boxplot');
 %-------------------------------------------------------------------------
 f3=figure('name','Figure 3 - Annual flow CDF');
     subplot(2,2,1,'fontsize',10);
+    P=NaN(nsc,1);
     for i=1:nsc
         P(i)=cdfplot(Q_MTFyear2(:,i));
         hold on 
@@ -3332,6 +3292,7 @@ f5=figure('name','Figure 5 - Productivity boxplot');
 %-------------------------------------------------------------------------
 f6=figure('name','Figure 6 - Productivity CDF');
     subplot(5,2,1,'fontsize',10);
+    P=NaN(nsc,1);
     for i=1:nsc
         P(i)=cdfplot(Yact{2,maize}(:,i));
         hold on 
@@ -3457,6 +3418,7 @@ f6=figure('name','Figure 6 - Productivity CDF');
 %-------------------------------------------------------------------------
 f7=figure('name','Figure 7 - Productivity CDF simple');
     subplot(5,2,1,'fontsize',10);
+    P=NaN(ngroup2,1);
     for g=1:ngroup2
         gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
         P(g)=cdfplot(reshape(Yact{2,maize}(:,gindex),[],1));
@@ -3716,6 +3678,7 @@ f10=figure('name','Figure 10 - TSI boxplot');
 %-------------------------------------------------------------------------
 f12=figure('name','Figure 12 - Flow synth CDF'); %PUBLICATION FIGURE
     subplot(2,2,1,'fontsize',10);
+    P=NaN(nsc,1);
     for i=1:nsc
         P(i)=cdfplot(Q_MTFyear2(:,i));
         hold on 
