@@ -205,11 +205,11 @@
     Year=NaN(nTime,nsc);   % Year number
     %Date=NaT(nTime,nsc); % function works not in Matlab 2015a
     
-    %climate variables
-    Tmin=NaN(nTime,nsc); % minimum temperature (°C)
-    Tmax=NaN(nTime,nsc); % maximum temperature (°C)
-    Rain=NaN(nTime,nsc); % rainfall (mm)
-    ETo=NaN(nTime,nsc);  % reference evapotranspiration (mm)
+%     %climate variables
+%     Tmin=NaN(nTime,nsc); % minimum temperature (°C)
+%     Tmax=NaN(nTime,nsc); % maximum temperature (°C)
+%     Rain=NaN(nTime,nsc); % rainfall (mm)
+%     ETo=NaN(nTime,nsc);  % reference evapotranspiration (mm)
 
     %catchment-scale results
     TrCatch=NaN(nTime,nsc);     % Crop transpiration (actual) (mm)
@@ -310,14 +310,14 @@ Name=ScenarioName{1,sc};
         Year(:,sc)=CatchACOutput(:,15);   % Year number
         Date(:,sc)=datetime(Year(:,sc),Month(:,sc),Day(:,sc)); %#ok<SAGROW> % Date 
         
-        % Extract climate variables 
-        Tempstr=ReadACTempInput(DatapathACSC);
-        Tmin(:,sc)=Tempstr{2,1}(:,1);
-        Tmax(:,sc)=Tempstr{2,1}(:,2);
-        Rainstr=ReadACPluInput(DatapathACSC);
-        Rain(:,sc)=Rainstr{2,1};
-        ETostr=ReadACEToInput(DatapathACSC);
-        ETo(:,sc)=ETostr{2,1};
+%         %Extract climate variables 
+%         Tempstr=ReadACTempInput(DatapathACSC);
+%         Tmin(:,sc)=Tempstr{2,1}(:,1);
+%         Tmax(:,sc)=Tempstr{2,1}(:,2);
+%         Rainstr=ReadACPluInput(DatapathACSC);
+%         Rain(:,sc)=Rainstr{2,1};
+%         ETostr=ReadACEToInput(DatapathACSC);
+%         ETo(:,sc)=ETostr{2,1};
         
         %Check number of timesteps
         nt=length(CatchACOutput(:,1));   % Number of timesteps

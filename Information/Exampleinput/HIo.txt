@@ -1,0 +1,14 @@
+DecidiousForest	0
+Impervious	0	
+Water	0	
+AnnualGrass	85
+PermanentGrass	85
+Bean	22
+Pea	34
+Carrot	60
+Potato	90
+Sugarbeet	70
+Maize	52
+WinterBarley	33
+WinterWheat	52
+Unknown	0

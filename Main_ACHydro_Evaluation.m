@@ -10,8 +10,8 @@
 %  agro-hydrological model. Environmental Modelling & Software [Submitted]
 %
 %  Documentation on the script can be found in the directory "Information",
-%  Examples of the required input textfiles can be found in the directory
-%  "ExampleInput"
+%  Examples of the required input textfiles can be found in the
+%  directory "ExampleInput"
 %
 %  TO DO before running the script: 
 %   1. Run AquaCrop simulations for all land units in the catchment
@@ -23,8 +23,7 @@
 %        (see CatchmentOutput.m, section 5)
 %
 %  Author: Hanne Van Gaelen
-%  Last update: 12/11/2015
-%  Version: AquaCrop-Hydro version 2015/11
+%  Last update: 19/02/2016
 %   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
@@ -41,6 +40,7 @@ close all % close all figures of a previous run
 %    c) the parameters for the hydrological model (Parameters.txt)
 %    d) the maximum root depth for every landunit and sim run (Zrx.txt)
 %    e) the soil parameters of each soil type present (SoilPar.txt)
+%    f) the reference harvest index for each crop (HIo.txt)
     
     DatapathInput = uigetdir('C:\','Select directory with all input files for AquaCrop-Hydro and the field observations');
 
