@@ -6,7 +6,7 @@
 % come to one result for the whole catchment
 %
 % Author: Hanne Van Gaelen
-% Last update: 15/01/2016
+% Last update: 10/03/2016
 %   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -185,6 +185,7 @@ if ACMode ==1 % AquaCrop was ran with the normal interface
         Cycle=NaN(100,nRealSim);
         WP=NaN(100,nRealSim);
         TS=NaN(100,nRealSim);
+        WSI=NaN(100,nRealSim);
         
         BundWat=NaN(nTime,nRealSim); 
         Tr=NaN(nTime,nRealSim); 
@@ -239,6 +240,7 @@ if ACMode ==1 % AquaCrop was ran with the normal interface
             Cycle(1:M,i)=RunOutput{2,i}(:,23);
             WP(1:M,i)=RunOutput{2,i}(:,34);
             TS(1:M,i)=RunOutput{2,i}(:,27);
+            WSI(1:M,i)=100-RunOutput{2,i}(:,18); % 1- Tr/Trx ratio is water stress index
             
         end
         
@@ -251,6 +253,7 @@ if ACMode ==1 % AquaCrop was ran with the normal interface
     Cycle=Cycle(1:max(RunNr(:)),:);
     WP=WP(1:max(RunNr(:)),:);
     TS=TS(1:max(RunNr(:)),:);
+    WSI=WSI(1:max(RunNr(:)),:);
     
  elseif ACMode ==2 % AquaCrop version 5.0 was ran with the plugin 
    %%%% 2.1 Read output of AquaCrop for all simulations
@@ -295,6 +298,7 @@ if ACMode ==1 % AquaCrop was ran with the normal interface
         Cycle=NaN(100,nRealSim);
         WP=NaN(100,nRealSim);
         TS=NaN(100,nRealSim);
+        WSI=NaN(100,nRealSim);
         
         BundWat=NaN(nTime,nRealSim); 
         Tr=NaN(nTime,nRealSim); 
@@ -348,7 +352,8 @@ if ACMode ==1 % AquaCrop was ran with the normal interface
             HI(1:M,i)=SeasonOutput{2,i}(:,30);
             Cycle(1:M,i)=SeasonOutput{2,i}(:,22);
             WP(1:M,i)=SeasonOutput{2,i}(:,32);
-            TS(1:M,i)=SeasonOutput{2,i}(:,25);        
+            TS(1:M,i)=SeasonOutput{2,i}(:,25); 
+            WSI(1:M,i)=100-SeasonOutput{2,i}(:,17);     
         end
         
     %%%% 2.5 Clean up crop production variables (because initiated with 100
@@ -360,6 +365,7 @@ if ACMode ==1 % AquaCrop was ran with the normal interface
     Cycle=Cycle(1:max(RunNr(:)),:);  
     WP=WP(1:max(RunNr(:)),:);  
     TS=TS(1:max(RunNr(:)),:);  
+    WSI=WSI(1:max(RunNr(:)),:);  
  end  
  clear a i M Yseason Brel WabalOutput CropOutput ProfOutput DayOutput;
 
@@ -568,6 +574,7 @@ clear TrSaL TrSiL TrxSaL TrxSiL ESaL ESiL ExSaL ExSiL ETaSaL ETaSiL ETxSaL ETxSi
  Cyclecrop=cell(2,ncrop);
  WPcrop=cell(2,ncrop);
  TScrop=cell(2,ncrop);
+ WSIcrop=cell(2,ncrop);
  
   for c=1:ncrop
      % write away crop name
@@ -582,6 +589,7 @@ clear TrSaL TrSiL TrxSaL TrxSiL ESaL ESiL ExSaL ExSiL ETaSaL ETaSiL ETxSaL ETxSi
      Cyclecrop(1,c)=CropLim(c,1);
      WPcrop(1,c)=CropLim(c,1);
      TScrop(1,c)=CropLim(c,1);
+     WSIcrop(1,c)=CropLim(c,1);
      
      %search all projects with this crop
      index=find(strcmp(CropLim(c,1),Crop(:,1))==1);
@@ -594,6 +602,7 @@ clear TrSaL TrSiL TrxSaL TrxSiL ESaL ESiL ExSaL ExSiL ETaSaL ETaSiL ETxSaL ETxSi
      subsetCycle=Cycle(2:2:end,index);
      subsetWP=WP(2:2:end,index);
      subsetTS=TS(2:2:end,index);
+     subsetWSI=WSI(2:2:end,index);     
      
      % remove NaN rows of this crop production data (at the end)
      subsetY = subsetY(all(~isnan(subsetY),2),:); 
@@ -602,7 +611,8 @@ clear TrSaL TrSiL TrxSaL TrxSiL ESaL ESiL ExSaL ExSiL ETaSaL ETaSiL ETxSaL ETxSi
      subsetHI = subsetHI(all(~isnan(subsetHI),2),:); 
      subsetCycle=subsetCycle(all(~isnan(subsetCycle),2),:); 
      subsetWP=subsetWP(all(~isnan(subsetWP),2),:); 
-     subsetTS=subsetTS(all(~isnan(subsetTS),2),:);     
+     subsetTS=subsetTS(all(~isnan(subsetTS),2),:); 
+     subsetWSI=subsetWSI(all(~isnan(subsetWSI),2),:);     
      
      %take weighted average
      wgt=Wgt2(index,1);
@@ -614,6 +624,7 @@ clear TrSaL TrSiL TrxSaL TrxSiL ESaL ESiL ExSaL ExSiL ETaSaL ETaSiL ETxSaL ETxSi
      Cyclecrop{2,c}=subsetCycle*wgt;
      WPcrop{2,c}=subsetWP*wgt;
      TScrop{2,c}=subsetTS*wgt;
+     WSIcrop{2,c}=subsetWSI*wgt;
      
      % calculate extra crop production variables 
      Bfinpotcrop{2,c}=Bfincrop{2,c}./(Brelfincrop{2,c}/100);
@@ -624,7 +635,7 @@ clear TrSaL TrSiL TrxSaL TrxSiL ESaL ESiL ExSaL ExSiL ETaSaL ETaSiL ETxSaL ETxSi
      
      DSIcrop{2,c}=((Ypotcrop{2,c}-Ycrop{2,c})./Ypotcrop{2,c})*100;
      
-     clear subsetY subsetBfin subsetBrelfin subsetHI subsetWP subsetTS index wgt index2
+     clear subsetY subsetBfin subsetBrelfin subsetHI subsetWP subsetTS subsetWSI index wgt index2
      
   end
  
@@ -645,7 +656,7 @@ CatchACOutput=[TrCatch,TrxCatch,ECatch,ExCatch,ETaCatch,ETxCatch,ROCatch,DPCatch
 CropCatchACOutput(1,1:ncrop)=Ycrop(1,1:ncrop); % add cropnames
 
 for c=1:ncrop % add data of each crop
-CropCatchACOutput{2,c}=[Bfincrop{2,c},Bfinpotcrop{2,c},Brelfincrop{2,c}, Ycrop{2,c},Ypotcrop{2,c},HIcrop{2,c},Cyclecrop{2,c},DSIcrop{2,c}, WPcrop{2,c},TScrop{2,c}];
+CropCatchACOutput{2,c}=[Bfincrop{2,c},Bfinpotcrop{2,c},Brelfincrop{2,c}, Ycrop{2,c},Ypotcrop{2,c},HIcrop{2,c},Cyclecrop{2,c},DSIcrop{2,c}, WPcrop{2,c},TScrop{2,c},WSIcrop{2,c}];
 end
 
 %%%% 6.3 Results of individual simulation units

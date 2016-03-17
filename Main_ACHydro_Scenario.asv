@@ -3461,7 +3461,7 @@ f4=figure('name','Figure 4 - Montlhly flow boxplot');
 
 f5=figure('name','Figure 5 - Productivity response scatter');
         col={[0,0,0],[0.6,0.6,0.6]};
-        P=NaN(ngroup,1);
+            P=NaN(nsc,1);
         sub(1)=subplot(3,2,1,'fontsize',10);
         line([-20,40],[-20,40],'Color','k','LineStyle','--')
         line([-20,40],[0,0],'Color','k')
