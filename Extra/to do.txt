@@ -1,0 +1,4 @@
+CLIMATE INPUT 
+- for AC normal: read CLim output file 
+- for AC plugin: adapt script to read files with also input 7 demanded
+

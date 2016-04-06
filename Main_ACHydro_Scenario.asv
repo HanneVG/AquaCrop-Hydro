@@ -5,7 +5,7 @@
 %
 % TO DO before running the script: 
 %   1. Run AquaCrop simulations for all land units in the catchment for
-%      each scenario
+%      each scenario (with and without heat stress)
 %   2. Ensure that all AquaCrop output files are numbered with format "01", "02",
 %      "03", "10","20" according to the landunit number
 %   3. Ensure that all AquaCrop ouput files are organized in subfolders
@@ -13,9 +13,10 @@
 %   4. Prepare all required input files for this script
 %   5. Make sure that the first scenario (specified in Scenario.txt) is
 %   the baseline scenario 
+%   
 %
 % Author: Hanne Van Gaelen
-% Last updated: 10/03/2016
+% Last updated: 31/03/2016
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -38,6 +39,12 @@
 % store the AquaCrop climate files (Temp, ET0, rainfall)
 
      DatapathAC=uigetdir('C:\','Select directory of scenario subfloders with AquaCrop output files for all landunits');     
+
+% specify in which path all AquaCrop simulation output files are stored for
+% all scenarios (each scenario in different subfolder) FOR THE AQUACROP SIMULATION WITHOUT HEAT STRESS. Make sure also to
+% store the AquaCrop climate files (Temp, ET0, rainfall)
+
+     DatapathACHeat=uigetdir('C:\','Select directory of scenario subfloders with AquaCrop output files for all landunits NO HEAT STRESS');     
      
 % specify in which path all inputs for AquaCrop-Hydro are stored including 
 %    a) additional information on AquaCrop simulations of each landunits (SimInfo.txt)
@@ -66,6 +73,7 @@
 % specify in which path all inputs for date calculations are stored (each scenario in different subfolder) including *Temp.Txt and *PrChar.txt) 
 
      DatapathDate= uigetdir('C:\','Select directory of scenario subfloders with all input files for date calculations');
+     
 
 % specify the AquaCrop mode that was used (1= normal AquaCrop, 2= plugin version)
      ACMode=inputdlg('Did you use AquaCrop normal (1) or stand-alone plugin version (2)?','AquaCrop Mode');
@@ -205,12 +213,6 @@
     Year=NaN(nTime,nsc);   % Year number
     %Date=NaT(nTime,nsc); % function works not in Matlab 2015a
     
-%     %climate variables
-%     Tmin=NaN(nTime,nsc); % minimum temperature (°C)
-%     Tmax=NaN(nTime,nsc); % maximum temperature (°C)
-%     Rain=NaN(nTime,nsc); % rainfall (mm)
-%     ETo=NaN(nTime,nsc);  % reference evapotranspiration (mm)
-
     %catchment-scale results
     TrCatch=NaN(nTime,nsc);     % Crop transpiration (actual) (mm)
     TrxCatch=NaN(nTime,nsc);    % Potential (maximum) crop transpiration (mm)
@@ -250,7 +252,7 @@
                             % Yact= Actual simulated final yield at maturity (ton/ha)  
                             % HIact= Actual simulated Harvest index at maturity (%) as affected by stresses   
                             % LGPact=  Actual simulated length of growing period (days) as affected by early senescence
-
+    Prodh=cell(2,nsc);
    % the catchment hydrology results   
     Q_MBF=NaN(nTime,nsc);
     Q_MIF=NaN(nTime,nsc);
@@ -272,12 +274,13 @@
     CC(1,1:nsc)=  ScenarioName(1,1:nsc);    
     B(1,1:nsc)= ScenarioName(1,1:nsc);  
     Prod(1,1:nsc)= ScenarioName(1,1:nsc);
+    Prodh(1,1:nsc)= ScenarioName(1,1:nsc);
     GDD(1,1:nsc)=ScenarioName(1,1:nsc);
 
 % 3.2 Run ACHydro and save output
 %-------------------------------------------------------------------------
     
-for sc=1:nsc %loop trough all scenarios
+for sc=9:nsc %loop trough all scenarios
 
 % show progress
 disp(['Now running scenario ',num2str(sc),' of  ',num2str(nsc)]);
@@ -287,6 +290,7 @@ Name=ScenarioName{1,sc};
 
 % Datapaths for this scenario
   DatapathACSC=fullfile(DatapathAC,Name);
+  DatapathACSCh=fullfile(DatapathACHeat,Name);
   DatapathInputSC=DatapathACHinput;                % input is the same for all scenarios   
   DatapathOutputSC=fullfile(DatapathACHOutput,Name);  
 
@@ -297,10 +301,19 @@ Name=ScenarioName{1,sc};
         %can be found
     else
         error(['The AquaCrop results for scenario ',num2str(sc),' with scenarioname ',Name,' could not be found'])
-    end    
+    end   
+    
+    if exist(DatapathACSCh) == 7 %#ok<EXIST>
+        %continue as the AquaCrop results for a scneario with this name
+        %can be found
+    else
+        error(['The AquaCrop results for scenario ',num2str(sc),' with scenarioname ',Name,' (NO HEAT STRESS) could not be found'])
+    end  
+    
     
 % Run AquaCrop-Hydro for this scenario
-[Q_MBFsc,Q_MIFsc,Q_MOFsc,Q_MTFsc,area,f,Wrmin,Wrmax,pbf,SoilPar,SimACOutput,CatchACOutput,CropCatchACOutput,Par]=AquaCropHydro(DatapathACSC, DatapathInputSC,ACMode);
+[Q_MBFsc,Q_MIFsc,Q_MOFsc,Q_MTFsc,area,f,Wrmin,Wrmax,pbf,SoilPar,SimACOutput,CatchACOutput,CropCatchACOutput,Par]=AquaCropHydro(DatapathACSC, DatapathInputSC,ACMode); % with heat stress
+[~,~,~,~,~,~,~,~,~,~,~,~,CropCatchACOutputh,~]=AquaCropHydro(DatapathACSCh, DatapathInputSC,ACMode); % without heat stress for pollination
 
 % extract output for this scenario       
         
@@ -309,16 +322,7 @@ Name=ScenarioName{1,sc};
         Month(:,sc)=CatchACOutput(:,14);  % Month number
         Year(:,sc)=CatchACOutput(:,15);   % Year number
         Date(:,sc)=datetime(Year(:,sc),Month(:,sc),Day(:,sc)); %#ok<SAGROW> % Date 
-        
-%         %Extract climate variables 
-%         Tempstr=ReadACTempInput(DatapathACSC);
-%         Tmin(:,sc)=Tempstr{2,1}(:,1);
-%         Tmax(:,sc)=Tempstr{2,1}(:,2);
-%         Rainstr=ReadACPluInput(DatapathACSC);
-%         Rain(:,sc)=Rainstr{2,1};
-%         ETostr=ReadACEToInput(DatapathACSC);
-%         ETo(:,sc)=ETostr{2,1};
-        
+                
         %Check number of timesteps
         nt=length(CatchACOutput(:,1));   % Number of timesteps
         if nt==nTime 
@@ -359,7 +363,8 @@ Name=ScenarioName{1,sc};
         
       % Save crop production results for main season   
         Prod{2,sc}=CropCatchACOutput(1:2,:); 
-  
+        Prodh{2,sc}=CropCatchACOutputh(1:2,:); 
+        
       % Save the catchment hydrology results   
         Q_MBF(1:nTime,sc)=Q_MBFsc(1:nTime,1);
         Q_MIF(1:nTime,sc)=Q_MIFsc(1:nTime,1);
@@ -367,7 +372,7 @@ Name=ScenarioName{1,sc};
         Q_MTF(1:nTime,sc)=Q_MTFsc(1:nTime,1);
 
  
-% write output for this scenario to excel      
+% write output for this scenario (with heat stress) to excel      
       % Combine output in matrix if necessary
         HeadersFlow={'Date','Baseflow','Interflow','Overland flow', 'Total flow'};
         FlowOutput=[exceltime(Date(1:nTime,1)),Q_MBFsc(1:nTime,1),Q_MIFsc(1:nTime,1),Q_MOFsc(1:nTime,1),Q_MTFsc(1:nTime,1)];
@@ -386,6 +391,13 @@ Name=ScenarioName{1,sc};
         xlswrite(filename,exceltime(Date(1:nTime,1)),'SimWabal','A2');
         xlswrite(filename,CatchACOutput(1:nTime,1:11),'SimWabal','B2'); 
         
+ 
+% save workspace variables (to be sure)
+filename=['workspace ',datestr(date),' untilscenario',num2str(sc)];
+filename=fullfile(DatapathScenOut,filename);
+save(filename)
+clear filename 
+ 
         
 clear SimACOutput CatchOutput FlowOutput WabalCatchOutput DatapathOutputSC DatapathInputSC   
 clear Q_MTFsc Q_MOFsc Q_MIFsc Q_MBFsc
@@ -401,12 +413,13 @@ Cropnames= Prod{2,1}(1,:);
 [~,ncrop]=size(Cropnames);
 
 Yact(1,1:ncrop)=Cropnames(1,1:ncrop);
-DSI(1,1:ncrop)=Cropnames(1,1:ncrop);
-WSI(1,1:ncrop)=Cropnames(1,1:ncrop);
-BWSI(1,1:ncrop)=Cropnames(1,1:ncrop);
-WP(1,1:ncrop)=Cropnames(1,1:ncrop);
-TSI(1,1:ncrop)=Cropnames(1,1:ncrop);
-LGPact(1,1:ncrop)=Cropnames(1,1:ncrop);
+DSI(1,1:ncrop)=Cropnames(1,1:ncrop);  % drought stress index (based on yield loss)
+WSI(1,1:ncrop)=Cropnames(1,1:ncrop);  % water stress index (based on transpiration)
+BWSI(1,1:ncrop)=Cropnames(1,1:ncrop); % water stress index (based on biomass loss)
+WP(1,1:ncrop)=Cropnames(1,1:ncrop); % water productivity
+TSI(1,1:ncrop)=Cropnames(1,1:ncrop); % temperature (heat) stress index
+HSI(1,1:ncrop)=Cropnames(1,1:ncrop);  % cold stres index
+LGPact(1,1:ncrop)=Cropnames(1,1:ncrop); % actual length of growing period
 
 % initialize subsets
 nyear=NaN(ncrop,1);
@@ -414,6 +427,7 @@ for c=1:ncrop
 [nyear(c,1),~]=size(Prod{2,1}{2,c}(:,1));
 end
 subsetY=NaN(max(nyear(:)),nsc);
+subsetYh=NaN(max(nyear(:)),nsc);% yield for conditions where heat stress is not considered
 subsetDSI=NaN(max(nyear(:)),nsc);
 subsetWSI=NaN(max(nyear(:)),nsc);
 subsetBWSI=NaN(max(nyear(:)),nsc);
@@ -423,7 +437,8 @@ subsetLGP=NaN(max(nyear(:)),nsc);
 
 for c=1:ncrop % loop trough each crop
     for sc=1:nsc %loop trough each scenario
-        subsetY(1:nyear(c,1),sc)=Prod{2,sc}{2,c}(:,4);       
+        subsetY(1:nyear(c,1),sc)=Prod{2,sc}{2,c}(:,4); 
+        subsetYh(1:nyear(c,1),sc)=Prodh{2,sc}{2,c}(:,4); 
         subsetDSI(1:nyear(c,1),sc)=Prod{2,sc}{2,c}(:,8);
         subsetWSI(1:nyear(c,1),sc)=Prod{2,sc}{2,c}(:,11);
         subsetBWSI(1:nyear(c,1),sc)=100-Prod{2,sc}{2,c}(:,3); % 100- Brel
@@ -438,9 +453,11 @@ for c=1:ncrop % loop trough each crop
     BWSI{2,c}=subsetBWSI;
     WP{2,c}=subsetWP;
     TSI{2,c}=subsetTS;
+    HSI{2,c}=(subsetYh-subsetY)./subsetYh;
     LGPact{2,c}=subsetLGP;  
     
     clear subsetY;
+    clear subsetYh;
     clear subsetDSI;
     clear subsetWSI;
     clear subsetBWSI;
@@ -449,7 +466,7 @@ for c=1:ncrop % loop trough each crop
     clear subsetLGP;
 end
 
-clear c sc subsetY subsetDSI subsetWSI subsetBWSI subsetWP subsetTS subsetLGP nyear
+clear c sc subsetY subsetDSI subsetWSI subsetBWSI subsetWP subsetTS subsetLGP subset Yh nyear
 
 % 3.4 Define index of crops you want to show
 %------------------------------------------------------------------------- 
@@ -464,7 +481,7 @@ pea=find(strcmp(Cropnames(1,1:ncrop),'Pea')==1);
 % save workspace variables so that you can skip this the first part of the
 % code next time
 
-filename=['workspace ',datestr(date)];
+filename=['workspace ',datestr(date),' all scenarios'];
 filename=fullfile(DatapathScenOut,filename);
 save(filename)
 clear filename 
@@ -1072,6 +1089,7 @@ clear f1 f2
 % stats for each crop over different years 
     DSIstats(1,1:ncrop)=DSI(1,1:ncrop); 
     TSIstats(1,1:ncrop)=TSI(1,1:ncrop);
+    HSIstats(1,1:ncrop)=HSI(1,1:ncrop);
     WSIstats(1,1:ncrop)=WSI(1,1:ncrop);
     BWSIstats(1,1:ncrop)=BWSI(1,1:ncrop);
     
@@ -1089,6 +1107,13 @@ clear f1 f2
         TSIstats{2,c}(4,1:nsc)=min(TSI{2,c}(:,1:nsc));
         TSIstats{2,c}(5,1:nsc)=max(TSI{2,c}(:,1:nsc));
         TSIstats{2,c}(6,1:nsc)=prctile(TSI{2,c}(:,1:nsc),95);
+  
+        HSIstats{2,c}(1,1:nsc)=mean(HSI{2,c}(:,1:nsc));
+        HSIstats{2,c}(2,1:nsc)=median(HSI{2,c}(:,1:nsc));
+        HSIstats{2,c}(3,1:nsc)=std(HSI{2,c}(:,1:nsc));
+        HSIstats{2,c}(4,1:nsc)=min(HSI{2,c}(:,1:nsc));
+        HSIstats{2,c}(5,1:nsc)=max(HSI{2,c}(:,1:nsc));
+        HSIstats{2,c}(6,1:nsc)=prctile(HSI{2,c}(:,1:nsc),95);
         
         WSIstats{2,c}(1,1:nsc)=mean(WSI{2,c}(:,1:nsc));
         WSIstats{2,c}(2,1:nsc)=median(WSI{2,c}(:,1:nsc));
@@ -1109,12 +1134,14 @@ clear c
 % Calculate changes of stats (change of avg, change of median)
     DSIDeltastats(1,1:ncrop)=DSI(1,1:ncrop); 
     TSIDeltastats(1,1:ncrop)=TSI(1,1:ncrop); 
+    HSIDeltastats(1,1:ncrop)=HSI(1,1:ncrop); 
     WSIDeltastats(1,1:ncrop)=WSI(1,1:ncrop); 
     BWSIDeltastats(1,1:ncrop)=BWSI(1,1:ncrop); 
     
     for c=1:ncrop
         for stat=1:2
         DSIDeltastats{2,c}(stat,1:nsc)=(DSIstats{2,c}(stat,1:nsc)-DSIstats{2,c}(stat,1));
+        HSIDeltastats{2,c}(stat,1:nsc)=(HSIstats{2,c}(stat,1:nsc)-HSIstats{2,c}(stat,1));       
         TSIDeltastats{2,c}(stat,1:nsc)=(TSIstats{2,c}(stat,1:nsc)-TSIstats{2,c}(stat,1));
         WSIDeltastats{2,c}(stat,1:nsc)=(WSIstats{2,c}(stat,1:nsc)-WSIstats{2,c}(stat,1));      
         BWSIDeltastats{2,c}(stat,1:nsc)=(BWSIstats{2,c}(stat,1:nsc)-BWSIstats{2,c}(stat,1));  
@@ -1124,7 +1151,7 @@ clear c
 clear c stat
 
 
-% 6.2 Vizualize DSI, WSI & TSI impact with boxplots
+% 6.2 Vizualize DSI, WSI, TSI & HSI impact with boxplots
 %-------------------------------------------------------------------------
 
 f1=figure('name','Median DSI changes');%(boxplot= variation over different GCMs) 
@@ -1388,7 +1415,71 @@ f2=figure('name','Median Temperature stress changes');%(boxplot= variation over 
         
         linkaxes(h,'y')% link y axis of different plots (so that they change simultaneously
         clear sub h         
-   
+
+f2b=figure('name','Median Heat stress changes');%(boxplot= variation over different GCMs) 
+        sub(1)=subplot(2,5,1,'fontsize',10);
+        boxplot(HSIDeltastats{2,maize}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        ylabel('Median HSI change (%)')
+        axis([xlim, -20,5])
+        set(gca,'box','off')
+        title('Maize')
+        
+        sub(2)=subplot(2,5,2,'fontsize',10);
+        boxplot(HSIDeltastats{2,wwheat}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Winter Wheat')
+        
+        sub(3)=subplot(2,5,3,'fontsize',10);
+        boxplot(HSIDeltastats{2,potato}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Potato')
+        
+        sub(4)=subplot(2,5,4,'fontsize',10);
+        boxplot(HSIDeltastats{2,sugarbeet}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Sugarbeet')
+        
+        sub(5)=subplot(2,5,5,'fontsize',10);
+        boxplot(HSIDeltastats{2,pea}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames);
+        line(xlim,[0,0],'Color','k','LineStyle','--')
+        set(gca,'box','off')
+        title('Peas')    
+
+        linkaxes(sub,'y')% link y axis of different plots (so that they change simultaneously
+        
+        h(1)=subplot(2,5,6,'fontsize',10);
+        bar(HSIstats{2,maize}(2,1))
+        ylabel('Median historical HSI(%)')
+        axis([xlim , 0 ,40])
+        title('Maize')
+        set(gca,'XTickLabel',{' '})
+        
+        h(2)=subplot(2,5,7,'fontsize',10);
+        bar(HSIstats{2,wwheat}(2,1))
+        title('Winter Wheat')
+        set(gca,'XTickLabel',{' '})
+        
+        h(3)=subplot(2,5,8,'fontsize',10);
+        bar(HSIstats{2,potato}(2,1))
+        title('Potato')
+        set(gca,'XTickLabel',{' '})
+         
+        h(4)=subplot(2,5,9,'fontsize',10);
+        bar(HSIstats{2,sugarbeet}(2,1))
+        title('Sugarbeet')
+        set(gca,'XTickLabel',{' '})
+                
+        h(5)=subplot(2,5,10,'fontsize',10);
+        bar(HSIstats{2,pea}(2,1))
+        title('Peas')
+        set(gca,'XTickLabel',{' '})
+        
+        linkaxes(h,'y')% link y axis of different plots (so that they change simultaneously
+        clear sub h        
       
 % 6.3 Vizualize DSI & TSI with cumulative distribution function
 %-------------------------------------------------------------------------
@@ -2945,13 +3036,17 @@ savefig(f1,filename)
 clear filename f1
 
 %% -----------------------------------------------------------------------
-% 11. SAVE SUMMARY TABLES
+% 11. IMPACT ON ET coefficient
+%-------------------------------------------------------------------------
+% 
+%% -----------------------------------------------------------------------
+% 12. SAVE SUMMARY TABLES
 %-------------------------------------------------------------------------
 
 xlname='SummaryTables.xlsx';
 filename = fullfile(DatapathScenOut,xlname);
 
-% 11.1 Summary of annual discharge 
+% 12.1 Summary of annual discharge 
 % -----------------------------------------------------------------------  
 %  Baseline median and relative changes to median
 
@@ -2983,7 +3078,7 @@ clear HeadersColumns HeadersRows
 clear Row1 Row2 Row3 Row4 DataMatrix
 clear g gindex letters letters2
 
-% 11.2 Summary of monthly total flow 
+% 12.2 Summary of monthly total flow 
 % ----------------------------------------------------------------------- 
 %  Relative changes to baseline median
 
@@ -3002,7 +3097,7 @@ end
 
 clear m g gindex DataMatrix 
 
-% 11.3 Summary of Crop development and production parameters
+% 12.3 Summary of Crop development and production parameters
 % -----------------------------------------------------------------------     
 % Baseline median and absolute changes to median
 
@@ -3041,7 +3136,7 @@ clear HeadersColumns HeadersRows
 clear row1 row2 row3 row4 row 5 DataMatrix row
 clear c g letters letters2 name gindex cindex
 
-% 11.4 Summary of LGP gap
+% 12.4 Summary of LGP gap
 % ----------------------------------------------------------------------- 
 % Baseline median and future median
 
@@ -3066,7 +3161,7 @@ end
 clear c cindex g gindex DataMatrix 
 clear name 
 
-% 11.5 Summary of CV yield, WPET and flow
+% 12.5 Summary of CV yield, WPET and flow
 % ----------------------------------------------------------------------- 
 % Baseline and future median
 
@@ -3136,7 +3231,7 @@ clear c cindex g gindex DataMatrix
 clear row1 row2 row3 row4
 clear name
 
-% 11.6 Summary of variability (range) of yield, WPET and flow
+% 12.6 Summary of variability (range) of yield, WPET and flow
 % ----------------------------------------------------------------------- 
 % Baseline and future median
 name={'Maize','WinterWheat','Potato','Sugarbeet','Pea'};
@@ -3202,10 +3297,57 @@ row4=NaN(1,ngroup2);
 clear  c cindex g gindex DataMatrix 
 clear row1 row2 row3 row4
 
-clear filename
+% 12.7 Soil water balance
+% ----------------------------------------------------------------------- 
+%initialize climate variables
+Tmin=NaN(nTime,nsc); % minimum temperature (°C)
+Tmax=NaN(nTime,nsc); % maximum temperature (°C)
+Rain=NaN(nTime,nsc); % rainfall (mm)
+ETo=NaN(nTime,nsc);  % reference evapotranspiration (mm)
 
+%read climate variables
+for sc=1:nsc
+Name=ScenarioName{1,sc};% Extract scenario name
+DatapathACSC=fullfile(DatapathAC,Name);% Datapaths for this scenario
+
+Tempstr=ReadACTempInput(DatapathACSC);
+Tmin(:,sc)=Tempstr{2,1}(:,1);
+Tmax(:,sc)=Tempstr{2,1}(:,2);
+Rainstr=ReadACPluInput(DatapathACSC);
+Rain(:,sc)=Rainstr{2,1};
+ETostr=ReadACEToInput(DatapathACSC);
+ETo(:,sc)=ETostr{2,1};
+end
+%calculate water balances
+WabalAll=NaN(8,nsc);     
+WabalGroup=NaN(8,ngroup2); % each column is one group, for each group the sum of P, ETo, E, Tr, DP, RO, Storage of soil and bunds water, total
+
+for sc=1:nsc
+WabalAll(1,sc)=sum(Rain(:,sc));
+WabalAll(2,sc)=sum(ETo(:,sc));
+WabalAll(3,sc)=sum(ECatch(:,sc));
+WabalAll(4,sc)=sum(TrCatch(:,sc));
+WabalAll(5,sc)=sum(DPCatch(:,sc));
+WabalAll(6,sc)=sum(ROCatch(:,sc));
+WabalAll(7,sc)=(BundWatCatch(end,sc)-BundWatCatch(1,sc))+(Wr2Catch(end,sc)-Wr2Catch(1,sc));
+WabalAll(8,sc)=sum(WabalAll(1:7,sc));
+end
+
+for g=1:ngroup2
+    gindex=find(strcmp(groupmat(1,1:nsc),groupnames2{1,g})==1);
+    for comp=3:8
+    WabalGroup(comp,g)=median(WabalAll(comp,gindex));
+    end
+end
+
+% write away table
+xlswrite(filename,groupnames2,'Wabal','B1');
+xlswrite(filename,{'Rain';'ETo';'E';'Tr';'DP';'RO'; 'Storage';'Total'},'Wabal','A2:A9');
+xlswrite(filename,WabalGroup,'Wabal','B2');
+
+clear filename
 %% -----------------------------------------------------------------------
-% 12. PUBLICATION FIGURES
+% 13. PUBLICATION FIGURES
 %-------------------------------------------------------------------------
 close all 
 
@@ -3215,7 +3357,7 @@ f2=figure('name','Figure 2 - Annual Flow boxplot');
     sub(1)=subplot(1,4,1,'fontsize',10);
     boxplot(Q_MTFyearDeltastats(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup', groupnames,'colors',boxplotcolor,'symbol','+');
     line(xlim,[0,0],'Color','k','LineStyle','--')
-    ylabel('Median annual flow change (%)')
+    ylabel('Change of median annual flow (%)')
     title('Total flow')
     axis([xlim, -15,40])
     set(gca,'box','off')
@@ -3302,7 +3444,7 @@ f4=figure('name','Figure 4 - Montlhly flow boxplot');
     sub(1)=subplot('Position',[0.064, 0.15, 0.06,0.80],'fontsize',8); 
     boxplot(Q_MTFmonthDeltastats{2,1}(2,2:nsc)*100,groupmat(1,2:nsc),'grouporder',groupnames,'colorgroup',groupnames,'colors',boxplotcolor );
     line(xlim,[0,0],'Color','k','LineStyle','--')
-    ylabel('Median monthly flow change (%)','fontsize',10)
+    ylabel('Change of median monthly flow (%)','fontsize',10)
     xlabel('1')
     axis([xlim, -60,80])
     set(gca,'XTick',[])
@@ -3461,7 +3603,7 @@ f4=figure('name','Figure 4 - Montlhly flow boxplot');
 
 f5=figure('name','Figure 5 - Productivity response scatter');
         col={[0,0,0],[0.6,0.6,0.6]};
-            P=NaN(nsc,1);
+        P=NaN(ngroup,1);
         sub(1)=subplot(3,2,1,'fontsize',10);
         line([-20,40],[-20,40],'Color','k','LineStyle','--')
         line([-20,40],[0,0],'Color','k')
@@ -3494,8 +3636,8 @@ f5=figure('name','Figure 5 - Productivity response scatter');
             P(g)=scatter(median(YactDeltastats{2,wwheat}(2,gindex)*100),median(WPDeltastats{2,wwheat}(2,gindex)*100),30,c,'o','filled');
             hold on
         end
-        xlabel('Median yield change (%)')
-        ylabel('Median WPET change (%)')
+        xlabel('Change of median yield (%)')
+        ylabel('Change of median WPET (%)')
         set(gca,'box','off')
         title('Winter Wheat','fontsize',8)
         
@@ -3826,7 +3968,7 @@ f8=figure('name','Figure 8 - LGP boxplot');
         line(xlim,[0,0],'Color','k','LineStyle','--')
         a=xlim;
         text(a(1,1),1,[num2str(LGPact{2,maize}(2,1)),' days'],'HorizontalAlignment','left','fontsize',7)
-        ylabel('Change of length of growing period (days)')
+        ylabel('Change of median LGP (days)')
         axis([xlim, -50,10])
         set(gca,'box','off');
         title('Maize')
@@ -3904,13 +4046,13 @@ f9=figure('name','Figure 9 - WSI boxplot');
         linkaxes(sub,'y')
         clear sub
 
-% FIGURE 10: BOXPLOT TSI CHANGES
+% FIGURE 10: BOXPLOT TSI (CSI & HSI) CHANGES
 %-------------------------------------------------------------------------        
 f10=figure('name','Figure 10 - TSI boxplot');
         sub(1)=subplot(1,5,1,'fontsize',10);
         boxplot(TSIDeltastats{2,maize}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
         line(xlim,[0,0],'Color','k','LineStyle','--')
-        ylabel('Median TSI change (%)','fontsize',8)
+        ylabel('Median CSI change (%)','fontsize',8)
         axis([xlim, -20,5])
         set(gca,'box','off')
         title('Maize')
@@ -3942,6 +4084,37 @@ f10=figure('name','Figure 10 - TSI boxplot');
         linkaxes(sub,'y')
         clear sub
 
+%         sub(1)=subplot(2,5,6,'fontsize',10);
+%         boxplot(HSIDeltastats{2,maize}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+%         line(xlim,[0,0],'Color','k','LineStyle','--')
+%         ylabel('Median HSI change (%)','fontsize',8)
+%         axis([xlim, -20,5])
+%         set(gca,'box','off')
+%         
+%         sub(2)=subplot(2,5,7,'fontsize',10);
+%         boxplot(HSIDeltastats{2,wwheat}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+%         line(xlim,[0,0],'Color','k','LineStyle','--')
+%         set(gca,'box','off')
+%         
+%         sub(3)=subplot(2,5,8,'fontsize',10);
+%         boxplot(HSIDeltastats{2,potato}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+%         line(xlim,[0,0],'Color','k','LineStyle','--')
+%         set(gca,'box','off')
+%         
+%         sub(4)=subplot(2,5,9,'fontsize',10);
+%         boxplot(HSIDeltastats{2,sugarbeet}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+%         line(xlim,[0,0],'Color','k','LineStyle','--')
+%         set(gca,'box','off')
+%         
+%         sub(5)=subplot(2,5,10,'fontsize',10);
+%         boxplot(HSIDeltastats{2,pea}(2,2:nsc),groupmat(1,2:nsc),'grouporder',groupnames,'labels',groupnames,'colorgroup',groupnames,'colors',boxplotcolor,'symbol','+' );
+%         line(xlim,[0,0],'Color','k','LineStyle','--')
+%         set(gca,'box','off')
+%         
+%         linkaxes(sub,'y')
+%         clear sub      
+        
+        
 % FIGURE 12: CDF PLOTS ANNUAL and SEASONAL TOTAL FLOW (with synthetic scenarios)
 %-------------------------------------------------------------------------
 f12=figure('name','Figure 12 - Flow synth CDF'); %PUBLICATION FIGURE

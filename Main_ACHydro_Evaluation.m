@@ -1975,8 +1975,13 @@ figure('name','Cumulative flows publication');
         axis([date(1),date(end),0,maxy]);
         datetick('x','mm/yyyy')
         set(gca,'box','off');%remove ticks in upper right side
-
-%FIG file
+        fig=gcf;
+        fig.PaperUnits='centimeters';
+        fig.PaperPosition=[0 0 15 11];
+        fig.PaperSize=[15 11];
+        print('CumFlow_600dpi','-dpdf','-r600')
+        print('CumFlow_300dpi','-dpdf','-r300')
+ %FIG file
 figure('name','Cumulative flows publication');
         P=plot(date(StartTimeCalib):date(end),[Q_MBFcum(StartTimeCalib:end,1)*f/area,FiltBFcum(StartTimeCalib:end,1)*f/area, Q_MOFcum(StartTimeCalib:end,1)*f/area,FiltOFcum(StartTimeCalib:end,1)*f/area, Q_MIFcum(StartTimeCalib:end,1)*f/area,FiltIFcum(StartTimeCalib:end,1)*f/area, Q_MTFcum(StartTimeCalib:end,1)*f/area,FiltTotcum(StartTimeCalib:end,1)*f/area,ObsTotcum(StartTimeCalib:end,1)*f/area]);% graph of cumulatives
         hold on
@@ -2051,11 +2056,11 @@ figure('name','Flow comparison');
         
         clear a p maxy
         linkaxes(sub,'x')% link x axis of different plots (so that they change simultaneously)
+
 %Color figure
 figure('name','Flow comparison');
         sub(1)=subplot (3,1,1:2,'fontsize',10);
         p=plot(date,[ObsTot_fill,Q_MTF]);% graph of total flow
-        xlabel('Time','fontsize',10);
         ylabel('Total discharge (m³/s)','fontsize',10);
         axis tight;
         NameArray = {'Color'};
@@ -2065,7 +2070,7 @@ figure('name','Flow comparison');
         line([date(StartTimeValid),date(StartTimeValid)],[0,1.35],'Color','k','LineStyle','--');
         text(date(2400),1.2,'Calibration');%text om aan te duiden wat welke periode is
         text(date(4300),1.2,'Validation');
-        text(date(400),1.2,'Warm-up');
+        text(date(300),1.2,'Warm-up');
         set(gca,'box','off');%remove ticks in upper right side
         tickDates = datenum(2000:1:2016,1,1) ; %// creates a vector of tick positions
         set(gca, 'XTick' , tickDates, 'XTickLabel' , datestr(tickDates,'yyyy') ) %//
@@ -2088,7 +2093,12 @@ figure('name','Flow comparison');
         
         clear a p maxy
         linkaxes(sub,'x')% link x axis of different plots (so that they change simultaneously)
-
+        fig=gcf;
+        fig.PaperUnits='centimeters';
+        fig.PaperPosition=[0 0 20 10];
+        fig.PaperSize=[20 10];
+        print('TotalFlow_600dpi','-dpdf','-r600')
+        print('TotalFlow_300dpi','-dpdf','-r300')        
 %FIG file
 figure('name','Flow comparison');
         sub(1)=subplot (3,1,1:2,'fontsize',10);
@@ -2196,6 +2206,13 @@ figure('name','Flow comparison');
         tickDates = xmin:10:xmax ; %// creates a vector of tick positions
         set(gca, 'XTick' , tickDates, 'XTickLabel' , datestr(tickDates,'dd/mm/yyyy') ) %//
         clear a p sub 
+        
+        fig=gcf;
+        fig.PaperUnits='centimeters';
+        fig.PaperPosition=[0 0 12 9];
+        fig.PaperSize=[12 9];
+        print('OFprob_600dpi','-dpdf','-r600')
+        print('OFprob_300dpi','-dpdf','-r300')    
         
 %FIG file
      figure('name','Overlandflow problem');
@@ -2340,7 +2357,7 @@ figure('name','Flow comparison');
         ValueArray = {'k','k'}';
         set(P,NameArray,ValueArray);
         xlabel('Time','fontsize',10);
-        ylabel('Soil water content (mm/2 m soil depth)','fontsize',10);
+        ylabel('SWC (mm/2 m soil depth)','fontsize',10);
         xmin=date(1497);
         xmax=date(1800);
         a=axis;%asks for axislimits of y axis
@@ -2360,11 +2377,19 @@ figure('name','Flow comparison');
         set(p,NameArray,ValueArray);
         xmin=date(1497);
         xmax=date(1800);
-        axis([xmin,xmax,0,0.2]);
+        axis([xmin,xmax,0,0.1]);
         set(gca,'box','off');%remove ticks in upper right side
         tickDates = xmin:60:xmax ; %// creates a vector of tick positions
         set(gca, 'XTick' , tickDates, 'XTickLabel' , datestr(tickDates,'mm/yyyy') ) %//
-        text(xmax-155,0.19,'(c)','fontsize',10);
+        text(xmax-155,0.09,'(c)','fontsize',10);
+        
+        fig=gcf;
+        fig.PaperUnits='centimeters';
+        fig.PaperPosition=[0 0 16 16];
+        fig.PaperSize=[16 16];
+        print('BFprob_600dpi','-dpdf','-r600')
+        print('BFprob_300dpi','-dpdf','-r300') 
+        
  %FIG file
  figure('name','Baseflow problem');
         sub(1)=subplot (3,1,1,'fontsize',10);
