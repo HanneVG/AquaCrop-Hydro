@@ -1968,7 +1968,7 @@ figure('name','Cumulative flows publication');
         line([date(StartTimeValid),date(StartTimeValid)],[0,maxy],'Color','k','LineStyle','--');
         text(date(1700),maxy-(maxy/20),'\bf Calibration');%text to show which period
         text(date(4200),maxy-(maxy/20),'\bf Validation');
-        text(date(end)+60,3500,'TOT')
+        text(date(end)+60,3500,'TF')
         text(date(end)+60,2100,'BF')
         text(date(end)+60,600,'IF')
         text(date(end)+60,950,'OF')
@@ -1980,7 +1980,7 @@ figure('name','Cumulative flows publication');
         fig.PaperPosition=[0 0 15 11];
         fig.PaperSize=[15 11];
         print('CumFlow_600dpi','-dpdf','-r600')
-        print('CumFlow_300dpi','-dpdf','-r300')
+        print('CumFlow_150dpi','-dpdf','-r150')
  %FIG file
 figure('name','Cumulative flows publication');
         P=plot(date(StartTimeCalib):date(end),[Q_MBFcum(StartTimeCalib:end,1)*f/area,FiltBFcum(StartTimeCalib:end,1)*f/area, Q_MOFcum(StartTimeCalib:end,1)*f/area,FiltOFcum(StartTimeCalib:end,1)*f/area, Q_MIFcum(StartTimeCalib:end,1)*f/area,FiltIFcum(StartTimeCalib:end,1)*f/area, Q_MTFcum(StartTimeCalib:end,1)*f/area,FiltTotcum(StartTimeCalib:end,1)*f/area,ObsTotcum(StartTimeCalib:end,1)*f/area]);% graph of cumulatives
@@ -2098,7 +2098,7 @@ figure('name','Flow comparison');
         fig.PaperPosition=[0 0 20 10];
         fig.PaperSize=[20 10];
         print('TotalFlow_600dpi','-dpdf','-r600')
-        print('TotalFlow_300dpi','-dpdf','-r300')        
+        print('TotalFlow_150dpi','-dpdf','-r150')        
 %FIG file
 figure('name','Flow comparison');
         sub(1)=subplot (3,1,1:2,'fontsize',10);
@@ -2212,7 +2212,7 @@ figure('name','Flow comparison');
         fig.PaperPosition=[0 0 12 9];
         fig.PaperSize=[12 9];
         print('OFprob_600dpi','-dpdf','-r600')
-        print('OFprob_300dpi','-dpdf','-r300')    
+        print('OFprob_150dpi','-dpdf','-r150')    
         
 %FIG file
      figure('name','Overlandflow problem');
@@ -2331,9 +2331,9 @@ figure('name','Flow comparison');
         NameArray = {'Color'};
         ValueArray = {'r'}'; 
         set(h2,NameArray,ValueArray);        
-        ylabel(ax(1),'Rainfall or ET0 (mm)','fontsize',10);
+        ylabel(ax(1),'Rainfall or ET_{0} (mm)','fontsize',10);
         ylabel(ax(2),'Deep percolation (mm)','fontsize',10);       
-        xlabel(ax(1),'Time','fontsize',10);        
+        %xlabel(ax(1),'Time','fontsize',10);        
         xmin=date(1497);
         xmax=date(1800);
         axis(ax(1),[xmin,xmax,0,50]);
@@ -2356,7 +2356,7 @@ figure('name','Flow comparison');
         NameArray = {'Color'};
         ValueArray = {'k','k'}';
         set(P,NameArray,ValueArray);
-        xlabel('Time','fontsize',10);
+        %xlabel('Time','fontsize',10);
         ylabel('SWC (mm/2 m soil depth)','fontsize',10);
         xmin=date(1497);
         xmax=date(1800);
@@ -2388,7 +2388,7 @@ figure('name','Flow comparison');
         fig.PaperPosition=[0 0 16 16];
         fig.PaperSize=[16 16];
         print('BFprob_600dpi','-dpdf','-r600')
-        print('BFprob_300dpi','-dpdf','-r300') 
+        print('BFprob_150dpi','-dpdf','-r150') 
         
  %FIG file
  figure('name','Baseflow problem');
