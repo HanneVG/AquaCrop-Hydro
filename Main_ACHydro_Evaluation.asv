@@ -2602,4 +2602,7 @@ figure('name','Flow fit validation period');
     xlabel('Observed','fontsize',12);
     ylabel('Simulated','fontsize',12);
     title('\bf\fontsize{12} Overland flow'); 
-           
+    
+    
+filename=fullfile(DatapathScenOut,'Fig -  Annual Flow boxplot');
+savefig(f1,filename)        
